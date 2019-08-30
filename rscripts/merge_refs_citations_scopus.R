@@ -65,7 +65,7 @@ if ((length(unique(df$doi)) == nrow(df)) == FALSE){
 
 df <- data.frame(lapply(df, function(x) {
   gsub("\\ï»¿", "", x)
-  }))
+}))
 
 # create search string (to be pasted into Scopus)
 
@@ -121,7 +121,9 @@ in_df <- select(df, c(V3, doi)) %>%
   #add col to indicate where data contained in
   mutate(source = rep("refs")) %>%
   # add col of title substrings to make merge on titles more accurate
-  mutate(title_sub = substring(in_df$title, 1,60))
+  mutate(title_sub = substring(.$title, 1,60)) %>%
+  #sort title_sub alphabetically
+  arrange(title_sub)
 
 
 # get df of all titles & dois included refs in scopus results 
@@ -132,7 +134,9 @@ in_scopus <- select(scopus, c(Title, DOI)) %>%
   #add col to indicate where data contained in
   mutate(source = rep("scopus"))%>%
   # add col of title substrings to make merge on titles more accurate
-  mutate(title_sub = substring(in_scopus$title, 1,60))
+  mutate(title_sub = substring(.$title, 1,60)) %>%
+  #sort title_sub alphabetically
+  arrange(title_sub)
 
 
 # convert all to character
@@ -148,10 +152,12 @@ in_df[] <- lapply(in_df, tolower)
 # merge on title substrings
 all <- full_join(in_df, in_scopus, by = c("DOI", "title_sub"))
 
-all <- full_join(in_df, in_scopus, by = "DOI")
 
+# check all unique titles have unique DOIs
 
-# see if any duplicate dois 
+length(unique(all$DOI)) == length(unique(all$title_sub))
+
+# find duplicated dois
 
 dup_doi <- all$DOI[duplicated(all$DOI)]
 
@@ -165,20 +171,22 @@ if ((length(id) > 0)) {
 
 # check duplicate dois have same title
 
-setdiff(dups$title_sub[dups$source.y == "scopus"], dups$title_sub[dups$source.x == "refs"])
+setdiff(dup_doi$title_sub[dup_doi$source.y == "scopus"], dup_doi$title_sub[dup_doi$source.x == "refs"])%>%
+  sort()
 
-setdiff(dups$title_sub[dups$source.x == "refs"], dups$title_sub[dups$source.y == "scopus"])
+setdiff(dup_doi$title_sub[dup_doi$source.x == "refs"], dup_doi$title_sub[dup_doi$source.y == "scopus"]) %>%
+  sort()
 
-#manual check indicates all duplicate dois have same title
+print("manual check indicates all duplicate dois have same title")
 
 #check for duplicate title substrings
 
 dup_title <- all$title_sub[duplicated(all$title_sub)]
 
-id <- which(all$title_sub %in% title_sub)
+id <- which(all$title_sub %in% dup_title)
 
 if ((length(id) > 0)) {
   stop(dup_title <- all[id, ])
 } else {
-  print("no dups")
+  print("no duplicate titles")
 }
