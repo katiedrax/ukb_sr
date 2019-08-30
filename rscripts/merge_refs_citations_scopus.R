@@ -1,3 +1,8 @@
+# Description
+
+# This code merges the included refereneces (from Endnote), their citations (from Endnote) and their scopus profiles (exported from scopus as csv)
+# It only cleans the datasets in so far as to allow them to merge correctly 
+
 #########
 #### packages####
 #########
@@ -10,12 +15,16 @@ library(tidyverse)
 
 # read in citations (exported from endnote )
 
-cite <- as.data.frame(readLines("citations.txt", encoding = "UTF-8-BOM"))
-colnames(cite)[1] <- "X1"
+cite <- as.data.frame(readLines("data/citations.txt", encoding = "UTF-8"))
+colnames(cite)[1] <- "citation"
 
-cite$X1 <- gsub("\\ï»¿", "", cite$X1)
+# remove all unicode characters 
 
-cite <- separate(cite, X1, into = c("temp", "doi"), sep = "doi:", fill = "left", remove = FALSE)
+cite$citation <- gsub("[^\u0001-\u007F]+", "", cite$citation)
+
+# create doi col by separating it from end of citations
+
+cite <- separate(cite, citation, into = c("temp", "doi"), sep = "doi:", fill = "left", remove = FALSE)
 
 # check number of DOIs
 
@@ -35,23 +44,15 @@ cite$temp <- NULL
 
 #import details of included references (exported from endnote)
 
-df <- read.csv("csv.csv", header =F, stringsAsFactors = F, encoding = "UTF-8-BOM")
+df <- read.csv("data/csv.csv", header =F, stringsAsFactors = F, encoding = "UTF-8")
 
-# remove empty cols
-
-all_na <- sapply(df, function(x) all(is.na(x)))
-
-df <- df[!all_na]
+# add headers
+##TO DO
+#names(df) <- c("authors", "year", "title")
 
 # rename doi col
 
 df <- dplyr::rename(df, doi = "V50")
-
-# add in citation
-
-df2<- merge(df, cite, by = "doi", all.x = TRUE)
-
-sapply(df, class)
 
 # check dois
 
@@ -61,26 +62,23 @@ if ((length(unique(df$doi)) == nrow(df)) == FALSE){
   print("dois OK")
 }
 
-# remove strange symbol from df
+# remove all unicode characters from df
 
 df <- data.frame(lapply(df, function(x) {
-  gsub("\\ï»¿", "", x)
+  gsub("[^\u0001-\u007F]+", "", x)
 }))
 
 # create search string (to be pasted into Scopus)
 
 doi_search <- paste("DOI(", df$doi, ")", sep = "", collapse = " OR ")
 
-# add headers
-##TO DO
-#names(df) <- c("authors", "year", "title")
 
 ##################
 #### import scopus results ####
 #################
 
 
-scopus <- read.csv("scopus_doi.csv", stringsAsFactors = F, encoding = "UTF-8")
+scopus <- read.csv("data/scopus_doi.csv", stringsAsFactors = F, encoding = "UTF-8")
 
 # find duplicate DOIs
 
@@ -94,7 +92,7 @@ if ((length(id) > 0)) {
   print("no dups")
 }
 
-# check dois of refs in dups are correct & replace those that arent in scopus
+# check dois of refs in dups are correct & replace those that arent
 
 scopus$DOI[which(scopus$Title == "A case of recent myocardial infarction with cardiac failure")] <- "10.1136/heartjnl-2016-309715"
 
@@ -119,12 +117,7 @@ in_df <- select(df, c(V3, doi)) %>%
   # rename headers
   rename(DOI = "doi", title = "V3") %>%
   #add col to indicate where data contained in
-  mutate(source = rep("refs")) %>%
-  # add col of title substrings to make merge on titles more accurate
-  mutate(title_sub = substring(.$title, 1,60)) %>%
-  #sort title_sub alphabetically
-  arrange(title_sub)
-
+  mutate(source = rep("refs"))
 
 # get df of all titles & dois included refs in scopus results 
 
@@ -132,12 +125,7 @@ in_scopus <- select(scopus, c(Title, DOI)) %>%
   #rename headers
   rename(title = "Title") %>%
   #add col to indicate where data contained in
-  mutate(source = rep("scopus"))%>%
-  # add col of title substrings to make merge on titles more accurate
-  mutate(title_sub = substring(.$title, 1,60)) %>%
-  #sort title_sub alphabetically
-  arrange(title_sub)
-
+  mutate(source = rep("scopus"))
 
 # convert all to character
 
@@ -149,44 +137,66 @@ in_df[] <- lapply(in_df, as.character)
 in_scopus[] <- lapply(in_scopus, tolower)
 in_df[] <- lapply(in_df, tolower)
 
-# merge on title substrings
-all <- full_join(in_df, in_scopus, by = c("DOI", "title_sub"))
+# merge everything together
+all <- merge(in_df, in_scopus, all= T)
 
+# remove any punctuation  from title to make sure identical titles with different punctuation are matched
+all$title  <- gsub("[[:punct:]]", "", all$title)
+all$title  <- gsub("–", "", all$title)
 
-# check all unique titles have unique DOIs
+#many titles are identicial but have some different characters so >
+# add col of title substrings to make it easier to find duplicate titles then >
+# find items with duplicated title substring and doi ( this means refs have same dois & titles in scopus search)
 
-length(unique(all$DOI)) == length(unique(all$title_sub))
+all$sub <- substring(all$title, 1,35)
 
-# find duplicated dois
+dup_sub_doi <- all[duplicated(all[, c("DOI", "sub")]), ]
 
-dup_doi <- all$DOI[duplicated(all$DOI)]
+matches <- all[all$DOI %in% dup_sub_doi$DOI, ]
 
-id <- which(all$DOI %in% dup_doi)
+# find refs that were not in matches & check
 
-if ((length(id) > 0)) {
-  stop(dup_doi <- all[id, ])
-} else {
-  print("no dups")
-}
+not_matches <- all[!(all$DOI %in% dup_sub_doi$DOI), ]
 
-# check duplicate dois have same title
+id <- not_matches[duplicated(not_matches[, "DOI"]), ]
+dup_doi <- not_matches[not_matches$DOI %in% id$DOI, ]
 
-setdiff(dup_doi$title_sub[dup_doi$source.y == "scopus"], dup_doi$title_sub[dup_doi$source.x == "refs"])%>%
-  sort()
+print("all not_matches with same DOI have same title just have slight differences in spacing etc")
 
-setdiff(dup_doi$title_sub[dup_doi$source.x == "refs"], dup_doi$title_sub[dup_doi$source.y == "scopus"]) %>%
-  sort()
+not_dup_doi <- not_matches[!(not_matches$DOI %in% id$DOI), ]
 
-print("manual check indicates all duplicate dois have same title")
+print("not_dup_doi shows refs that do not have a matching scopus result BUT also shows one scopus result that is not an included reference")
 
-#check for duplicate title substrings
+#################
+# add citations#
+#################
 
-dup_title <- all$title_sub[duplicated(all$title_sub)]
+# convert all cols to characters
+df[] <- lapply(df, as.character)
+cite[] <- lapply(cite, as.character)
 
-id <- which(all$title_sub %in% dup_title)
+# merge with citation
 
-if ((length(id) > 0)) {
-  stop(dup_title <- all[id, ])
-} else {
-  print("no duplicate titles")
-}
+df_cit <- full_join(df, cite, by = "doi")
+
+##############
+# add scopus #
+##############
+
+# convert all cols to characters
+df[] <- lapply(df, as.character)
+scopus[] <- lapply(scopus, as.character)
+
+# merge with citation
+
+df_cit_scop <- full_join(df, scopus, by = c("doi" = "DOI"))
+
+# remove scopus result that is not in refs 
+
+df_cit_scop <- df_cit_scop[!is.na(df_cit_scop$V3), ]
+
+#########
+# export#
+#########
+
+write.csv(df_cit_scop, "outputs/merged_cleaned.csv", row.names = F)
