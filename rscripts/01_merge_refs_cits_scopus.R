@@ -191,10 +191,6 @@ scopus[] <- lapply(scopus, as.character)
 
 df_cit_scop <- full_join(df, scopus, by = c("doi" = "DOI"))
 
-# remove scopus result that is not in refs 
-
-df_cit_scop <- df_cit_scop[!is.na(df_cit_scop$V3), ]
-
 #########
 # export#
 #########
