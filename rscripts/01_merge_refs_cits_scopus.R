@@ -1,7 +1,7 @@
 # Description
 
 # This code merges the included refereneces (from Endnote), their citations (from Endnote) and their scopus profiles (exported from scopus as csv)
-# It only cleans the datasets in so far as to allow them to merge correctly 
+# It only cleans the datasets in so far as to allow them to merge correctly and assign headers and export merged csv
 
 #########
 #### packages####
@@ -39,20 +39,33 @@ if ((length(unique(cite$doi)) == nrow(cite)) == FALSE){
 cite$temp <- NULL
 
 ###############
-#### import ref details ####
+#### import included ####
 ###############
 
 #import details of included references (exported from endnote)
 
 df <- read.csv("data/csv.csv", header =F, stringsAsFactors = F, encoding = "UTF-8")
 
+# remove empty cols so headers will be added correctly
+
+
+all_na <- sapply(df, function(x) all(is.na(x)))
+
+df <- df[!all_na]
+
+# vector of headers
+
+headers <- c("authors", "year", "title", "journal", "vol", "issue", 
+               "pages", "start_page", "epub_date", "date", "title_1", "alt_journal", "issn", "pmcid", 
+               "accession_num", "keywords", "abstract", "rayyan", "pubmed", "doi")
+
+# check # cols matches # headers
+
+length(colnames(df)) == length(headers)
+
 # add headers
-##TO DO
-#names(df) <- c("authors", "year", "title")
 
-# rename doi col
-
-df <- dplyr::rename(df, doi = "V50")
+names(df) <- headers
 
 # check dois
 
@@ -92,7 +105,8 @@ if ((length(id) > 0)) {
   print("no dups")
 }
 
-# check dois of refs in dups are correct & replace those that arent
+# manually check dois in dups are correct
+# replace dups with incorrect dois
 
 scopus$DOI[which(scopus$Title == "A case of recent myocardial infarction with cardiac failure")] <- "10.1136/heartjnl-2016-309715"
 
@@ -113,16 +127,16 @@ if ((length(id) > 0)) {
 ##################################
 
 # get df of all titles & dois included refs
-in_df <- select(df, c(V3, doi)) %>%
-  # rename headers
-  rename(DOI = "doi", title = "V3") %>%
+in_df <- select(df, c(title, doi)) %>%
+  # rename doi to be same format as scopus DOI col
+  rename(DOI = "doi") %>%
   #add col to indicate where data contained in
   mutate(source = rep("refs"))
 
 # get df of all titles & dois included refs in scopus results 
 
 in_scopus <- select(scopus, c(Title, DOI)) %>%
-  #rename headers
+  #rename title to be same format as df title col
   rename(title = "Title") %>%
   #add col to indicate where data contained in
   mutate(source = rep("scopus"))
@@ -168,31 +182,57 @@ not_dup_doi <- not_matches[!(not_matches$DOI %in% id$DOI), ]
 print("not_dup_doi shows refs that do not have a matching scopus result BUT also shows one scopus result that is not an included reference")
 
 #################
-# add citations#
+#### add citations ####
 #################
 
 # convert all cols to characters
 df[] <- lapply(df, as.character)
 cite[] <- lapply(cite, as.character)
 
+# check colnames
+
+colnames(df)
+colnames(cite)
+
 # merge with citation
 
-df_cit <- full_join(df, cite, by = "doi")
+df_cite <- full_join(df, cite, by = "doi")
+
+# check correct # cols
+
+length(colnames(df)) +length(colnames(cite)) == length(colnames(df_cite)) + 1
 
 ##############
-# add scopus #
+#### add scopus ####
 ##############
 
 # convert all cols to characters
 df[] <- lapply(df, as.character)
 scopus[] <- lapply(scopus, as.character)
 
+# check colnames
+
+colnames(df_cite)
+colnames(scopus)
+
 # merge with citation
 
-df_cit_scop <- full_join(df, scopus, by = c("doi" = "DOI"))
+df_cite_scop <- full_join(df_cite, scopus, by = c("doi" = "DOI"))
+
+# check correct # cols
+
+length(colnames(df_cite)) +length(colnames(scopus)) == length(colnames(df_cite_scop)) + 1
+
+######################
+# drop very long cols#
+######################
+
+# the affiliations cols are intoducing errors into the export, remove these to prevent this
+
+df_cite_scop <- select(df_cite_scop, -c(Authors.with.affiliations, Affiliations))
 
 #########
-# export#
+#### export ####
 #########
 
-write.csv(df_cit_scop, "outputs/merged_cleaned.csv", row.names = F)
+write.csv(df_cite_scop, "outputs/merged.csv", row.names = F, fileEncoding = "UTF-8")
