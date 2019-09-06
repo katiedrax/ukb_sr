@@ -223,14 +223,6 @@ df_cite_scop <- full_join(df_cite, scopus, by = c("doi" = "DOI"))
 
 length(colnames(df_cite)) +length(colnames(scopus)) == length(colnames(df_cite_scop)) + 1
 
-######################
-# drop very long cols#
-######################
-
-# the affiliations cols are intoducing errors into the export, remove these to prevent this
-
-df_cite_scop <- select(df_cite_scop, -c(Authors.with.affiliations, Affiliations))
-
 #########
 #### export ####
 #########
