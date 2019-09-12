@@ -81,18 +81,33 @@ df <- data.frame(lapply(df, function(x) {
   gsub("[^\u0001-\u007F]+", "", x)
 }))
 
+#################################
+#### create scopus search string ####
+##################################
+
 # create search string (to be pasted into Scopus)
 
 doi_search <- paste("DOI(", df$doi, ")", sep = "", collapse = " OR ")
 
+# export the search string
+
+write.table(doi_search, "outputs/scopus_search_string.txt", quote = F, row.names = F, col.names = F)
 
 ##################
 #### import scopus results ####
 #################
 
+# NOT AUTOMATED: paste scopus_search_string into advanced search in Scopus & click search
+# select 'All' > click drop down arrow next to 'RIS export' > select 'CSV' > select all items you want to export > 
+# click 'Export' > save csv as 'scopus' in this project's 'data' folder
+
 # import csv exported from scopus
 
-scopus <- read.csv("data/scopus_doi.csv", header = T, stringsAsFactors = F, encoding = "UTF-8")
+scopus <- read.csv("data/scopus.csv", header = T, stringsAsFactors = F, encoding = "UTF-8")
+
+# drop affiliations col, this had to be exported to export the 'authors with affiliations' col
+
+scopus$Affiliations <- NULL
 
 # find duplicate DOIs
 
@@ -106,8 +121,8 @@ if ((length(id) > 0)) {
   print("no dups")
 }
 
-# manually check dois in dups are correct
-# replace dups with incorrect dois
+# NOT AUTOMATED - I manually checked dois in dups are correct = 1 is not correct
+# replace dois of duplicate that has an incorrect doi 
 
 scopus$DOI[which(scopus$Title == "A case of recent myocardial infarction with cardiac failure")] <- "10.1136/heartjnl-2016-309715"
 
@@ -255,4 +270,4 @@ length(colnames(df_cite_scop)) +length(colnames(source)) == length(colnames(df_c
 #### export ####
 #########
 
-write.csv(df_cite_scop, "outputs/merged.csv", row.names = F, fileEncoding = "UTF-8")
+write.csv(df_cite_scop_sourc, "outputs/merged.csv", row.names = F, fileEncoding = "UTF-8")
