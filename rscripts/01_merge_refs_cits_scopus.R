@@ -13,9 +13,9 @@ library(tidyverse)
 #### import citations####
 ###################
 
-# read in citations (exported from endnote )
+# read in citations (exported from endnote and changed into csv )
 
-cite <- as.data.frame(readLines("data/citations.txt", encoding = "UTF-8"))
+cite <- read.csv("data/citations.csv", header = T, encoding = "UTF-8")
 colnames(cite)[1] <- "citation"
 
 # remove all unicode characters 
@@ -90,8 +90,9 @@ doi_search <- paste("DOI(", df$doi, ")", sep = "", collapse = " OR ")
 #### import scopus results ####
 #################
 
+# import csv exported from scopus
 
-scopus <- read.csv("data/scopus_doi.csv", stringsAsFactors = F, encoding = "UTF-8")
+scopus <- read.csv("data/scopus_doi.csv", header = T, stringsAsFactors = F, encoding = "UTF-8")
 
 # find duplicate DOIs
 
@@ -207,7 +208,7 @@ length(colnames(df)) +length(colnames(cite)) == length(colnames(df_cite)) + 1
 ##############
 
 # convert all cols to characters
-df[] <- lapply(df, as.character)
+df_cite[] <- lapply(df_cite, as.character)
 scopus[] <- lapply(scopus, as.character)
 
 # check colnames
@@ -222,6 +223,33 @@ df_cite_scop <- full_join(df_cite, scopus, by = c("doi" = "DOI"))
 # check correct # cols
 
 length(colnames(df_cite)) +length(colnames(scopus)) == length(colnames(df_cite_scop)) + 1
+
+#################
+#### add source ####
+##################
+
+# import name of database the reference was retrieved 
+# data was exported from the Fulltexts endnote file as tab deliminated text file, opened in excel as csv, deleted unnecessary cols and added headers
+
+source <- read.csv("data/name of database.csv", header = T, stringsAsFactors = F, encoding = "UTF-8")
+
+# convert all cols to characters
+df_cite_scop[] <- lapply(df_cite_scop, as.character)
+source[] <- lapply(source, as.character)
+
+# check colnames
+
+colnames(df_cite_scop)
+colnames(source)
+
+# add source to df
+
+df_cite_scop_sourc <- full_join(df_cite_scop, source, by = ("doi"))
+
+# check correct num of cols
+# num of cols of two merged dfs combined should == num of cols in new df + 1 (the col you merged on)
+
+length(colnames(df_cite_scop)) +length(colnames(source)) == length(colnames(df_cite_scop_sourc)) + 1
 
 #########
 #### export ####
