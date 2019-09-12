@@ -10,13 +10,59 @@
 library(tidyverse)
 
 ###################
+#### import source ####
+###################
+
+# source data contains name of database the reference was retrieved from for all results from search on 15/01/19
+# source data created by exporting Fulltexts endnote file as tab deliminated text file > opened in excel as csv > 
+# unnecessary cols deleted >  headers added > saved
+
+# import name of database the reference was retrieved 
+
+source <- read.csv("data/name of database.csv", header = T, stringsAsFactors = F, encoding = "UTF-8")
+
+# check colnames
+colnames(source)
+
+# check number of DOIs
+
+if ((length(unique(source$doi)) == nrow(source)) == FALSE){
+  stop("dois wrong")
+} else {
+  print("dois OK")
+}
+
+# find duplicate dois
+
+dup_doi <- source$doi[duplicated(source$doi)]
+
+#remove duplicate dois
+
+source <- source[!(source$doi %in% dup_doi), ]
+
+# check number of DOIs again
+
+if ((length(unique(source$doi)) == nrow(source)) == FALSE){
+  stop("dois wrong")
+} else {
+  print("dois OK")
+}
+
+###################
 #### import citations####
 ###################
 
 # read in citations (exported from endnote and changed into csv )
 
-cite <- read.csv("data/citations.csv", header = T, encoding = "UTF-8")
+cite <- read.csv("data/citations.csv", header = F, encoding = "UTF-8")
+
+#add header
+
 colnames(cite)[1] <- "citation"
+
+#  check number of rows
+
+nrow(cite)
 
 # remove all unicode characters 
 
@@ -46,8 +92,15 @@ cite$temp <- NULL
 
 df <- read.csv("data/csv.csv", header =F, stringsAsFactors = F, encoding = "UTF-8")
 
-# remove empty cols so headers will be added correctly
+# check number of rows == 564
 
+if (nrow(df) != 564){
+  stop("wrong num of refs")
+} else {
+  print("564 included refs")
+}
+
+# remove empty cols so headers will be added correctly
 
 all_na <- sapply(df, function(x) all(is.na(x)))
 
@@ -218,6 +271,10 @@ df_cite <- full_join(df, cite, by = "doi")
 
 length(colnames(df)) +length(colnames(cite)) == length(colnames(df_cite)) + 1
 
+# check title still contains 564 included refs
+
+length(df_cite$title[!is.na(df_cite$title)]) == 564
+
 ##############
 #### add scopus ####
 ##############
@@ -239,14 +296,14 @@ df_cite_scop <- full_join(df_cite, scopus, by = c("doi" = "DOI"))
 
 length(colnames(df_cite)) +length(colnames(scopus)) == length(colnames(df_cite_scop)) + 1
 
+# check title still contains 564 included refs
+
+length(df_cite_scop$title[!is.na(df_cite_scop$title)]) == 564
+
+
 #################
 #### add source ####
 ##################
-
-# import name of database the reference was retrieved 
-# data was exported from the Fulltexts endnote file as tab deliminated text file, opened in excel as csv, deleted unnecessary cols and added headers
-
-source <- read.csv("data/name of database.csv", header = T, stringsAsFactors = F, encoding = "UTF-8")
 
 # convert all cols to characters
 df_cite_scop[] <- lapply(df_cite_scop, as.character)
@@ -259,12 +316,17 @@ colnames(source)
 
 # add source to df
 
-df_cite_scop_sourc <- full_join(df_cite_scop, source, by = ("doi"))
+df_cite_scop_sourc <- full_join(df_cite_scop, source, by = "doi")
 
 # check correct num of cols
 # num of cols of two merged dfs combined should == num of cols in new df + 1 (the col you merged on)
 
 length(colnames(df_cite_scop)) +length(colnames(source)) == length(colnames(df_cite_scop_sourc)) + 1
+
+# check title still contains 564 included refs
+
+length(df_cite_scop_sourc$title[!is.na(df_cite_scop_sourc$title)]) == 564
+
 
 #########
 #### export ####
