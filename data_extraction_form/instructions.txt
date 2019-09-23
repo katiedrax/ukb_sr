@@ -1,81 +1,49 @@
-#**BACKGROUND**  
-  
-##**Check eligibility**
+# Preregistration: data extraction from epidemiology articles
 
-*   Exclude retractions & identify corrections
-    *   We will check if the article has been corrected or retracted by assessing the notices attached to the online version of the article. Retracted articles will be excluded.
-*   Exclude inaccessible supplementary material
-    *   We will check if the authors provided supplementary material and whether we can access it via the University of Bristol subscriptions - if an article has inaccessible supplementary material it will be \[excluded?\] X
+## Time of writing
+Data extraction has not yet begun. 
+The first draft of the data extraction form has been piloted on one study by three people.
 
-  
-##**Separate extraction**  
-  
-The following items will be extracted separately to this form manually by one person or a bibliographic manager.
+## Procedure
 
-*   Article ID(s) of related articles
-    *   Related articles are articles that contain the same analyses (X). They are to be identified prospectively by examining authors with matching first author and matching last author and to be done retrospectively by examining studies that share the same UK Biobank application number.
-*   Citation
-    *   Bibliographic
-*   Publication date
-    *   Bibliographic
-*   Authors
-    *   Bibliographic
-*   Journal
-    *   Bibliographic
-*   Volume
-    *   Bibliographic
-*   Issue
-    *   Bibliographic
-*   Open access
-    *   Bibliographic
-    *   We will check whether the article is openly accessible by following this two-step process:  (1) check article on open access button and follow the link on non-university network  (2)  if no on open access button check if there are links on google scholar)
-*   Countries of corresponding, first, second & last author
-    *   Extractor (extract from author affiliations from page 1)
-*   UK Biobank Application number
-    *   We will extract the study's approved UK Biobank data application number if present ((1) search article for all these terms:  **'application' | 'approv' | 'number' | 'UK Biobank Resource'** (2) if not found examine any strings of numbers in article)
-*   Author keywords
-    *   Extractor ((1)extract from page 1 (2) if not on page 1 search article for 'keywords')
-*   Journal endorsement
-    *   We will examine the article's journal ‘instructions/guide for authors’ published \[X around six months\] before \[X article publication date?\] to determine if the journal endorsed STROBE at the time of publication)
-*   Source
-    *   The source through which the article was identified noted in Endnote and the following labels will be assigned: "UKB list" = articles identified via the list provided by the UK Biobank;  "search" = via the literature search; "both" = via the list and search)
-*   Journal impact factor
-    *   The impact factor for the journal at \[X time of publication?\] will be retrieved from \[X reuteurs?\]?
-*   Corresponding author
-    *   Bibliographic (if missing extract from page 1 (2) if not on page 1 search article for 'corresponding' | '@')
-*   Conflicts of interest statement
-    *   We will extract conflicts of interest statements if present ((1) search article material for all these terms: **'competing' | 'interest' | 'conflict' | 'disclosure' **(2) if not found examine article for similar terms)
-*   Classification (MR, epi or other)
-    *   Rayyan
-*   Variation of STROBE guidelines used
-    *   We will indicate which STROBE guidelines were used to assess the article (e.g. STREGA, STROBE, STARD)
-*   Article vs application
-    *   We will assess the extent to which the article is aligned with the approved UKB application by (1) examining the overlap between application and article keywords and whether there are clear differences between the aims stated in the approved UK Biobank data application and the article (X if we do this should we be looking at registration discrepancies too?)
+The following procedure will be conducted for all articles classified as 'observational epidemiology'
+
+1. One person (KD) will identify and exclude retracted articles by assessing the notices attached to the online version of the article. 
+2. One person (KD) will identify any articles with supplementary material which cannot be accessed via the University of Bristol subscriptions. If an article has inaccessible supplementary material it will be excluded(?)
+3. The items in Table 1 will be extracted manually by one person (KD) or automatically by a bibliographic manager.
+4.  The articles will be randomly assigned to two people (MG, KD, BW or RR) who will independently complete the data extraction form for each article. This means each person will extract data from 89 articles. Any conflicts will be discussed by the two extractors and resolved by mutual consent if possible. If not resolved after discussion RR or MM will assign the category.
 
   
-**This data extraction form**  
-  
-This data extraction form is designed to extract data about a study's reporting quality. Here we define a study as all analyses of the UK Biobank data contained within an article.   
-  
-**Missing items**  
-  
-We anticipate many articles will have some incomplete STROBE items. If articles are missing items that do not affect the chances of successfully replicating the article's reported methods we will not attempt to retrieve these items. We will attempt to retrieve missing items that we judge to hinder replication - we call these 'essential' items. The following are considered essential items : (X).  Since we anticipate very few articles will have comments, corrections, and related articles the identification and retrieval of missing information will be done after all data has been extracted.  
+
+*Table 1. Methods for extracting article's meta-data*
+
+| **Item**  | **Definition** | **Method of extraction** |
+|---|---|---|
+|  Article ID(s) of related articles |Article IDs of articles that contain similar analyses.| Examine articles with same first author, last author and UK Biobank application number.|
+| Citation| | Bibliographic|
+| Publication date| | Bibliographic|
+| Authors | |
+|Journal| |
+|Volume| |
+|Issue| |
+|Open Access| | (1) search for article on open access button (https://openaccessbutton.org/) and follow the link on non-university network  (2) if no on open access button check if there are links on google scholar|
+|Countries of corresponding, first & last author | | Extract country of author's affiliations|
+|UK Biobank Application number |Study's approved UK Biobank data application number (if present)| (1) search article for all these terms:  'application' , 'approv' , 'number' , 'Resource' (2) if not found examine any strings of numbers in article|
+| Author keywords | | (1)extract from page 1 (2) if not on page 1 search article for 'keywords' |
+| Journal endorsement | Journal's endorsement of STROBE before publication| (1) extract references to STROBE from the journal's ‘instructions/guide for authors’ published six months (?) before article publication date (?)|
+| Journal impact factor |  | Retrieve the impact factor of the journal for year of publication from Web of Science's  Journal Citation Reports (JCR) (?)|
+| Corresponding author address|| Bibliographic (if missing (1)extract from page 1 (2) if not on page 1 search article for 'corresponding', '@')|
+| Conflicts of interest statement || (1) search article material for all these terms: 'competing', 'interest' ,'conflict' , 'disclosure' (2) if not found examine article for similar terms (3) if present  extract conflicts of interest statements|
+| Classification | Classification (MR, epi or other) as assigned by KD, BW and RR in Rayyan | Rayyan|
+| Article vs application | Extent to which the article is aligned with the approved UKB application | (1) examine the overlap between application and article keywords and whether there are clear differences between the aims stated in the approved UK Biobank data application and the article (? if we do this should we be looking at registration discrepancies too?)|
+ 
+## **Missing items**  
+
+We will not attempt to retrieve any missing items in the data extraction form, this is to give an accurate assessment of the version of record and to avoid exhausting the extractors resources.
  
 
-Missing items will be retrieved using the following procedure:
+## Questions
 
-1.  Articles will be labeled as 'No' or 'Yes' to indicate whether they have missing items \[Yes = articles with a 'No', 'Partial'  or 'Unclear' response any essential items; 'No' = articles with 'Yes' responses to all essential items\].
-2.  We will then attempt to retrieve these missing items from related publications (i.e. comments, corrections, and related articles\].
-3.  If missing items are retrieved we will update the data extraction form and indicate where this missing information can be found.
-4.  We will then label the articles with missing information as 'All', 'Some', 'None' and 'Unable' to indicate how many missing items were retrieved \['All' = all missing information retrieved from related publications; 'Some' = some missing information retrieved from related publications; 'None' = related publications contained no missing information; 'Unable' = there were no related publications to consult\].
-5.  For any articles labeled as 'Some', 'None' or 'Unable' we will attempt to retrieve the remaining missing items by emailing the corresponding author and asking them to provide it.
-6.  If the corresponding authors provide missing items we will update the data extraction form and indicate that the missing item was provided by the author.
-7.  Articles will be labeled as 'All', 'Some', 'None', 'No reply' or 'Broken link' to indicate how much missing information the corresponding author provided \['All' = the author provided all remaining missing items; 'Some' = the author provided some missing information; 'None' = the author replied but provided no missing information; 'No reply' = the corresponding author did not reply; 'Broken link' = the corresponding authors email was broken\].
-8.  Finally, we will extract any comments from the article's corresponding author.
-
-(X) We will not be chasing down missing STROBE items for sake of simplicity, to give an accurate assessment of the version of record and to avoid exhausting the authors  
- 
-
-\[X\] what about starred items ("\*Give information separately for cases and controls in case-control studies and, if applicable, for exposed and unexposed groups in cohort and cross-sectional studies.")  
+(?) what about starred items ("\*Give information separately for cases and controls in case-control studies and, if applicable, for exposed and unexposed groups in cohort and cross-sectional studies.")  
    
-\[X\] what if there are multiple studies? would it be authors fully reporting this information for ALL studies, etc?
+(?)what if there are multiple studies? would it be authors fully reporting this information for ALL studies, etc?
