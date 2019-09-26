@@ -88,45 +88,9 @@ cite$temp <- NULL
 #### import included ####
 ###############
 
-#import details of included references (exported from endnote)
+#import references from cleaned csv file
 
-df <- read.csv("data/csv.csv", header =F, stringsAsFactors = F, encoding = "UTF-8")
-
-# check number of rows == 564
-
-if (nrow(df) != 564){
-  stop("wrong num of refs")
-} else {
-  print("564 included refs")
-}
-
-# remove empty cols so headers will be added correctly
-
-all_na <- sapply(df, function(x) all(is.na(x)))
-
-df <- df[!all_na]
-
-# vector of headers
-
-headers <- c("authors", "year", "title", "journal", "vol", "issue", 
-               "pages", "start_page", "epub_date", "date", "title_1", "alt_journal", "issn", "pmcid", 
-               "accession_num", "keywords", "abstract", "rayyan", "pubmed", "doi")
-
-# check # cols matches # headers
-
-length(colnames(df)) == length(headers)
-
-# add headers
-
-names(df) <- headers
-
-# check dois
-
-if ((length(unique(df$doi)) == nrow(df)) == FALSE){
-  stop("dois wrong")
-} else {
-  print("dois OK")
-}
+df <- read.csv("outputs/csv_clean.csv", header =T, stringsAsFactors = F, encoding = "UTF-8")
 
 # remove all unicode characters from df
 
