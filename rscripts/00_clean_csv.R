@@ -271,6 +271,10 @@ if(length(class_df[which(class_df$class != class_df$class_manual),]) > 0){
   print("no diffs in classifications")
 )
 
+# drop class_manual if same as class
+
+df$class_manual <- NULL
+
 # check correct number of classifications
 
 if((sum(df$class == "descriptive") == 6) &
@@ -337,5 +341,7 @@ if((length(unique(na.omit(id))) == nrow(df)) == TRUE){
 #########
 #### export ####
 #########
+
+
 
 write.csv(df, "outputs/csv_clean.csv", row.names = F, fileEncoding = "UTF-8")
