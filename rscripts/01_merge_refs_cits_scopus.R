@@ -3,6 +3,9 @@
 # This code merges the included refereneces (from Endnote), their citations (from Endnote) and their scopus profiles (exported from scopus as csv)
 # It only cleans the datasets in so far as to allow them to merge correctly and assign headers and export merged csv
 
+
+## TO DO merge on title (after removing all punct etc) or article id
+
 #########
 #### packages####
 #########
@@ -13,40 +16,46 @@ library(tidyverse)
 #### import source ####
 ###################
 
-# source data contains name of database the reference was retrieved from for all results from search on 15/01/19
-# source data created by exporting Fulltexts endnote file as tab deliminated text file > opened in excel as csv > 
-# unnecessary cols deleted >  headers added > saved
+# source contains database reference was retrieved from for all results from search on 15/01/19
+# source.csv created by exporting Fulltexts endnote file as tab deliminated text file > opened in excel as csv 
+# > deleted all cols except author, title, doi and name of database > added any missing dois from Endnote
+# > added headers
 
-# import name of database the reference was retrieved 
+# import name of database (i.e. source) the reference was retrieved from
 
-source <- read.csv("data/name of database.csv", header = T, stringsAsFactors = F, encoding = "UTF-8")
+source <- read.csv("data/02_source_w_headers.csv", header = T, stringsAsFactors = F, encoding = "UTF-8", na.strings = "")
 
-# check colnames
-colnames(source)
+################
+#### clean source ####
+#################
 
-# check number of DOIs
+# function to remove any duplicates
 
-if ((length(unique(source$doi)) == nrow(source)) == FALSE){
-  stop("dois wrong")
-} else {
-  print("dois OK")
+remove_dups <- function(df, col1, col2){
+  cols_to_check <- c(col1, col2)
+  df <- df[!duplicated(df[, cols_to_check]), ]
 }
 
-# find duplicate dois
+#remove dups
 
-dup_doi <- source$doi[duplicated(source$doi)]
+source <- remove_dups(source, "title", "doi")
 
-#remove duplicate dois
+# function to check each row has a unique doi (not counting NA as a value)
 
-source <- source[!(source$doi %in% dup_doi), ]
-
-# check number of DOIs again
-
-if ((length(unique(source$doi)) == nrow(source)) == FALSE){
-  stop("dois wrong")
-} else {
-  print("dois OK")
+check_doi <- function(doi_col, df){
+  if((length(na.omit(unique(doi_col))) == nrow(df)) == FALSE)
+    stop("missing/duplicated dois")
+  else
+    print("dois OK")
 }
+
+# check dois
+
+check_doi(source$doi, source)
+
+# check each row has unique doi or is missing
+
+(sum(is.na(source$doi)) + length(unique(na.omit(source$doi)))) == nrow(source)
 
 ###################
 #### import citations####
@@ -54,7 +63,7 @@ if ((length(unique(source$doi)) == nrow(source)) == FALSE){
 
 # read in citations (exported from endnote and changed into csv )
 
-cite <- read.csv("data/citations.csv", header = F, encoding = "UTF-8")
+cite <- read.csv("data/03_citations.csv", header = F, encoding = "UTF-8")
 
 #add header
 
@@ -66,7 +75,7 @@ nrow(cite)
 
 # remove all unicode characters 
 
-cite$citation <- gsub("[^\u0001-\u007F]+", "", cite$citation)
+#cite$citation <- gsub("[^\u0001-\u007F]+", "", cite$citation)
 
 # create doi col by separating it from end of citations
 
@@ -74,11 +83,9 @@ cite <- separate(cite, citation, into = c("temp", "doi"), sep = "doi:", fill = "
 
 # check number of DOIs
 
-if ((length(unique(cite$doi)) == nrow(cite)) == FALSE){
-  stop("dois wrong")
-} else {
-  print("dois OK")
-}
+check_doi(doi_col = cite$doi, cite)
+
+## TO DO REMOVE DUPLICATES 
 
 # remove temp col
 
