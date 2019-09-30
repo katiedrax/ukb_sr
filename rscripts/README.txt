@@ -1,0 +1,2 @@
+00. Clean csv of 564 references which were screened then classified in Rayyan, create search string of DOIs, paste scopus_search_string into advanced search in Scopus, click search, select 'All', click drop down arrow next to 'RIS export', select 'CSV', select all items you want to export (see X) click 'Export' and save csv as 'scopus' in this project's 'data' folder
+01. Merge csv of references, citations, scopus results and source of references.
