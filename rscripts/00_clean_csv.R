@@ -76,7 +76,7 @@ colnames(df)
 
 # check contents of col without endnote header
 
-df[, "no_head"]
+df$no_head[!is.na(df$no_head)]
 
 # if col with no header contains a doi add contents it's to doi col
 
@@ -96,37 +96,33 @@ colnames(df)
 #### check dois ####
 ###############
 
-# check all dois contain 10.
 
-df$doi[!grepl("^10", df$doi)]
+# create function to check no missing, duplicated or incorrect dois
 
-# check if any dois have anything extra coming before doi
-
-df$doi[!grepl("^10", df$doi)]
-
-# check all rows have a unique doi
-
-if ((length(unique(na.omit(df$doi))) == nrow(df)) == FALSE){
-  stop("dois wrong/missing")
-} else {
-  print("dois OK")
+check_doi <- function(doi_col){
+  # check no dois missing
+  if(sum(is.na(doi_col)) > 0) stop("dois missing") else
+    # check all dois contain 10.
+    if(length(doi_col[!grepl("10", doi_col)]) != 0) stop("some dois don't contain 10") else
+      # check all dois start with 10
+      if(length(doi_col[!grepl("^10", doi_col)]) != 0) stop("some dois don't start with 10") else
+        # check no dois duplicated
+        if(sum(duplicated(doi_col)) > 0) stop("duplicate dois") else
+          # correct
+          return("dois OK")
 }
 
-# check if any dois are missing
+#check doi 
 
-no_doi <- df[is.na(df$doi), c("title", "authors")]
+check_doi(df$doi)
 
 # add missing doi
 
 df$doi[df$title == "Analysis of shared heritability in common disorders of the brain"] <- "10.1126/science.aap8757"
 
-# check all rows have a unique doi again
+# check doi again
 
-if ((length(unique(na.omit(df$doi))) == nrow(df)) == FALSE){
-  stop("dois wrong/missing")
-} else {
-  print("dois OK")
-}
+check_doi(df$doi)
 
 
 ######################
@@ -312,11 +308,11 @@ first <- first %>%
   #extract first 5 characters from first author's last name
   substr(1, 5)
 
-# extract last 3 characters of doi
+# extract last 4 characters of doi
 do <- substr(df$doi, nchar(df$doi)-4+1, nchar(df$doi))
 
-# extract first 3 characters of title
-ti <- substr(df$title, 1, 3)
+# extract first last 4 characters of title
+ti <- substr(df$title, nchar(df$title)-4+1, nchar(df$title))
 
 # paste it all together
 
@@ -330,8 +326,31 @@ if((length(unique(na.omit(id))) == nrow(df)) == TRUE){
   stop("article ids not unique")
 }
 
+# make ID first column
+
+df <- select(df, id, everything())
+
+#################################
+#### create scopus search string ####
+##################################
+
+# create search string to be pasted into Scopus
+
+doi_search <- paste("DOI(", df$doi, ")", sep = "", collapse = " OR ")
+
+# export the search string
+
+write.table(doi_search, "outputs/scopus_search_string.txt", quote = F, row.names = F, col.names = F)
+
 #########
 #### export ####
 #########
 
+# export all references
 write.csv(df, "outputs/csv_clean.csv", row.names = F, fileEncoding = "UTF-8")
+
+# export only epi references
+
+epi <- df[df$class == "epi", ]
+
+write.csv(epi, "outputs/csv_clean_epi.csv", row.names = F, fileEncoding = "UTF-8")
