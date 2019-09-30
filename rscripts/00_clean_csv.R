@@ -1,14 +1,6 @@
 # Description
 
 # This code cleans the csv containing all included refereneces from Rayyan
-# Refs exported as Endnote file from Rayyan > exported from Endnote as tab-delim text file > text file exported as CSV from Excel
-# in endnote:
-## 0. classifications exported separately from rayyan and imported into Endnote 
-## 1. classification label added to refs in custom 3 field when imported into endnote
-## 2. incorrect/missing dois were added
-## 3. refs were updated & checked they were all duplicates of non-updated refs exported from rayyan
-## 4. DOI field replaced to language field so it could be exported
-## 5. carriage return replaced with /// from all fields except author
 
 #########
 #### packages####
@@ -341,7 +333,5 @@ if((length(unique(na.omit(id))) == nrow(df)) == TRUE){
 #########
 #### export ####
 #########
-
-
 
 write.csv(df, "outputs/csv_clean.csv", row.names = F, fileEncoding = "UTF-8")
