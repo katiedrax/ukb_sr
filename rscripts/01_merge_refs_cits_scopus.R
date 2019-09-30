@@ -16,11 +16,6 @@ library(tidyverse)
 #### import source ####
 ###################
 
-# source contains database reference was retrieved from for all results from search on 15/01/19
-# source.csv created by exporting Fulltexts endnote file as tab deliminated text file > opened in excel as csv 
-# > deleted all cols except author, title, doi and name of database > added any missing dois from Endnote
-# > added headers
-
 # import name of database (i.e. source) the reference was retrieved from
 
 source <- read.csv("data/02_source_w_headers.csv", header = T, stringsAsFactors = F, encoding = "UTF-8", na.strings = "")
@@ -36,9 +31,14 @@ remove_dups <- function(df, col1, col2){
   df <- df[!duplicated(df[, cols_to_check]), ]
 }
 
-#remove dups
+# check & remove duplicates
 
-source <- remove_dups(source, "title", "doi")
+if(sum(duplicated(source[, c("title", "doi")])) > 0){
+  #remove dups
+  source <- remove_dups(source, "title", "doi")
+} else {
+  print("no dups")
+}
 
 # function to check each row has a unique doi (not counting NA as a value)
 
@@ -61,7 +61,7 @@ check_doi(source$doi, source)
 #### import citations####
 ###################
 
-# read in citations (exported from endnote and changed into csv )
+# read in citations 
 
 cite <- read.csv("data/03_citations.csv", header = F, encoding = "UTF-8")
 
@@ -73,23 +73,26 @@ colnames(cite)[1] <- "citation"
 
 nrow(cite)
 
-# remove all unicode characters 
-
-#cite$citation <- gsub("[^\u0001-\u007F]+", "", cite$citation)
-
 # create doi col by separating it from end of citations
 
 cite <- separate(cite, citation, into = c("temp", "doi"), sep = "doi:", fill = "left", remove = FALSE)
 
-# check number of DOIs
-
-check_doi(doi_col = cite$doi, cite)
-
-## TO DO REMOVE DUPLICATES 
-
 # remove temp col
 
 cite$temp <- NULL
+
+# remove duplicates
+
+if(sum(duplicated(cite[, "doi"])) > 0){
+  #remove dups
+  cite <- remove_dups(cite, "doi", col2 = NULL)
+} else {
+  print("no dups")
+}
+
+# check dois
+
+check_doi(cite$doi, cite)
 
 ###############
 #### import included ####
