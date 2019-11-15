@@ -1,43 +1,47 @@
-# Instructions: data extraction from epidemiology articles
+---
+title: "Instructions: data extraction from epidemiology articles"
+author: "Katie Drax"
+date: "15 November 2019"
+output: word_document
+---
 
-## Time of writing
+# Time of writing
 
+- The study designs in **[number?]** articles have been identified by KD and MG. 
 - Data extraction has not yet begun for any eligible articles
 - The first draft of the data extraction form has been piloted on one observational epidemiology study by MG, KD and RR (Dregan (2018) Arterial stiffness association with chronic inflammatory disorders in the UK Biobank study).
 
-## Procedure
+# Procedure
 
 The following procedure will be used for all articles classified as 'observational epidemiology'
 
 1. Two people (from KD, RR, MG and BW) will independently identify the study design(s) (cohort, case-control or cross-sectional) used by each of the 178 articles by answering the first block of questions in the data extraction form. They will also check all supplementary material can be accessed via University of Bristol subscriptions. We will attempt to retrieve any supplementary material we cannot access (e.g., by contacting the authors). Any conflicts will be discussed by the two extractors and resolved by mutual consent if possible. If not resolved after discussion, RR or MM will determine the study designs
 1. Articles containing multiple different study designs will be discussed on a case-by-case basis to confirm whether a single reporting checklist is adequate, or if multiple reporting checklists apply to a single article.
 1. KD will identify and exclude retracted articles by assessing the notices attached to the online version of the article.
-1. The information in Table 1 will be extracted manually by KD or automatically by bibliographic software.
-1. The articles will be randomly selected for extraction and two people (from MG, KD, BW and RR) will independently complete the data extraction form for each article. Any conflicts will be discussed by the two extractors and resolved by mutual consent if possible. If not resolved after discussion, RR or MM will assign the category. Articles will continue to be selected at random until none remain, or until the authors resources are exhausted.
-
-
+1. The information in Table 1 will be extracted manually by KD or automatically by Endnote.
+1. The articles will be randomly selected for data extraction and two people (from MG, KD, BW and RR) will independently complete the data extraction form for each article. Any conflicts will be discussed by the two extractors and resolved by mutual consent if possible. If not resolved after discussion, RR or MM will assign the category. Articles will continue to be selected at random until none remain, or until the authors resources are exhausted.
 
 *Table 1. Methods for extracting article meta-data*
 
 | Item | Definition | Method of extraction |
 | --- | --- | --- |
 | Article ID(s) of related articles | Article IDs of articles that contain similar analyses. | Examine articles with same first author, last author and UK Biobank application number. |
-| Citation |   | Bibliographic |
-| Publication date |   | Bibliographic |
-| Authors |   |   |
-| Journal |   |   |
-| Volume |   |   |
-| Issue |   |   |
+| Citation |   | Endnote |
+| Publication date |   | Endnote |
+| Authors |   |  Endnote |
+| Journal |   | Endnote  |
+| Volume |   | Endnote  |
+| Issue |   | Endnote  |
 | Open Access |   | (1) Search for article on open access button ([https://openaccessbutton.org/](https://openaccessbutton.org/)) and follow the link on non-university network  (2) If no on open access button check if there are links on Google Scholar |
 | Countries of corresponding, first &amp; last author |   | Extract country of author's affiliations |
 | UK Biobank Application number | Study's approved UK Biobank data application number (if present) | (1) Search article for all these terms:  'application' , 'approv' , 'number' , 'Resource' (2) If not found examine any strings of numbers in article |
 | Author keywords |   | (1) Extract from page 1 (2) If not on page 1 search article for 'keywords' |
 | Journal endorsement | Journal's endorsement of STROBE before publication | (1) Extract references to STROBE from the journal's most recent 'instructions/guide for authors' before article's publication date |
 | Journal impact factor |   | Retrieve the impact factor of the journal for year of publication from Web of Science's Journal Citation Reports (JCR) |
-| Corresponding author address |   | Bibliographic; if missing: (1) extract from page 1 (2) If not on page 1 search article for 'corresponding', '@') |
+| Corresponding author email address |   | Endnote; if missing: (1) extract from page 1 (2) If not on page 1 search article for 'corresponding', '@') |
 | Conflicts of interest statement |   | (1) Search article material for all these terms: 'competing', 'interest' ,'conflict' , 'disclosure' (2) If not found examine article for similar terms (3) if present extract conflicts of interest statements |
 | Classification | Classification ('mendelian randomisation', 'observational epidemiology' or 'other') as assigned by KD, BW and RR in Rayyan | Rayyan |
 
-## Missing items
+# Missing items
 
 We will not attempt to retrieve any missing items in the data extraction form, in order to give an accurate assessment of the version of record and to avoid exhausting the extractors resources.
