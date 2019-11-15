@@ -1,28 +1,19 @@
-**Instructions: data extraction from epidemiology articles**
+# Instructions: data extraction from epidemiology articles
 
-**Time of writing**
+## Time of writing
 
 - Data extraction has not yet begun for any eligible articles
 - The first draft of the data extraction form has been piloted on one observational epidemiology study by MG, KD and RR (Dregan (2018) Arterial stiffness association with chronic inflammatory disorders in the UK Biobank study).
 
-**Procedure**
+## Procedure
 
 The following procedure will be used for all articles classified as 'observational epidemiology'
 
-1. Two people (from KD, RR, MG and BW) will independently identify the study design (cohort, case-control or cross-sectional) used by each of the 178 articles by answering the first block of questions in the data extraction form. Any conflicts will be discussed by the two extractors and resolved by mutual consent if possible. If not resolved after discussion, RR or MM will determine the study designs
-2. If the articles contain multiple study designs the extractor will confirm whether the article should be assessed STROBE guidelines at the article-level or study-level.
-
-#
-[ANNOTATION:
-
-BY 'Marcus Munafo'
-ON '2019-09-23T20:11:00'MM
-NOTE: 'Or determine whether a single guideline is adequate, or multiple guidelines apply to a single article?']
-
-3. One person (KD) will identify and exclude retracted articles by assessing the notices attached to the online version of the article.
-4. One person (KD) will identify any articles with supplementary material which cannot be accessed via University of Bristol subscriptions. We will attempt to retrieve any supplementary material we cannot access (e.g., by contacting the authors).
-5. The information in Table 1 will be extracted manually by one person (KD) or automatically by bibliographic software.
-6. The articles will be randomly selected for extraction and two people (from MG, KD, BW and RR) will independently complete the data extraction form for each article. Any conflicts will be discussed by the two extractors and resolved by mutual consent if possible. If not resolved after discussion, RR or MM will assign the category. Articles will continue to be selected at random until none remain, or until the authors resources are exhausted.
+1. Two people (from KD, RR, MG and BW) will independently identify the study design(s) (cohort, case-control or cross-sectional) used by each of the 178 articles by answering the first block of questions in the data extraction form. They will also check all supplementary material can be accessed via University of Bristol subscriptions. We will attempt to retrieve any supplementary material we cannot access (e.g., by contacting the authors). Any conflicts will be discussed by the two extractors and resolved by mutual consent if possible. If not resolved after discussion, RR or MM will determine the study designs
+1. Articles containing multiple different study designs will be discussed on a case-by-case basis to confirm whether a single reporting checklist is adequate, or if multiple reporting checklists apply to a single article.
+1. KD will identify and exclude retracted articles by assessing the notices attached to the online version of the article.
+1. The information in Table 1 will be extracted manually by KD or automatically by bibliographic software.
+1. The articles will be randomly selected for extraction and two people (from MG, KD, BW and RR) will independently complete the data extraction form for each article. Any conflicts will be discussed by the two extractors and resolved by mutual consent if possible. If not resolved after discussion, RR or MM will assign the category. Articles will continue to be selected at random until none remain, or until the authors resources are exhausted.
 
 
 
@@ -47,6 +38,6 @@ NOTE: 'Or determine whether a single guideline is adequate, or multiple guidelin
 | Conflicts of interest statement |   | (1) Search article material for all these terms: 'competing', 'interest' ,'conflict' , 'disclosure' (2) If not found examine article for similar terms (3) if present extract conflicts of interest statements |
 | Classification | Classification ('mendelian randomisation', 'observational epidemiology' or 'other') as assigned by KD, BW and RR in Rayyan | Rayyan |
 
-**Missing items**
+## Missing items
 
 We will not attempt to retrieve any missing items in the data extraction form, in order to give an accurate assessment of the version of record and to avoid exhausting the extractors resources.
