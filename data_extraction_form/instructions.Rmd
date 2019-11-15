@@ -9,17 +9,26 @@ output: word_document
 
 - The study designs in **[number?]** articles have been identified by KD and MG. 
 - Data extraction has not yet begun for any eligible articles
-- The first draft of the data extraction form has been piloted on one observational epidemiology study by MG, KD and RR (Dregan (2018) Arterial stiffness association with chronic inflammatory disorders in the UK Biobank study).
+- The Data Extraction form has been piloted on **[number]** observational epidemiology articles by MG, KD and RR. 
+**[X] changes were made so the Data Extraction Form **[will/will not]** be completed again for the piloted articles.
 
 # Procedure
 
 The following procedure will be used for all articles classified as 'observational epidemiology'
 
-1. Two people (from KD, RR, MG and BW) will independently identify the study design(s) (cohort, case-control or cross-sectional) used by each of the 178 articles by answering the first block of questions in the data extraction form. They will also check all supplementary material can be accessed via University of Bristol subscriptions. We will attempt to retrieve any supplementary material we cannot access (e.g., by contacting the authors). Any conflicts will be discussed by the two extractors and resolved by mutual consent if possible. If not resolved after discussion, RR or MM will determine the study designs
+1. Two people (from KD, RR, MG and BW) will independently identify the study design(s) (cohort, case-control or cross-sectional) used by each of the 178 articles by completing the Study Design Form for each article. 
+The form also asks extractors to indicate if all supplementary material can be accessed via University of Bristol subscriptions. 
+We will attempt to retrieve any supplementary material we cannot access (e.g., by contacting the authors). 
+Any conflicts will be discussed by the two extractors and resolved by mutual consent if possible. 
+If not resolved after discussion, RR or MM will determine the study designs. 
+The Study Design Form was hosted on Qualtrics but a PDF version can be found here https://osf.io/nd78g/.  
 1. Articles containing multiple different study designs will be discussed on a case-by-case basis to confirm whether a single reporting checklist is adequate, or if multiple reporting checklists apply to a single article.
 1. KD will identify and exclude retracted articles by assessing the notices attached to the online version of the article.
 1. The information in Table 1 will be extracted manually by KD or automatically by Endnote.
-1. The articles will be randomly selected for data extraction and two people (from MG, KD, BW and RR) will independently complete the data extraction form for each article. Any conflicts will be discussed by the two extractors and resolved by mutual consent if possible. If not resolved after discussion, RR or MM will assign the category. Articles will continue to be selected at random until none remain, or until the authors resources are exhausted.
+1. The articles will be randomly selected for data extraction and two people (from MG, KD, BW and RR) will independently complete the Data Extraction Form for each article. 
+Any conflicts will be discussed by the two extractors and resolved by mutual consent if possible. 
+If not resolved after discussion, RR or MM will assign the category. 
+Articles will continue to be selected at random until none remain, or until the authors resources are exhausted.
 
 *Table 1. Methods for extracting article meta-data*
 
@@ -44,4 +53,4 @@ The following procedure will be used for all articles classified as 'observation
 
 # Missing items
 
-We will not attempt to retrieve any missing items in the data extraction form, in order to give an accurate assessment of the version of record and to avoid exhausting the extractors resources.
+We will not attempt to retrieve any missing items in the Data Extraction Form, in order to give an accurate assessment of the version of record and to avoid exhausting the extractors resources.
