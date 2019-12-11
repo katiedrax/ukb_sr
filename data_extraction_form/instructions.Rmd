@@ -1,29 +1,28 @@
 ---
-title: "Instructions: data extraction from epidemiology articles"
+title: "Preregistration: data extraction from epidemiology articles"
 author: "Katie Drax"
-date: "15 November 2019"
+date: "4 December 2019"
 output: word_document
 ---
 
 # Time of writing
 
-- The study designs in **[number?]** articles have been identified by KD and MG. 
+- KD and MG independently identifed the study designs (cohort, case-control or cross-sectional) used by each of the 178 "observational epidemiology" articles by completing the Study Design Form for each article. 
+In the form, extractors also indicated if all supplementary material can be accessed via University of Bristol subscriptions. 
+Any conflicts were discussed by the two extractors and resolved by mutual consent if possible. 
+If not resolved after discussion, RR determined the study designs. 
+The Study Design Form was hosted on Qualtrics but a PDF version can be found here https://osf.io/nd78g/.
 - Data extraction has not yet begun for any eligible articles
 - The Data Extraction form has been piloted on **[number]** observational epidemiology articles by MG, KD and RR. 
 **[X] changes were made so the Data Extraction Form **[will/will not]** be completed again for the piloted articles.
+- KD assessed examined the notices attached to the online version of the observational epidemiology articles to identify any retracted articles. None were identified
 
-# Procedure
+# Data extraction procedure
 
 The following procedure will be used for all articles classified as 'observational epidemiology'
 
-1. Two people (from KD, RR, MG and BW) will independently identify the study design(s) (cohort, case-control or cross-sectional) used by each of the 178 articles by completing the Study Design Form for each article. 
-The form also asks extractors to indicate if all supplementary material can be accessed via University of Bristol subscriptions. 
-We will attempt to retrieve any supplementary material we cannot access (e.g., by contacting the authors). 
-Any conflicts will be discussed by the two extractors and resolved by mutual consent if possible. 
-If not resolved after discussion, RR or MM will determine the study designs. 
-The Study Design Form was hosted on Qualtrics but a PDF version can be found here https://osf.io/nd78g/.  
+1. We will attempt to retrieve any supplementary material we could not access (e.g., by contacting the authors). 
 1. Articles containing multiple different study designs will be discussed on a case-by-case basis to confirm whether a single reporting checklist is adequate, or if multiple reporting checklists apply to a single article.
-1. KD will identify and exclude retracted articles by assessing the notices attached to the online version of the article.
 1. The information in Table 1 will be extracted manually by KD or automatically by Endnote.
 1. The articles will be randomly selected for data extraction and two people (from MG, KD, BW and RR) will independently complete the Data Extraction Form for each article. 
 Any conflicts will be discussed by the two extractors and resolved by mutual consent if possible. 
