@@ -1,4 +1,4 @@
-article_id,title,initials,access_1,access_2,design,design_ev,design_judg,design_judg_5_TEXT,design_judg_rat,comments,correct_design,correct_supp_access
+article_id,title,initials,access_1,access_2,design,design_ev,design_judg,design_judg_5_TEXT,design_judg_rat,comments,resol_correct_design,resol_correct_supp_access
 Ander2017entsw173,Adiposity among 132 479 UK Biobank participants; contribution of sugar intake vs other macronutrients,MG,Yes,Yes,Cross-sectional,"We conducted a cross-sectional study and, therefore, cannot demonstrate a temporal relationship between diet and adiposity. ",,,,,,
 Ander2017entsw173,Adiposity among 132<U+2009>479 UK Biobank participants; contribution of sugar intake vs other macronutrients ,kd,Yes,Yes,Cross-sectional,"""We conducted a cross-sectional study and, therefore, cannot demonstrate a temporal relationship between diet and adiposity.""",,,,,,
 Ander2018ysis.022,Red and processed meat consumption and breast cancer: UK Biobank cohort study and meta-analysis,MG,Yes,Yes,Cohort,"Over a median of 7 years follow-up, 4819 of the 262,195 women developed breast cancer.",,,,,,
