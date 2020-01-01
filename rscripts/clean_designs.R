@@ -12,20 +12,21 @@ library(stringr)
 input <- "data/Classifying+epi+study+designs_11+December+2019_23.50.csv"
 # Import first three rows of the  Qualtrics csv export
 
-header <- read.csv(input, encoding = "UTF-8", nrows = 3)
+header <- read.csv(input, encoding = "UTF-8", nrows = 2, stringsAsFactors = F)
 
 # Row 1 should contain the "question numbers", row 2 the full question text and row 3 the "import id"s
 # As "Question Export Tags" assigned and question numbers changed to variable names the first row contains the correct variable names >
 # warn user to check row content and that variables in row 1 match full questions
 
-warning("manually check rows 1 = variables & row 2& 3 are import id and full questions")
-warning("manually check variables names match full questions")
+if(sum(str_count(colnames(header))) != 227) stop("check header colnames contains variable names")
+if(sum(grepl("ImportId", header[2,])) != 21) stop("check header row 2 contains import ids")
+if(sum(str_count(header[1, ])) != 1794) stop("check header row 1 contains full questions")
 
-# remove rows 2 and 3 by assigning column names (row 1)
+# assign column names to header
 
 header <- colnames(header)
 
-# remove row 2 and 3 on import skipping first three rows and assign header (row 1) as col.names
+# remove row 2 and 3 on import skipping first three rows and assign header as col.names
 
 df <- read.csv(input, skip = 3,
                encoding = "UTF-8", header = F, col.names = header, na.strings = c("", " "), stringsAsFactors = F)
@@ -38,6 +39,7 @@ df <- read.csv(input, skip = 3,
 
 qual_cols <- colnames(df)[1:10]
 qual_cols
+warning("check qual_cols above")
 
 # remove qual_cols
 
@@ -71,6 +73,7 @@ df$design_all <- gsub("no_statement,|NA,|,NA", "", df$design_all)
 df$design_all[grep("cross-sectional,cohort", df$design_all)] <- "cohort,cross-sectional"
 df$design_all[grep("cross-sectional,cross-sectional", df$design_all)] <- "cross-sectional"
 
+table(df$design)
 ####################
 # merge preparation ####
 ##################
@@ -86,21 +89,26 @@ articles <- read.csv("https://osf.io/8uy9w/?action=download", encoding = "UTF-8"
 # check kd & md assessed all articles in csv_clean_epi.csv
 
 if(length(dplyr::setdiff(articles, kd$article_id)) > 0 | dplyr::setdiff(articles, mg$article_id) >0){
-  stop("kd or mg have not assessed all articles")
+  print(setdiff(articles, kd$article_id))
+  print(setdiff(articles, mg$article_id))
+  stop("kd or mg have not assessed the articles above")
 }
 
 # check title duplicates
 
 if(length(kd$title[duplicated(kd$title)]) >0 | length(mg$title[duplicated(mg$title)]) >0){
+  print(kd$title[duplicated(kd$title)])
+  print(mg$title[duplicated(mg$title)])
   stop("kd or mg have duplicated titles")
 }
 
 # check article id duplicates
 
 if(length(kd$title[duplicated(kd$article_id)]) >0 | length(mg$title[duplicated(mg$article_id)]) >0){
-  stop("kd or mg have duplicated titles")
+  print(kd$title[duplicated(kd$article_id)])
+  print(mg$title[duplicated(mg$article_id)])
+  stop("kd or mg have duplicated article ids")
 }
-
 
 ###########
 # merge####
@@ -132,8 +140,6 @@ clean_string <- function(string){
 # create df
 title_cons <- both
 
-# clean title strings for better matching
-
 # clean title strings
 
 title_cons$title.kd <- clean_string(title_cons$title.kd)
@@ -144,6 +150,11 @@ title_cons <- title_cons[which(title_cons$title.kd != title_cons$title.mg),] %>%
 
 title_cons <- cbind(both$title.kd[both$article_id %in% title_cons], both$title.mg[both$article_id %in% title_cons])
 
+#########################
+# find design conflicts####
+##########################
+
+
 
 conflict <- both[which(both$design.kd != both$design.mg),]%>%
   select(c(design.kd, design.mg), everything())
@@ -152,6 +163,8 @@ no_conflict <- both[which(both$design.kd == both$design.mg),]%>%
   select(c(design.kd, design.mg), everything())
 
 
+############
 # export ####
+#############
 
 write.csv(df, "outputs/clean_designs.csv", row.names = F)
