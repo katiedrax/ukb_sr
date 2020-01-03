@@ -9,7 +9,7 @@ library(stringr)
 
 # assign input file 
 
-input <- "data/Classifying+epi+study+designs_11+December+2019_23.50.csv"
+input <- "data/Classifying+epi+study+designs_1+January+2020_21.04.csv"
 # Import first three rows of the  Qualtrics csv export
 
 header <- read.csv(input, encoding = "UTF-8", nrows = 2, stringsAsFactors = F)
@@ -31,15 +31,19 @@ header <- colnames(header)
 df <- read.csv(input, skip = 3,
                encoding = "UTF-8", header = F, col.names = header, na.strings = c("", " "), stringsAsFactors = F)
 
+# check length correct
+
+if(nrow(df) != 358) stop("too few/many observations")
+
 ############
 # clean ####
 ###########
 
-# vector of cols automatically outputted by Qualtrics (always first 10 cols if responses anonymised)
+# vector of cols automatically outputted by Qualtrics (always first 10 cols if responses anonymised and should be 112 characters)
 
 qual_cols <- colnames(df)[1:10]
-qual_cols
-warning("check qual_cols above")
+
+if(sum(str_count(qual_cols)) != 112) stop("check qual_cols contains qualtrics columns")
 
 # remove qual_cols
 
@@ -54,11 +58,35 @@ df <- df[order(df$article_id), ]
 
 df$initials <- tolower(df$initials)
 df$initials <- gsub("[[:punct:]]", "", df$initials)
-table(df$initials)
+if(sum(df$initials != "kd" |df$initials != "mg") != length(df$article_id)) stop("initials contains strings other than kd and mg")
+
+#################
+# check clean title ####
+##################
+
+# function to clean string 
+clean_string <- function(string){
+  # string: a vector of strings
+  # remove any non-english character, numbers, spaces or punctuation and lower
+  string <- gsub("[^\u0001-\u007F]+","", string)
+  string <- gsub("[0-9]", "", string)
+  string <- gsub("[[:punct:]]", "", string)
+  string <- tolower(string)
+  string <- gsub("[[:space:]]", "", string)
+}
+
+# column containing clean substring of title
+
+df$title_sub <- clean_string(df$title)
 
 #################
 # new column of designs ####
 ######################
+# some designs are missing because the supplmentary material is inaccessible material
+# set missing designs to to be confirmed (TBC)
+
+df$design[df$access_article != "Yes" | df$access_supp == "Present but not accessible"] <- "TBC"
+  
 
 # new column combining design_judg and design to see stated and judged designs together
 
@@ -73,7 +101,13 @@ df$design_all <- gsub("no_statement,|NA,|,NA", "", df$design_all)
 df$design_all[grep("cross-sectional,cohort", df$design_all)] <- "cohort,cross-sectional"
 df$design_all[grep("cross-sectional,cross-sectional", df$design_all)] <- "cross-sectional"
 
-table(df$design)
+# check designs
+
+table(df$design, useNA = "always")
+warning("check values in table all contain different combinations of designs")
+
+if(sum(is.na(df$design)) > 0) stop("check designs that are missing") else print("no missing designs")
+
 ####################
 # merge preparation ####
 ##################
@@ -81,26 +115,17 @@ table(df$design)
 kd <- df[df$initials == "kd", ]
 mg <- df[df$initials == "mg", ]
 
-# vector of all articles in csv_clean_epi.csv on OSF
+# df of all articles in csv_clean_epi.csv on OSF
 
-articles <- read.csv("https://osf.io/8uy9w/?action=download", encoding = "UTF-8", stringsAsFactors = F) %>%
-  .$id
+articles_df <- read.csv("https://osf.io/8uy9w/?action=download", encoding = "UTF-8", stringsAsFactors = F)
 
-# check kd & md assessed all articles in csv_clean_epi.csv
+# vector of all article id's in csv_clean_epi.csv on oSF
 
-if(length(dplyr::setdiff(articles, kd$article_id)) > 0 | dplyr::setdiff(articles, mg$article_id) >0){
-  print(setdiff(articles, kd$article_id))
-  print(setdiff(articles, mg$article_id))
-  stop("kd or mg have not assessed the articles above")
-}
+articles <- articles_df$id
 
-# check title duplicates
-
-if(length(kd$title[duplicated(kd$title)]) >0 | length(mg$title[duplicated(mg$title)]) >0){
-  print(kd$title[duplicated(kd$title)])
-  print(mg$title[duplicated(mg$title)])
-  stop("kd or mg have duplicated titles")
-}
+###############################
+# check article id duplicates ####
+###############################
 
 # check article id duplicates
 
@@ -108,6 +133,103 @@ if(length(kd$title[duplicated(kd$article_id)]) >0 | length(mg$title[duplicated(m
   print(kd$title[duplicated(kd$article_id)])
   print(mg$title[duplicated(mg$article_id)])
   stop("kd or mg have duplicated article ids")
+} else {
+  print("kd and mg have no duplicated article ids")
+}
+
+# find Mark's duplicate article_ids
+mg_id_dup <- mg$article_id[duplicated(mg$article_id)]
+mg_id_dup_df <-   mg[mg$article_id %in% mg_id_dup,]
+
+# mark has duplicate titles for article that had inaccessible supplementary material (which ended the questionnaire) >
+# he redid the questionnaire this time incorrectly responding 'not present' or 'yes' to the supplementary material question so that he could complete with the form
+# merge Mark's responses with the same article_id by >
+# removing the incomplete responses and correcting the access_supp for the complete but incorrect responses
+
+id <- which(mg$access_supp == "Present but not accessible" & mg$article_id %in% mg_id_dup)
+mg <- mg[-id, ]
+
+mg$access_supp[mg$article_id %in% mg_id_dup] <- "Present but not accessible"
+
+# find Katie's
+kd_id_dup <- kd$article_id[duplicated(kd$article_id)]
+kd_id_dup_df <-   kd[kd$article_id %in% kd_id_dup,]
+
+# Katie has given the wrong article_id for the title "Association between adiposity outcomes and residential density: a full-data, cross-sectional analysis of 419<U+2008>562 UK Biobank adult participants"
+# create vectors to identify and replace id of title with wrong article_id
+
+if(kd_id_dup != "Sarka2018ants51-2") stop("duplicate article id is wrong") else wrong_id <- kd_id_dup
+
+correct_id <- articles_df$id[grep("Association between adiposity outcomes and residential density", articles_df$title)]
+title_with_wrong_id <- grep("Association between adiposity outcomes and residential density", kd_id_dup_df$title, value = T)
+
+# replace article_id of row that has title with wrong article_id
+kd$article_id[kd$article_id == wrong_id & kd$title == title_with_wrong_id] <- correct_id
+
+# check article id duplicates again
+
+if(length(kd$title[duplicated(kd$article_id)]) >0 | length(mg$title[duplicated(mg$article_id)]) >0){
+  print(kd$title[duplicated(kd$article_id)])
+  print(mg$title[duplicated(mg$article_id)])
+  stop("kd or mg have duplicated article ids")
+} else {
+  print("kd and mg have no duplicated article ids")
+}
+
+#########################
+# check title duplicates ####
+#########################
+
+# check there are no duplicate titles
+
+if(length(kd$title[duplicated(kd$title)]) >0 | length(mg$title[duplicated(mg$title)]) >0){
+  print(kd$title[duplicated(kd$title)])
+  print(mg$title[duplicated(mg$title)])
+  stop("kd or mg have duplicated titles")
+} else {
+  print("kd and mg have no duplicate titles")
+}
+
+######################
+# check all articles classified ####
+######################
+
+# check kd & md classified all articles in csv_clean_epi.csv
+
+if(length(dplyr::setdiff(articles, kd$article_id)) > 0 | dplyr::setdiff(articles, mg$article_id) >0){
+  print(setdiff(articles, kd$article_id))
+  print(setdiff(articles, mg$article_id))
+  stop("kd or mg have not assessed the articles above")
+} else {
+  print("kd and mg have assessed all articles")
+}
+
+# vector of article_ids Mark has not assessed
+mg_no <- setdiff(articles, mg$article_id)
+
+if(length(mg_no) > 0){
+  # create string of articles_df$title that match the article id's Mark has not assessed then shorten them for easier matching
+  mg_no_title <- articles_df$title[articles_df$id %in% mg_no] %>%
+    substr(., 1, 40)
+  # check title is not in mg
+  print(grep(mg_no_title, mg$title))
+  stop("Mark has not assessed article: ", mg_no)
+} else {
+  print("Mark has assessed all articles")
+}
+
+# vector of article ids katie has not assessed
+kd_no <- setdiff(articles, kd$article_id)
+
+if(length(kd_no) > 0){
+  # create string of articles_df$title that match the article id's Mark has not assessed then shorten them for easier matching
+  kd_no_title <- articles_df$title[articles_df$id %in% mg_no] %>%
+    substr(., 1, 40)
+  # check title is not in kd
+  print(grep(mg_no_title, mg$title))
+  stop("Katie has not assessed article: ", kd_no)
+} else {
+  print("Katie has assessed all articles")
 }
 
 ###########
@@ -122,49 +244,36 @@ both <- full_join(kd, mg, by = "article_id", suffix = c(".kd", ".mg"))
 both <- both[,order(colnames(both))] %>%
   select(article_id, title.kd, title.mg, everything())
 
-#################
-# find title conflicts ####
-##################
+# drop initials columns as only needed for merge
 
-# function to clean string 
-clean_string <- function(string){
-  # string: a vector of strings
-  # remove any non-english character, numbers, spaces or punctuation and lower
-  string <- gsub("[^\u0001-\u007F]+","", string)
-  string <- gsub("[0-9]", "", string)
-  string <- gsub("[[:punct:]]", "", string)
-  string <- tolower(string)
-  string <- gsub("[[:space:]]", "", string)
-}
+both$initials.kd <- NULL
+both$initials.mg <- NULL
 
-# create df
-title_cons <- both
-
-# clean title strings
-
-title_cons$title.kd <- clean_string(title_cons$title.kd)
-title_cons$title.mg <- clean_string(title_cons$title.mg)
-
-title_cons <- title_cons[which(title_cons$title.kd != title_cons$title.mg),] %>%
-  .$article_id
-
-title_cons <- cbind(both$title.kd[both$article_id %in% title_cons], both$title.mg[both$article_id %in% title_cons])
-
-#########################
-# find design conflicts####
-##########################
+###################
+# check title conflicts ####
+########################
 
 
+title_cons <- both[which(both$title_sub.kd != both$title_sub.mg), ] %>%
+  select(c(article_id, title.kd, title.mg))
+warning("manually compare titles View(title_cons) to check they are the same")
 
-conflict <- both[which(both$design.kd != both$design.mg),]%>%
-  select(c(design.kd, design.mg), everything())
+# titles may all be correct but differ in spelling, unicode characters, etc
+# if are correct delete Katie's title and title_sub columns
 
-no_conflict <- both[which(both$design.kd == both$design.mg),]%>%
-  select(c(design.kd, design.mg), everything())
+# add any titles of articles Katie has assessed and Mark has not
+both$title.mg[is.na(both$title.mg)] <- both$title.kd[is.na(both$title.mg)]
 
+#delete Katie's title and title_sub columns 
+both$title.kd <- NULL
+both$title_sub.kd <- NULL
+
+# rename remaining columns
+colnames(both)[colnames(both) == "title.mg"] <- "title"
+colnames(both)[colnames(both) == "title_sub.mg"] <- "title_sub"
 
 ############
 # export ####
 #############
 
-write.csv(df, "outputs/clean_designs.csv", row.names = F)
+write.csv(both, "outputs/clean_designs.csv", row.names = F, fileEncoding = "UTF-8")
