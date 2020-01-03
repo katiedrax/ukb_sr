@@ -51,6 +51,8 @@ if(article_cons$article_id == "Tyrre2015bank0732"){
 check_art <- find_cons(both, both$access_article.kd, both$access_article.mg)
 
 if(check_art == "no conflicts"){
+  # add any access_article values in Katie's column that are missing in Marks so these aren't lost
+  both$access_article.mg[is.na(both$access_article.mg)] <- both$access_article.kd[is.na(both$access_article.mg)]
   # if no conflicts remove one access_supp column
   both$access_article.kd <- NULL
   # rename the remaining column as access_supp
@@ -107,7 +109,10 @@ both$access_supp.kd[both$article_id == "Cummi2016bank53-X"] <- "Present but not 
 check_supp <- find_cons(both, both$access_supp.kd, both$access_supp.mg)
 
 if(check_supp == "no conflicts"){
-  # if no conflicts remove one access_supp column
+  # if not conflicts remove katie's access_supp column
+  # add any access_supp values in Katie's column that are missing in Marks so these aren't lost
+  both$access_supp.mg[is.na(both$access_supp.mg)] <- both$access_supp.kd[is.na(both$access_supp.mg)]
+  # then remove Katies access_supp column
   both$access_supp.kd <- NULL
   # rename the remaining column as access_supp
   colnames(both)[colnames(both) == "access_supp.mg"] <- "access_supp"
