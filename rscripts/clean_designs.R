@@ -82,11 +82,6 @@ df$title_sub <- clean_string(df$title)
 #################
 # new column of designs ####
 ######################
-# some designs are missing because the supplmentary material is inaccessible material
-# set missing designs to to be confirmed (TBC)
-
-df$design[df$access_article != "Yes" | df$access_supp == "Present but not accessible"] <- "TBC"
-  
 
 # new column combining design_judg and design to see stated and judged designs together
 
@@ -271,6 +266,18 @@ both$title_sub.kd <- NULL
 # rename remaining columns
 colnames(both)[colnames(both) == "title.mg"] <- "title"
 colnames(both)[colnames(both) == "title_sub.mg"] <- "title_sub"
+
+##################################
+# assign random number list ####
+##############################
+
+# if article ids are identical to those in csv_clean_epi add random number list
+
+if(identical(sort(both$article_id), sort(articles))){
+  set.seed(1)
+  both$num <- sample(1:length(both$article_id), length(both$article_id), replace = F)
+  both <- select(both, num, everything())
+}
 
 ############
 # export ####
