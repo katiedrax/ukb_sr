@@ -1,11 +1,21 @@
 library(dplyr)
 
+##########
+# import ####
+##########
+
 df <- read.csv("outputs/clean_designs.csv", stringsAsFactors = F, encoding = "UTF-8")
+
+##############
+# functions ####
+#############
 
 # function to check conflicts
 
 
 find_cons <- function(df,a,b){
+  if(is.null(a)) stop("a doesn't exist")
+  if(is.null(b)) stop("b doesn't exist")
   # a & b = two columns to be compared
   # df = dataframe columns are in
   # create df of katie's and Mark's columns that don't match and include NAs in matching
@@ -36,6 +46,51 @@ rename_col <- function(df, a, b, b_new_name){
       stop("still conflicts so can't merge columns")
     }
 }
+
+
+#################
+# new column of designs ####
+######################
+
+# new column combining design_judg and design to see stated and judged designs together
+
+df$design_all.kd <- paste(df$design.kd, df$design_judg.kd, sep = ",")
+df$design_all.mg <- paste(df$design.mg, df$design_judg.mg, sep = ",")
+# remove NAs added by paste 
+
+df$design_all.kd[df$design_all.kd == "NA,NA"] <- NA
+df$design_all.mg[df$design_all.mg == "NA,NA"]  <- NA
+
+df$design_all.kd <- gsub("no_statement,|NA,|,NA", "", df$design_all.kd)
+df$design_all.mg <- gsub("no_statement,|NA,|,NA", "", df$design_all.mg)
+
+# standarise order of designs
+df$design_all.kd[grep("cross-sectional,cohort", df$design_all.kd)] <- "cohort,cross-sectional"
+df$design_all.kd[grep("cross-sectional,cross-sectional", df$design_all.kd)] <- "cross-sectional"
+df$design_all.mg[grep("cross-sectional,cohort", df$design_all.mg)] <- "cohort,cross-sectional"
+
+# check all design responses are correct
+
+design_all_labels <- c("case-control", "other", "no_statement", "cross-sectional", "cohort", 
+                       "cohort,cross-sectional", "cohort,case-control", "cross-sectional,no_statement", "cross-sectional,other")
+
+if(length(setdiff(df$design_all.kd[!is.na(df$design_all.kd)], design_all_labels)) == 0){
+  print("correct design_all.kd responses")
+} else{
+  print(setdiff(df$design_all.kd[!is.na(df$design_all.kd)], design_all_labels))
+  stop("incorrect design_all.kd responses")
+}
+
+if(length(setdiff(df$design_all.mg[!is.na(df$design_all.mg)], design_all_labels)) == 0){
+  print("correct design_all.mg responses")
+} else{
+  print(setdiff(df$design_all.mg[!is.na(df$design_all.mg)], design_all_labels))
+  stop("incorrect design_all.mg responses")
+}
+
+# drop unnecessary columns
+
+df <- select(df, -c(design.kd, design.mg, design_judg.kd, design_judg.mg))
 
 #############
 # get articles ####
@@ -74,7 +129,7 @@ df <- rename_col(df, "access_article.kd", "access_article.mg", "access_article")
 # find supp material (SM) access conflicts ####
 ###############################
 
-# add column indicating if SM has been tracked down for articles with "Present but not availiable" SM
+# add column indicating if SM has been tracked down for articles with "Present but not available" SM
 
 df$supp_location <- NA
 
@@ -91,10 +146,6 @@ cons_supp <- find_cons(df, df$access_supp.kd, df$access_supp.mg)%>%
 
 no_sm <- c("Orteg2017bank97-5", "Malon2017mple7639", "Stile2017bankx080")
 df$access_supp.mg[df$article_id %in% no_sm] <- "Not present"
-
-# Tyrre2013tudyt220's SM is not accessible via journal online version but is via PMC
-
-df$access_supp.mg[df$article_id == "Tyrre2013tudyt220"] <- "Present but not accessible"
 
 # mark could not find SM for Tyree2015bank0732 so he incorrectly answered "Not present"
 # correct Mark's responses to "Present but not accessible"
@@ -114,19 +165,21 @@ df$access_supp.mg[df$article_id %in% yes_sm] <- "Yes"
 df$access_supp.mg[df$article_id == "Cummi2016bank53-X"] <- "Present but not accessible"
 df$access_supp.kd[df$article_id == "Cummi2016bank53-X"] <- "Present but not accessible"
 
+# searching showed Spenc2018ases1293 has available SM
+# correct Mark's response
+df$access_supp.mg[df$article_id == "Spenc2018ases1293"] <- "Yes"
+
 # rename col if no conflicts
 
 df <- rename_col(df, "access_supp.kd", "access_supp.mg", "access_supp")
-
 
 ###############
 # add SM locations ####
 #############
 
-sm_to_find <- df[which(df$access_supp == "Present but not accessible"),] %>%
-  select(c(article_id, title))
+sm_to_find <- df[which(df$access_supp == "Present but not accessible"),] 
 
-# add locations of SM for articles with inaccessible SM at the journal site
+# Tyrre2013tudyt220's SM is not accessible via journal online version but is via PMC
 df$supp_location[df$article_id == "Tyrre2013tudyt220"] <- "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3887570/"
 
 # Pyrko2018ords1603 SM is hard to find so add location in case
@@ -202,9 +255,9 @@ if(nrow(anti_join(resolved, df, by = "article_id")) >0){
 cons_design <- find_cons(df, df$design_all.kd, df$design_all.mg) %>%
   select(c(article_id, design_all.kd, design_all.mg, resol_correct_design, resol_becky), everything())
 
-# McMen2018bank1375 is clearly a cohort design
+# McMen2018bank1375 and Spenc2018ases1293 are clearly cohort designs
 
-df$resol_correct_design[df$article_id == "McMen2018bank1375"] <- "cohort"
+df$design_all.kd[df$article_id %in% c("McMen2018bank1375", "Spenc2018ases1293")] <- "cohort"
 
 # assign Sarka2018ants.009 to Becky to resolve
 
@@ -219,62 +272,32 @@ df$design_all.mg[!is.na(df$resol_correct_design)] <- df$resol_correct_design[!is
 
 df <- rename_col(df, "design_all.kd", "design_all.mg", "design")
 
-#####################
-# TEMP sort conflicts ####
-########################
+##########
+# export ####
+#########
 
-# create temp df
-temp <- df
+# remove existing conflicts objects so can check again
+rm(list = c("cons_design", "cons_supp", "cons_art"))
 
-# find conflicts again
-cons_design <- find_cons(temp, temp$design_all.kd, temp$design_all.mg)
-cons_sups <- find_cons(temp, temp$access_supp.kd, temp$access_supp.mg)
-cons_art <- find_cons(temp, temp$access_article.kd, temp$access_article.mg)
+# find any conflicts
 
-# set all designs of articles with some inaccessible materials to TBC
+cons_design <- find_cons(df, df$design_all.kd, df$design_all.mg)
+cons_supp <- find_cons(df, df$access_supp.kd, df$access_supp.mg)
+cons_art <- find_cons(df, df$access_article.kd, df$access_article.mg)
 
-temp$design_all.kd[(temp$access_article.kd != "Yes" & temp$access_article.mg != "Yes") | 
-     (temp$access_supp.kd == "Present but not accessible" & temp$access_supp.mg == "Present but not accessible")] <- "TBC"
+#  export
 
-temp$design_all.mg[(temp$access_article.kd != "Yes" & temp$access_article.mg != "Yes") | 
-               (temp$access_supp.kd == "Present but not accessible" & temp$access_supp.mg == "Present but not accessible")] <- "TBC"
+if(nrow(cons_design) != 0){
+  # if conflicts export df as is
+  warning("still conflicts so exporting unresolved designs")
+  # export df as is
+  write.csv(df, "outputs/unresolved_designs.csv", row.names = F, fileEncoding = "UTF-8")
+  } else {
+    # if no conflicts remove unnecessary columns and export clean version
+    #  no conflicts remain so don't need any columns that were used to resolve conflicts
+    cols <- colnames(df)[grepl("comments|design_|resol|design.|title_sub", colnames(df)) == F]
+    resolved <- df[, colnames(df)%in% cols]
+    # write csv
+    write.csv(resolved, "outputs/resolved_designs.csv", row.names = F, fileEncoding = "UTF-8")
+  }
 
-# set all values to NA for article_ids mark have not assessed (this is to maintain blinding)
-
-na_id <- temp$article_id[is.na(temp$design_all.kd) | is.na(temp$design_all.mg)]
-cols <- colnames(temp)[colnames(temp) != "article_id"]
-temp[temp$article_id %in% na_id, colnames(temp) %in% cols] <- NA
-
-# set all designs of articles currently in conflict to  TBC
-
-temp$design_all.kd[temp$article_id %in% cons_design$article_id] <- "TBC"
-temp$design_all.mg[temp$article_id %in% cons_design$article_id] <- "TBC"
-
-# try to rename again
-
-
-temp <- rename_col(temp, "access_article.kd", "access_article.mg", "access_article")
-
-temp <- rename_col(temp, "access_supp.kd", "access_supp.mg", "access_supp")
-temp <- rename_col(temp, "design_all.kd", "design_all.mg", "design")
-
-# drop al irrelevant columns
-
-#  no conflicts remain so don't need any columns that were used to resolve conflicts
-cols <- colnames(temp)[grepl("comments|design_|resol|design.", colnames(temp)) == F]
-
-temp <- temp[, colnames(temp)%in% cols]
-####################################
-# export list of conflicts for becky ####
-#####################################
-
-# get titles of conflicts to be resolved by Becky
-
-b <- df$article_id[df$resol_becky == T & is.na(df$resol_correct_design)]%>%
-  .[!is.na(.)]
-
-becky_it <- df %>%
-  select(., article_id, title) %>%
-  .[.$article_id %in% b, ]
-
-write.csv(becky_it, "../../Desktop/to becky.csv", row.names = F, fileEncoding = "UTF-8")
