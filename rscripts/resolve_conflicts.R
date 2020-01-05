@@ -1,14 +1,16 @@
 library(dplyr)
 
 df <- read.csv("outputs/clean_designs.csv", stringsAsFactors = F, encoding = "UTF-8")
-# set NA to actual value iso that it won't be ignored when matching
-df[is.na(df)] <- "NA"
+
 # function to check conflicts
 
-find_cons <- function(df,kd_col,mg_col){
-  # create df of katie's and Mark's columns that don't match
-  x <- df[which(kd_col != mg_col),]
-  # if conflicts return df and present warning
+
+find_cons <- function(df,a,b){
+  # a & b = two columns to be compared
+  # df = dataframe columns are in
+  # create df of katie's and Mark's columns that don't match and include NAs in matching
+  x <- df[which((!is.na(a) & !is.na(b) & a==b | is.na(a) & is.na(b)) == F),]
+  # if conflicts - save x and present warning
   if(nrow(x) >0){
     warning("conflicts")
     return(x)
@@ -18,13 +20,30 @@ find_cons <- function(df,kd_col,mg_col){
   }
 }
 
+# merge and rename column if two columns identical
+rename_col <- function(df, a, b, b_new_name){
+  # a = column you want to delete
+  # b = column you want to keep and rename
+  # check if there's conflicts
+  if(identical(df[[a]], df[[b]])){
+    # remove a column
+    df[[a]] <- NULL
+    # rename b
+    colnames(df)[colnames(df) == b] <- b_new_name
+    return(df)
+    } else {
+      # if still conflicts stop merge
+      stop("still conflicts so can't merge columns")
+    }
+}
+
 #############
 # get articles ####
 ################
 
 # df of all articles in csv_clean_epi.csv on OSF
 
-#articles_df <- read.csv("https://osf.io/8uy9w/?action=download", encoding = "UTF-8", stringsAsFactors = F)
+articles_df <- read.csv("https://osf.io/8uy9w/?action=download", encoding = "UTF-8", stringsAsFactors = F)
 
 # vector of all article id's in csv_clean_epi.csv on oSF
 
@@ -35,32 +54,21 @@ articles <- articles_df$id
 #########################
 
 # find article access conflicts
-article_cons <- find_cons(df, df$access_article.kd, df$access_article.mg)%>%
+cons_art <- find_cons(df, df$access_article.kd, df$access_article.mg)%>%
   select(c(article_id, access_article.kd, access_article.mg, title)) %>%
   print()
 
 # mark could not find article for Tyree2015bank0732 so he incorrectly answered "Not present"
-# if article_cons only contain Tyree2015bank0732 correct Mark's responses to "Present but not accessible"
-if("Tyrre2015bank0732" %in% article_cons$article_id){
+# if cons_art only contain Tyree2015bank0732 correct Mark's responses to "Present but not accessible"
+if("Tyrre2015bank0732" %in% cons_art$article_id){
   df$access_article.mg[df$article_id == "Tyrre2015bank0732"] <- "Present but not accessible"
 } else {
   stop("Tyree2015bank0732 has no article access conflict")
 }
 
-# check article conflicts again
+# rename access_article if no conflicts
 
-check_art <- find_cons(df, df$access_article.kd, df$access_article.mg)
-
-if(check_art == "no conflicts"){
-  # add any access_article values in Katie's column that are missing in Marks so these aren't lost
-  df$access_article.mg[is.na(df$access_article.mg)] <- df$access_article.kd[is.na(df$access_article.mg)]
-  # if no conflicts remove one access_article column
-  df$access_article.kd <- NULL
-  # rename the remaining column as access_article
-  colnames(df)[colnames(df) == "access_article.mg"] <- "access_article"
-} else {
-  stop("can't merge access_article cols because access_article has conflicts")
-}
+df <- rename_col(df, "access_article.kd", "access_article.mg", "access_article")
 
 ###############################
 # find supp material (SM) access conflicts ####
@@ -72,11 +80,11 @@ df$supp_location <- NA
 
 # find conflicts in access to SM
 
-supp_cons <- find_cons(df, df$access_supp.kd, df$access_supp.mg)%>%
+cons_supp <- find_cons(df, df$access_supp.kd, df$access_supp.mg)%>%
   select(c(article_id, access_supp.kd, access_supp.mg, title))
 
 # conflicts in SM access do not require official resolution between Mark and Katie
-# manually check if supp_cons are or aren't accessible then resolve here
+# manually check if cons_supp are or aren't accessible then resolve here
 
 # searching showed Orteg2017bank97-5, Malon2017mple7639 and Stile2017bankx080 have no SM
 # correct Mark's responses
@@ -100,29 +108,19 @@ yes_sm <- c("Papag2019omen2359", "Celis2017tudy1456", "Keids2016tion0196",
 
 df$access_supp.mg[df$article_id %in% yes_sm] <- "Yes"
 
-# searching showed Cummi2016bank53-X was not accessible
+# searching showed Cummi2016bank53-X SM was not accessible
 # correct Katie's & Mark's response
 
 df$access_supp.mg[df$article_id == "Cummi2016bank53-X"] <- "Present but not accessible"
 df$access_supp.kd[df$article_id == "Cummi2016bank53-X"] <- "Present but not accessible"
 
-# check conflicts again 
-check_supp <- find_cons(df, df$access_supp.kd, df$access_supp.mg)
+# rename col if no conflicts
 
-if(check_supp == "no conflicts"){
-  # if not conflicts remove katie's access_supp column
-  # add any access_supp values in Katie's column that are missing in Marks so these aren't lost
-  df$access_supp.mg[is.na(df$access_supp.mg)] <- df$access_supp.kd[is.na(df$access_supp.mg)]
-  # then remove Katies access_supp column
-  df$access_supp.kd <- NULL
-  # rename the remaining column as access_supp
-  colnames(df)[colnames(df) == "access_supp.mg"] <- "access_supp"
-} else {
-  stop("can't merge access_supp cols because access_supp still has conflicts")
-}
+df <- rename_col(df, "access_supp.kd", "access_supp.mg", "access_supp")
+
 
 ###############
-# locate SM ####
+# add SM locations ####
 #############
 
 sm_to_find <- df[which(df$access_supp == "Present but not accessible"),] %>%
@@ -186,20 +184,22 @@ resolved$resol_correct_design_becky <- NULL
 # resolve design conflicts ####
 ####################
 
-# merge conflicts with resolved so can see what the correct designs of the conflicted articles are
+# merge df with resolved so can see what the correct designs of the conflicted articles are
 
 df <- full_join(df, resolved, by = "article_id")
 
 # find those that failed to merge
-if(nrow(anti_join(resolved, conflicts, by = "article_id")) >0){
-  fail <- (anti_join(resolved, conflicts, by = "article_id"))
+if(nrow(anti_join(resolved, df, by = "article_id")) >0){
+  fail <- (anti_join(resolved, df, by = "article_id"))
   print(fail$article_id)
   stop("article_ids above failed to merge")
+} else {
+  print("merge successful")
 }
 
 # find conflicts
 
-conflicts <- find_cons(df, df$design_all.kd, df$design_all.mg) %>%
+cons_design <- find_cons(df, df$design_all.kd, df$design_all.mg) %>%
   select(c(article_id, design_all.kd, design_all.mg, resol_correct_design, resol_becky), everything())
 
 # McMen2018bank1375 is clearly a cohort design
@@ -215,6 +215,59 @@ df$resol_becky[df$article_id == "Sarka2018ants.009"] <- T
 df$design_all.kd[!is.na(df$resol_correct_design)] <- df$resol_correct_design[!is.na(df$resol_correct_design)]
 df$design_all.mg[!is.na(df$resol_correct_design)] <- df$resol_correct_design[!is.na(df$resol_correct_design)]
 
+# if no conflicts rename design column
+
+df <- rename_col(df, "design_all.kd", "design_all.mg", "design")
+
+#####################
+# TEMP sort conflicts ####
+########################
+
+# create temp df
+temp <- df
+
+# find conflicts again
+cons_design <- find_cons(temp, temp$design_all.kd, temp$design_all.mg)
+cons_sups <- find_cons(temp, temp$access_supp.kd, temp$access_supp.mg)
+cons_art <- find_cons(temp, temp$access_article.kd, temp$access_article.mg)
+
+# set all designs of articles with some inaccessible materials to TBC
+
+temp$design_all.kd[(temp$access_article.kd != "Yes" & temp$access_article.mg != "Yes") | 
+     (temp$access_supp.kd == "Present but not accessible" & temp$access_supp.mg == "Present but not accessible")] <- "TBC"
+
+temp$design_all.mg[(temp$access_article.kd != "Yes" & temp$access_article.mg != "Yes") | 
+               (temp$access_supp.kd == "Present but not accessible" & temp$access_supp.mg == "Present but not accessible")] <- "TBC"
+
+# set all values to NA for article_ids mark have not assessed (this is to maintain blinding)
+
+na_id <- temp$article_id[is.na(temp$design_all.kd) | is.na(temp$design_all.mg)]
+cols <- colnames(temp)[colnames(temp) != "article_id"]
+temp[temp$article_id %in% na_id, colnames(temp) %in% cols] <- NA
+
+# set all designs of articles currently in conflict to  TBC
+
+temp$design_all.kd[temp$article_id %in% cons_design$article_id] <- "TBC"
+temp$design_all.mg[temp$article_id %in% cons_design$article_id] <- "TBC"
+
+# try to rename again
+
+
+temp <- rename_col(temp, "access_article.kd", "access_article.mg", "access_article")
+
+temp <- rename_col(temp, "access_supp.kd", "access_supp.mg", "access_supp")
+temp <- rename_col(temp, "design_all.kd", "design_all.mg", "design")
+
+# drop al irrelevant columns
+
+#  no conflicts remain so don't need any columns that were used to resolve conflicts
+cols <- colnames(temp)[grepl("comments|design_|resol|design.", colnames(temp)) == F]
+
+temp <- temp[, colnames(temp)%in% cols]
+####################################
+# export list of conflicts for becky ####
+#####################################
+
 # get titles of conflicts to be resolved by Becky
 
 b <- df$article_id[df$resol_becky == T & is.na(df$resol_correct_design)]%>%
@@ -224,16 +277,4 @@ becky_it <- df %>%
   select(., article_id, title) %>%
   .[.$article_id %in% b, ]
 
-# find conflicts again
-conflicts <- find_cons(df, df$design_all.kd, df$design_all.mg) %>%
-  select(c(article_id, design_all.kd, design_all.mg, resol_correct_design, resol_becky), everything())
-
-# create design column for articles with correct designs
-
-df$design <- NA
-
-for(i in df$design)
-  if(df$design_all.kd == df$design_all.mg) print(i)
-
-df$design[which(df$design_all.kd == df$design_all.mg)] <- df$design_all.kd[which(df$design_all.kd == df$design_all.mg)]
 write.csv(becky_it, "../../Desktop/to becky.csv", row.names = F, fileEncoding = "UTF-8")
