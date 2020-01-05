@@ -2,6 +2,7 @@
 
 library(dplyr)
 library(stringr)
+library(tidyr)
 
 ##########
 # import####
@@ -9,7 +10,7 @@ library(stringr)
 
 # assign input file 
 
-input <- "data/Classifying+epi+study+designs_1+January+2020_21.04.csv"
+input <- "data/Classifying+epi+study+designs_5+January+2020_19.38.csv"
 # Import first three rows of the  Qualtrics csv export
 
 header <- read.csv(input, encoding = "UTF-8", nrows = 2, stringsAsFactors = F)
@@ -33,7 +34,7 @@ df <- read.csv(input, skip = 3,
 
 # check length correct
 
-if(nrow(df) != 358) stop("too few/many observations")
+if(nrow(df) != 359) stop("too few/many observations")
 
 ############
 # clean ####
@@ -79,29 +80,41 @@ clean_string <- function(string){
 
 df$title_sub <- clean_string(df$title)
 
-#################
-# new column of designs ####
-######################
+################
+# check designs ####
+##############
 
-# new column combining design_judg and design to see stated and judged designs together
+# check designs only missing because material was inaccessible
 
-df$design_all <- paste(df$design, df$design_judg, sep = ",")
+if(sum(df$access_article[is.na(df$design)] != "Yes" | df$access_supp[is.na(df$design)] == "Present but not accessible") != sum(is.na(df$design))){
+  stop("check NA designs")
+} else {
+  print("all NA designs had inaccesible material")
+}
 
-# remove NAs added by paste 
+# check all design responses are correct
 
-df$design_all[df$design_all == "NA,NA"] <- NA
-df$design_all <- gsub("no_statement,|NA,|,NA", "", df$design_all)
+design_labels <- c("case-control", "no_statement", "cross-sectional", "cohort", "cohort,cross-sectional", "cohort,case-control", "cross-sectional,no_statement")
 
-# standarise order of designs
-df$design_all[grep("cross-sectional,cohort", df$design_all)] <- "cohort,cross-sectional"
-df$design_all[grep("cross-sectional,cross-sectional", df$design_all)] <- "cross-sectional"
+if(length(setdiff(df$design[!is.na(df$design)], design_labels)) == 0){
+  print("correct design responses")
+} else{
+  print(setdiff(df$design[!is.na(df$design)], design_labels))
+  stop("incorrect design responses")
+}
 
-# check designs
+# check all design_judg responses are correct
 
-table(df$design, useNA = "always")
-warning("check values in table all contain different combinations of designs")
+df$design_judg[df$design_judg == "cross-sectional,cohort"] <- "cohort,cross-sectional"
 
-if(sum(is.na(df$design)) > 0) stop("check designs that are missing") else print("no missing designs")
+design_judg_labels <- c(design_labels, "other")
+
+if(length(setdiff(df$design_judg[!is.na(df$design_judg)], design_judg_labels)) == 0){
+  print("correct design_judg responses")
+} else{
+  print(setdiff(df$design_judg[!is.na(df$design_judg)], design_judg_labels))
+  stop("incorrect design_judg responses")
+}
 
 ####################
 # merge preparation ####
@@ -122,15 +135,6 @@ articles <- articles_df$id
 # check article id duplicates ####
 ###############################
 
-# check article id duplicates
-
-if(length(kd$title[duplicated(kd$article_id)]) >0 | length(mg$title[duplicated(mg$article_id)]) >0){
-  print(kd$title[duplicated(kd$article_id)])
-  print(mg$title[duplicated(mg$article_id)])
-  stop("kd or mg have duplicated article ids")
-} else {
-  print("kd and mg have no duplicated article ids")
-}
 
 # find Mark's duplicate article_ids
 mg_id_dup <- mg$article_id[duplicated(mg$article_id)]
@@ -191,7 +195,7 @@ if(length(kd$title[duplicated(kd$title)]) >0 | length(mg$title[duplicated(mg$tit
 
 # check kd & md classified all articles in csv_clean_epi.csv
 
-if(length(dplyr::setdiff(articles, kd$article_id)) > 0 | dplyr::setdiff(articles, mg$article_id) >0){
+if(length(setdiff(articles, kd$article_id)) > 0 | length(setdiff(articles, mg$article_id)) >0){
   print(setdiff(articles, kd$article_id))
   print(setdiff(articles, mg$article_id))
   stop("kd or mg have not assessed the articles above")
@@ -271,12 +275,14 @@ colnames(both)[colnames(both) == "title_sub.mg"] <- "title_sub"
 # assign random number list ####
 ##############################
 
-# if article ids are identical to those in csv_clean_epi add random number list
+# if article ids are identical to those in csv_clean_epi add random number list and names
 
 if(identical(sort(both$article_id), sort(articles))){
   set.seed(1)
   both$num <- sample(1:length(both$article_id), length(both$article_id), replace = F)
   both <- select(both, num, everything())
+} else {
+  stop("article_id's incorrect")
 }
 
 ############
