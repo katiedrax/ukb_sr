@@ -47,51 +47,6 @@ rename_col <- function(df, a, b, b_new_name){
     }
 }
 
-
-#################
-# new column of designs ####
-######################
-
-# new column combining design_judg and design to see stated and judged designs together
-
-df$design_all.kd <- paste(df$design.kd, df$design_judg.kd, sep = ",")
-df$design_all.mg <- paste(df$design.mg, df$design_judg.mg, sep = ",")
-# remove NAs added by paste 
-
-df$design_all.kd[df$design_all.kd == "NA,NA"] <- NA
-df$design_all.mg[df$design_all.mg == "NA,NA"]  <- NA
-
-df$design_all.kd <- gsub("no_statement,|NA,|,NA", "", df$design_all.kd)
-df$design_all.mg <- gsub("no_statement,|NA,|,NA", "", df$design_all.mg)
-
-# standarise order of designs
-df$design_all.kd[grep("cross-sectional,cohort", df$design_all.kd)] <- "cohort,cross-sectional"
-df$design_all.kd[grep("cross-sectional,cross-sectional", df$design_all.kd)] <- "cross-sectional"
-df$design_all.mg[grep("cross-sectional,cohort", df$design_all.mg)] <- "cohort,cross-sectional"
-
-# check all design responses are correct
-
-design_all_labels <- c("case-control", "other", "no_statement", "cross-sectional", "cohort", 
-                       "cohort,cross-sectional", "cohort,case-control", "cross-sectional,no_statement", "cross-sectional,other")
-
-if(length(setdiff(df$design_all.kd[!is.na(df$design_all.kd)], design_all_labels)) == 0){
-  print("correct design_all.kd responses")
-} else{
-  print(setdiff(df$design_all.kd[!is.na(df$design_all.kd)], design_all_labels))
-  stop("incorrect design_all.kd responses")
-}
-
-if(length(setdiff(df$design_all.mg[!is.na(df$design_all.mg)], design_all_labels)) == 0){
-  print("correct design_all.mg responses")
-} else{
-  print(setdiff(df$design_all.mg[!is.na(df$design_all.mg)], design_all_labels))
-  stop("incorrect design_all.mg responses")
-}
-
-# drop unnecessary columns
-
-df <- select(df, -c(design.kd, design.mg, design_judg.kd, design_judg.mg))
-
 #############
 # get articles ####
 ################

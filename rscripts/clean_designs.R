@@ -116,6 +116,37 @@ if(length(setdiff(df$design_judg[!is.na(df$design_judg)], design_judg_labels)) =
   stop("incorrect design_judg responses")
 }
 
+#################
+# column of all designs ####
+######################
+
+# new column combining design_judg and design to see stated and judged designs together
+
+df$design_all <- paste(df$design, df$design_judg, sep = ",")
+
+# remove NAs added by paste 
+
+df$design_all[df$design_all == "NA,NA"] <- NA
+
+df$design_all <- gsub("no_statement,|NA,|,NA", "", df$design_all)
+
+# standarise order of designs
+df$design_all[grep("cross-sectional,cohort", df$design_all)] <- "cohort,cross-sectional"
+df$design_all[grep("cross-sectional,cross-sectional", df$design_all)] <- "cross-sectional"
+
+# check all design responses are correct
+
+design_all_labels <- c("case-control", "other", "no_statement", "cross-sectional", "cohort", 
+                       "cohort,cross-sectional", "cohort,case-control", "cross-sectional,no_statement", "cross-sectional,other")
+
+if(length(setdiff(df$design_all[!is.na(df$design_all)], design_all_labels)) == 0){
+  print("correct design_all responses")
+} else{
+  print(setdiff(df$design_all[!is.na(df$design_all)], design_all_labels))
+  stop("incorrect design_all responses")
+}
+
+
 ####################
 # merge preparation ####
 ##################
