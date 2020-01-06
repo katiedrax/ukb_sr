@@ -1,8 +1,24 @@
+#############
 # libraries ####
+#############
 
 library(dplyr)
 library(stringr)
-library(tidyr)
+
+###############
+# functions ####
+##############
+
+# function to clean string 
+clean_string <- function(string){
+  # string: a vector of strings
+  # remove any non-english character, numbers, spaces or punctuation and lower
+  string <- gsub("[^\u0001-\u007F]+","", string)
+  string <- gsub("[0-9]", "", string)
+  string <- gsub("[[:punct:]]", "", string)
+  string <- tolower(string)
+  string <- gsub("[[:space:]]", "", string)
+}
 
 ##########
 # import####
@@ -54,29 +70,13 @@ df <- select(df, -qual_cols)
 
 df <- df[order(df$article_id), ]
 
-
 # standardise initials by lowering and removing punctuation
 
 df$initials <- tolower(df$initials)
 df$initials <- gsub("[[:punct:]]", "", df$initials)
 if(sum(df$initials != "kd" |df$initials != "mg") != length(df$article_id)) stop("initials contains strings other than kd and mg")
 
-#################
-# check clean title ####
-##################
-
-# function to clean string 
-clean_string <- function(string){
-  # string: a vector of strings
-  # remove any non-english character, numbers, spaces or punctuation and lower
-  string <- gsub("[^\u0001-\u007F]+","", string)
-  string <- gsub("[0-9]", "", string)
-  string <- gsub("[[:punct:]]", "", string)
-  string <- tolower(string)
-  string <- gsub("[[:space:]]", "", string)
-}
-
-# column containing clean substring of title
+# column containing clean substring of title for easier matching
 
 df$title_sub <- clean_string(df$title)
 
@@ -319,5 +319,9 @@ if(identical(sort(both$article_id), sort(articles))){
 ############
 # export ####
 #############
+
+#sort by random number
+
+both <- both[order(both$num), ]
 
 write.csv(both, "outputs/clean_designs.csv", row.names = F, fileEncoding = "UTF-8")
