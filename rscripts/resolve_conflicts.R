@@ -223,6 +223,14 @@ df$resol_becky[df$article_id == "Sarka2018ants.009"] <- T
 df$design_all.kd[!is.na(df$resol_correct_design)] <- df$resol_correct_design[!is.na(df$resol_correct_design)]
 df$design_all.mg[!is.na(df$resol_correct_design)] <- df$resol_correct_design[!is.na(df$resol_correct_design)]
 
+# set all designs of articles with some inaccessible materials to TBC
+
+df$design_all.kd[df$access_article != "Yes" | df$access_supp == "Present but not accessible"] <- "TBC"
+
+df$design_all.mg[df$access_article != "Yes" | df$access_supp == "Present but not accessible"] <- "TBC"
+
+
+
 # if no conflicts rename design column
 
 df <- rename_col(df, "design_all.kd", "design_all.mg", "design")
@@ -242,9 +250,9 @@ cons_art <- find_cons(df, df$access_article.kd, df$access_article.mg)
 
 #  export
 
-if(nrow(cons_design) != 0){
+if(exists("cons_design")|exists("cons_supp") | exists("cons_art")|sum(is.na(df$design)) >0|length(df$design[df$design == "TBC"]) > 0){
   # if conflicts export df as is
-  warning("still conflicts so exporting unresolved designs")
+  warning("still conflicts, NA designs or TBC designs so exported unresolved designs")
   # export df as is
   write.csv(df, "outputs/unresolved_designs.csv", row.names = F, fileEncoding = "UTF-8")
   } else {
