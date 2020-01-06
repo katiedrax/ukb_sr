@@ -7,50 +7,46 @@
 library(dplyr)
 
 # skip question name row so question row will be header
-df <- read.csv("data/Data+Extraction+Form_2+December+2019_17.58.csv", skip = 1)
+df <- read.csv("qualtrics_forms/Data+Extraction+Form_6+January+2020_17.10.csv", 
+               skip = 1, encoding = "UTF-8", stringsAsFactors = F)
 
-# save column names from raw df
 
-df_names <- colnames(df)
-
-#### remove unnecessary cols ####
-
-# vector of columns qualtrics automatically exports
-qual_cols <- colnames(df)[1:17]
+# vector of columns qualtrics automatically exports (always first 10 if response autonomised)
+qual_cols <- colnames(df)[1:10]
 
 # remove qual_cols
 
 df <- select(df, -qual_cols)
 
-#### remove rows ####
+# find design specific cols
+
+design_qs <- grepl("sectional|case.control|cohort", colnames(df), ignore.case = T)
+
+# variable name is in question text so remove question text from colnames that is not the name
+colnames(df) <- tolower(colnames(df))
+num <- grepl("\\d", colnames(df))
+colnames(df)[num] <- gsub("^[^\\d]+", "", colnames(df)[num], perl = T)
+colnames(df) <- gsub("(?<=\\.)(.*?)(?=text)", "", colnames(df), perl = T)
+colnames(df) <- gsub("\\.\\..*$", "", colnames(df), perl = T)
+
 
 # remove row automatically outputted by qualtrics
-id <- grep("import", df$Article.ID...copy.and.paste.in.the.article.ID.from.the.csv.file..close.Excel, ignore.case = T)
-df <- df[-1, ]
-
-# remove real responses 
-
-#### separate out strobe it
-id <- grep("^[a-zA-Z]{0,6}$", df$Your.initials)
+id <- grep("import", df$article_id, ignore.case = T)
 df <- df[-id, ]
 
-#### remove cols not needed for test ####
+
+#### remove cols not needed for design specific test ####
 
 # remove "Text" cols
-text <- grep("Text", colnames(df))
+text <- grep(".Text", colnames(df))
 
 test_df <- df[, -text]
 
 # remove cols that aren't design specific
-design_qs <- grep("sectional|case.control|cohort", colnames(test_df), ignore.case = T)
 
 test_df <- test_df[, design_qs]
 
-test_df$designs <- df$What.study.designs.do.the.authors.use.to.analyse.the.UK.Biobank.data.
-
-test_df <- select(test_df, designs, everything())
-
-write.csv(test_df, "outputs/test_design_cols.csv")
+test_df <- select(test_df, test_df$, everything())
 
 # cols for cohort & cross-sectional designs ####
 
@@ -65,4 +61,7 @@ coh_x <- grep("^(?=.*cohort)(?=.*cross).*$", colnames(df), ignore.case = T, perl
 x <- grep("sectional", colnames(df)[-coh_x], ignore.case = T)
 cc <- grep("control", colnames(df), ignore.case = T)
 coh <- grep("cohort", colnames(df)[-coh_x], ignore.case = T)
+
+
+
 

@@ -58,44 +58,63 @@ cons_design <- find_cons(temp, temp$design_all.kd, temp$design_all.mg)
 cons_supp <- find_cons(temp, temp$access_supp.kd, temp$access_supp.mg)
 cons_art <- find_cons(temp, temp$access_article.kd, temp$access_article.mg)
 
-# set all designs of articles with some inaccessible materials to TBC
-
-temp$design_all.kd[(temp$access_article.kd != "Yes" & temp$access_article.mg != "Yes") | 
-                     (temp$access_supp.kd == "Present but not accessible" & temp$access_supp.mg == "Present but not accessible")] <- "TBC"
-
-temp$design_all.mg[(temp$access_article.kd != "Yes" & temp$access_article.mg != "Yes") | 
-                     (temp$access_supp.kd == "Present but not accessible" & temp$access_supp.mg == "Present but not accessible")] <- "TBC"
-
-# set all designs of articles currently in conflict to  TBC
-
-temp$design_all.kd[temp$article_id %in% cons_design$article_id] <- "TBC"
-temp$design_all.mg[temp$article_id %in% cons_design$article_id] <- "TBC"
-
-# try to rename again
-
-temp <- rename_col(temp, "access_article.kd", "access_article.mg", "access_article")
-temp <- rename_col(temp, "access_supp.kd", "access_supp.mg", "access_supp")
-temp <- rename_col(temp, "design_all.kd", "design_all.mg", "design")
-
-#  no conflicts remain so don't need any columns that were used to resolve conflicts
-
-cols <- colnames(temp)[grepl("comments|design_|resol|design.|title_sub", colnames(temp)) == F]
-temp <- temp[, colnames(temp)%in% cols]
-
-# order by number 
-temp <- temp[order(temp$num),]
 ###########################
-# export first 80 articles ####
+# get first 80 articles ####
 ############################
 
-first_lot <- temp[temp$num %in% 1:80, ]
+if(exists("cons_design")|exists("cons_supp") | exists("cons_art")|sum(is.na(temp$design)) != 0){
+  stop("still conflicts and missing designs")
+} else {
+  #no conflicts remain so don't need any columns that were used to resolve conflicts
+  cols <- colnames(temp)[grepl("comments|design_|resol|design.|title_sub", colnames(temp)) == F]
+  # select first 80 random numbers
+  first_80 <- temp[temp$num %in% 1:80, colnames(temp) %in% cols] %>%
+    #order by number
+    .[order(.$num),]
+}
 
+# randomly assign Becky, Benji or Mark as second extractor - first lot Benji promised to do 20 articles, Becky 30 and Mark 30
 set.seed(1)
-first_lot$extractor_1 <- rep("Katie", length(first_lot$article_id))
-first_lot$extractor_2 <- sample(c(rep("Becky", 30), rep("Benji", 20), rep("Mark", 30)), replace = F)
-first_lot <- select(first_lot, num, extractor_1, extractor_2, everything())
+first_80$extractor_1 <- rep("Katie", length(first_80$article_id))
+first_80$extractor_2 <- sample(c(rep("Becky", 30), rep("Benji", 20), rep("Mark", 30)), replace = F)
+first_80 <- select(first_80, num, extractor_1, extractor_2, everything())
 
+table(first_80$design, useNA = "always")
 
+if(sum(first_80$extractor_2 == "Mark") == 30 & sum(first_80$extractor_2 == "Benji") == 20 & sum(first_80$extractor_2 == "Becky") == 30) {
+  print("Mark and Becky have 30 and Benji has 20")
+  } else {
+    stop("too many/few articles assigned to some extractors")
+}
+
+##################
+# merge first_80 ####
+##################
+
+# df of all articles in csv_clean_epi.csv on OSF
+
+articles_df <- read.csv("https://osf.io/8uy9w/?action=download", encoding = "UTF-8", stringsAsFactors = F)%>%
+  select(-c("title", "abstract", "class", "rayyan"))
+
+# merge with articles_df so extractors can use DOI and journal name to help locate article
+
+if(nrow(anti_join(first_80, articles_df, by = c("article_id" = "id"))) == 0){
+  first_80_merged <- full_join(first_80, articles_df, by = c("article_id" = "id"))%>%
+    # drop nas in num col
+    .[!is.na(.$num),]
+} else{
+  stop("some articles can't merge")
+}
+
+######################
+# export first_80_merged ####
+######################
+
+if(identical(first_80_merged$article_id, first_80$article_id)){
+  write.csv(first_80_merged, "outputs/first_80.csv", fileEncoding = "UTF-8", row.names = F) 
+  } else {
+    stop("article_id not identical in merge")
+  }
 
 ####################################
 # export list of conflicts for becky ####
@@ -103,7 +122,7 @@ first_lot <- select(first_lot, num, extractor_1, extractor_2, everything())
 
 # get titles of conflicts to be resolved by Becky
 
-b <- df$article_id[df$resol_becky == T & is.na(df$resol_correct_design)]%>%
+b <- temp$article_id[temp$resol_becky == T & is.na(temp$resol_correct_design)]%>%
   .[!is.na(.)]
 
 becky_it <- df %>%
