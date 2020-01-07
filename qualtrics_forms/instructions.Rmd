@@ -11,10 +11,9 @@ output: word_document
 In the form, extractors also indicated if all supplementary material can be accessed via University of Bristol subscriptions. 
 Any conflicts were discussed by the two extractors and resolved by mutual consent if possible. 
 If not resolved after discussion, RR determined the study designs. 
-The Study Design Form was hosted on Qualtrics but a PDF version can be found here https://osf.io/nd78g/.
+The Study Design Form was hosted on Qualtrics but a PDF version can be found here **[]**.
 - Data extraction has not yet begun for any eligible articles
-- The Data Extraction form has been piloted on **[number]** observational epidemiology articles by MG, KD and RR. 
-**[X] changes were made so the Data Extraction Form **[will/will not]** be completed again for the piloted articles.
+- The Data Extraction form has been piloted on 5 observational epidemiology articles by MG, KD and RR. Major changes were made so the Data Extraction Form will be completed again for the piloted articles.
 - KD assessed examined the notices attached to the online version of the observational epidemiology articles to identify any retracted articles. None were identified
 
 # Data extraction procedure
@@ -40,14 +39,14 @@ Articles will continue to be selected at random until none remain, or until the 
 | Journal |   | Endnote  |
 | Volume |   | Endnote  |
 | Issue |   | Endnote  |
-| Open Access |   | (1) Search for article on open access button ([https://openaccessbutton.org/](https://openaccessbutton.org/)) and follow the link on non-university network  (2) If no on open access button check if there are links on Google Scholar |
-| Countries of corresponding, first &amp; last author |   | Extract country of author's affiliations |
-| UK Biobank Application number | Study's approved UK Biobank data application number (if present) | (1) Search article for all these terms:  'application' , 'approv' , 'number' , 'Resource' (2) If not found examine any strings of numbers in article |
-| Author keywords |   | (1) Extract from page 1 (2) If not on page 1 search article for 'keywords' |
-| Journal endorsement | Journal's endorsement of STROBE before publication | (1) Extract references to STROBE from the journal's most recent 'instructions/guide for authors' before article's publication date |
+| Open Access |   | See if can access article on publishing journal's site on a non-university network. If not accessible search for self-archived version on Google Scholar |
+| Countries of corresponding author |   | Extract country from author's affiliations |
+| UK Biobank Application number | Study's approved UK Biobank data application number (if present) | Search article for all these terms:  'application' , 'approv' , 'number' , 'Resource'. If not found examine any strings of numbers in article |
+| Author keywords |   | Search page 1. If not on page 1 search article for 'keywords' |
+| Journal endorsement | Journal's endorsement of STROBE before publication | Extract references to STROBE from the journal's most recent 'instructions/guide for authors' before article's publication date |
 | Journal impact factor |   | Retrieve the impact factor of the journal for year of publication from Web of Science's Journal Citation Reports (JCR) |
-| Corresponding author email address |   | Endnote; if missing: (1) extract from page 1 (2) If not on page 1 search article for 'corresponding', '@') |
-| Conflicts of interest statement |   | (1) Search article material for all these terms: 'competing', 'interest' ,'conflict' , 'disclosure' (2) If not found examine article for similar terms (3) if present extract conflicts of interest statements |
+| Corresponding author email address |   | Endnote; if missing: search article for 'corresponding', '@') |
+| Conflicts of interest statement |   | Search article material for all these terms: 'competing', 'interest' ,'conflict' , 'disclosure'grcy |
 | Classification | Classification ('mendelian randomisation', 'observational epidemiology' or 'other') as assigned by KD, BW and RR in Rayyan | Rayyan |
 
 # Missing items
