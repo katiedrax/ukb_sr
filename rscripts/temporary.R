@@ -58,6 +58,17 @@ cons_design <- find_cons(temp, temp$design_all.kd, temp$design_all.mg)
 cons_supp <- find_cons(temp, temp$access_supp.kd, temp$access_supp.mg)
 cons_art <- find_cons(temp, temp$access_article.kd, temp$access_article.mg)
 
+#########
+# exclude ####
+#######
+
+# exclude any designs that need excluding because they are not epidemiological articles
+
+nepi <- grep("exclude_nepi", temp$design)
+temp <- temp[-nepi, ]
+# export list of not epi articles
+write.csv(temp[nepi, ], "outputs/not_epi.csv", fileEncoding = "UTF-8", row.names = F)
+
 ###########################
 # get first 80 articles ####
 ############################
