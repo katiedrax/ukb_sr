@@ -2,7 +2,7 @@
 title: "Preregistration: data extraction from epidemiology articles"
 author: "Katie Drax"
 date: "9 January 2020"
-output: word_document
+output: pdf_document
 ---
 
 # Time of writing
@@ -33,7 +33,7 @@ KD assessed examined the notices attached to the online version of the observati
 
 KD will attempt to retrieve any supplementary material we could not access by contacting the authors. 
 
-The information in Table 1 (attached) will be extracted manually by KD or automatically by Endnote which contains the article's metadata exported from the database the article was located in.
+The items in Table 1 will be extracted manually by KD or automatically by Endnote which contains the article's metadata exported from the database the article was located in.
 
 The extractors will independently complete the Data Extraction Form for each article they are assigned. 
 Any conflicts will be discussed by the two extractors and resolved by mutual consent if possible. 
@@ -52,14 +52,14 @@ Articles will continue to be selected at random until none remain, or until the 
 | Volume |   | Endnote  |
 | Issue |   | Endnote  |
 | Open Access |   | See if can access article on publishing journal's site on a non-university network. If not accessible search for self-archived version on Google Scholar |
-| Countries of corresponding author |   | Extract country from author's affiliations |
+| Country | Countries of corresponding author | Extract country from corresponding author's affiliations |
 | UK Biobank Application number | Study's approved UK Biobank data application number (if present) | Search article for all these terms:  'application' , 'approv' , 'number' , 'Resource'. If not found examine any strings of numbers in article |
 | Author keywords |   | Search page 1. If not on page 1 search article for 'keywords' |
 | Journal endorsement | Journal's endorsement of STROBE before publication | Extract references to STROBE from the journal's most recent 'instructions/guide for authors' before article's publication date |
-| Journal impact factor |   | Retrieve the impact factor of the journal for year of publication from Web of Science's Journal Citation Reports (JCR) |
-| Corresponding author email address |   | Search article for 'corresponding', '@') |
+| Journal impact factor |   | Retrieve the impact factor of the journal for year of publication from Web of Science's Journal Citation Reports |
+| Corresponding author email address |   | Search article for 'corresponding', '@' |
 | Conflicts of interest statement |   | Search article material for all these terms: 'competing', 'interest' ,'conflict' , 'disclosure' |
-| Classification | Classification ('mendelian randomisation', 'observational epidemiology' or 'other') as assigned by KD, BW and RR in Rayyan | Rayyan 
+| Classification | Classification assigned by KD, BW and RR in Rayyan | Rayyan 
 
 # Changes from the preregistered protocol
 
