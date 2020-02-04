@@ -10,42 +10,11 @@ df <- read.csv("", stringsAsFactors = F, encoding = "UTF-8")
 # functions ####
 #############
 
-# function to check conflicts
+# read in find conflicts and rename col functions
 
+source("rscripts/functions/find-conflicts-fun.R")
 
-find_cons <- function(df,a,b){
-  if(is.null(a)) stop("a doesn't exist")
-  if(is.null(b)) stop("b doesn't exist")
-  # a & b = two columns to be compared
-  # df = dataframe columns are in
-  # create df of katie's and Mark's columns that don't match and include NAs in matching
-  x <- df[which((!is.na(a) & !is.na(b) & a==b | is.na(a) & is.na(b)) == F),]
-  # if conflicts - save x and present warning
-  if(nrow(x) >0){
-    warning("conflicts")
-    return(x)
-  } else {
-    # if no conflicts print confirmation
-    print("no conflicts")
-  }
-}
-
-# merge and rename column if two columns identical
-rename_col <- function(df, a, b, b_new_name){
-  # a = column you want to delete
-  # b = column you want to keep and rename
-  # check if there's conflicts
-  if(identical(df[[a]], df[[b]])){
-    # remove a column
-    df[[a]] <- NULL
-    # rename b
-    colnames(df)[colnames(df) == b] <- b_new_name
-    return(df)
-    } else {
-      # if still conflicts stop merge
-      stop("still conflicts so can't merge columns")
-    }
-}
+source("rscripts/functions/rename-col-fun.R")
 
 #############
 # get articles ####
