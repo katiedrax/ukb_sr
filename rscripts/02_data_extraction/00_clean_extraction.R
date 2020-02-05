@@ -62,13 +62,51 @@ if(sum(grepl("^\\w+\\.", test[1,])) < 10) stop("row 1 doesn't contain variable n
 if(sum(grepl("ImportId", test[2,])) != ncol(test)) stop("check header row 2 contains import ids")
 
 ################
-# assign header ####
+# extract variable names ####
 ############
 
-# if passed all checks in check header section - assign full question text to header >
-# variable names contained in row 1 will be extracted later
+# if passed all checks in check header section create dataframe to export as data dictionary >
+# extract variable names contained in row 1 and match them to their full question text in row 1 >
+# the extracted variable names can then be used as a header
 
-header <- as.character(header[1, ])
+# dict dataframe by creating column of questions, unname so column names won't include labels
+dict <- as.data.frame(t(unname(header[1, ])))
+row.names(dict) <- c()
 
+colnames(dict)[colnames(dict) == "1"] <- "question"
 
-header <- gsub("Indicate if the authors report the following items for all the studies in the article \\(unless a study design is specified\\) - ", "", header)
+# extract variables from questions that start "[variable]."
+
+var.match <- grep("^\\w+\\.", dict$question, value = T) %>%
+  # remove the columns containing text entries (qualtrics exports these as the question plus "- Text" at the end)
+  .[-grep("\\- Text", .)]
+
+# find matches
+extract_match <- function(patterns, string){
+  if(is.null(patterns) | !is.character(patterns)) stop("pattern empty or not character")
+  if(is.null(string) | !is.character(string)) stop("string empty or not character")
+  a <- data.frame(match = character(0), string = character(0))
+  for (i in match){
+    out <- data.frame(pattern = i, string = grep(i, string, value = T))
+    a <- rbind(a, out)
+  }
+  if(nrow(a) == length(match)) {
+    return(a)
+  } else {
+    warning("more than one match per value in string")
+    return(a)
+  }
+}
+
+# extract matches for variable names at the start of a string in the format "[variable]."
+m <- regexpr("^\\w+\\.",var.match)
+match <- regmatches(var.match, m)%>%
+  #escape dots so will be searched for in for-loop
+  gsub("\\.", "\\\\.", .)
+
+# extract matches for strobe variable names which are a 'matrix' questions >
+# their format is "[matrix question text] - [strobe item number]."
+var.extract <- extract_match(match, var.match)
+
+m <- regexpr("- [1-9]{1,}.",dict$question)
+match <- regmatches(dict$question, m)
