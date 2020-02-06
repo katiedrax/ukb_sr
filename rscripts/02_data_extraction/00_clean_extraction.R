@@ -23,7 +23,7 @@ extract_var <- function(patterns, string){
   # for loop to search for each pattern in string
   for (i in patterns){
     # output rows that list the strings that matched i in patterns
-    out <- data.frame(variable = i, question = grep(i, string, value = T))
+    out <- data.frame(variable = i, question = grep(i, string, value = T), stringsAsFactors = F)
     # save row
     a <- rbind(a, out)
   }
@@ -56,18 +56,21 @@ find_matches <- function(pattern, string){
 
 input <- "data/data_extraction/Data+Extraction+Form_5+February+2020_16.24.csv"
 
-# Import first two rows of the  Qualtrics csv export with first row as headers
+# Import first three rows of the  Qualtrics csv export
 
-header <- read.csv(input, encoding = "UTF-8", nrows = 2, stringsAsFactors = F)
+header <- read.csv(input, encoding = "UTF-8", nrows = 3, stringsAsFactors = F, header = F)
 
-# vector of cols automatically outputted by Qualtrics 
+# vector of question text associated with cols automatically outputted by Qualtrics 
 
 qual_text <- c("Start Date", "End Date", "Response Type", "Progress", "Duration (in seconds)",
                     "Finished", "Recorded Date", "Response ID", "Distribution Channel", "User Language")
 
-qual_vars <- c("StartDate", "EndDate", "Status", "Progress", "Duration..in.seconds.",
+# vector of variable names associated with cols automatically outputted by Qualtrics
+qual_vars <- c("StartDate", "EndDate", "Status", "Progress", "Duration (in seconds)",
                "Finished", "RecordedDate", "ResponseId", "DistributionChannel", "UserLanguage")
 
+# vector of topic columns - not sure what these are but they seem pointless
+topic_cols <- "Q22_89_TEXT"
 ###############
 # check header ####
 ###############
@@ -75,10 +78,10 @@ qual_vars <- c("StartDate", "EndDate", "Status", "Progress", "Duration..in.secon
 # copy of header to check
 test <- header
 
-# remove all qual_vars if header contains them this makes checking easier
-if(sum(grepl(paste(qual_vars, collapse = "|"), colnames(test)[1:10])) == 10){
+# remove all qual_vars if row 1 contains them this makes checking easier
+if(sum(qual_vars %in% test[1, 1:10]) == 10){
   test <- test[, -c(1:10)]
-} else{
+} else {
   stop("header doesn't contain qual_vars")
 }
 
@@ -86,32 +89,34 @@ if(sum(grepl(paste(qual_vars, collapse = "|"), colnames(test)[1:10])) == 10){
 # so without qual_text, test col names should all contain question numbers in the format Q[1-2 digit number] >
 # warn user if this isn't true
 
-if(sum(grepl("Q[1-9]{1,2}", colnames(test))) != ncol(test)) stop("row 1 contains more than question numbers")
+if(sum(grepl("Q[1-9]{1,2}", test[1, ])) != ncol(test)) stop("row 1 contains more than question numbers")
 
-# row 1 should contain full question text >
+# row 2 should contain full question text >
 # KD added variable names to all question text by putting "[variable]." at start of all questions >
-# so values in row 1 (except those that were 'matrix' questions) should have this format >
-# warn user if row 1 contains very few values that start "^(\w+)\."
+# so values in row 2 (except those that were 'matrix' questions) should have this format >
+# warn user if row 2 contains very few values that start "^(\w+)\."
 
-if(sum(grepl("^\\w+\\.", test[1,])) < 10) stop("row 1 doesn't contain variable names")
+if(sum(grepl("^\\w+\\.", test[2,])) < 10) stop("row 2 doesn't contain variable names")
 
 # row 2 should contain import ids
 
-if(sum(grepl("ImportId", test[2,])) != ncol(test)) stop("check header row 2 contains import ids")
+if(sum(grepl("ImportId", test[3,])) != ncol(test)) stop("check header row 2 contains import ids")
 
 ################
 # extract "variable." variables ####
 ############
 
 # if passed all checks in check header section create dataframe to export as data dictionary >
-# extract variable names contained in row 1 and match them to their full question text in row 1 >
+# extract variable names contained in row 2 and match them to their full question text in row 2 >
 # the extracted variable names can then be used as a header
 
 # dict dataframe by creating column of questions, unname so column names won't include labels
-qs <- as.data.frame(t(unname(header[1, ])))
+qs <- as.data.frame(t(unname(header[2, ])), stringsAsFactors = F)
 row.names(qs) <- c()
 
-colnames(qs)[colnames(qs) == "1"] <- "question"
+if(ncol(qs) == 1){
+  colnames(qs)[1] <- "question"
+}
 
 # extract variables from questions that start "[variable]."
 
@@ -151,10 +156,18 @@ var_strobe_names <- extract_var(match, var_strobe)
 dict <- rbind(var_strobe_names, var_dot_names)
 
 # extract data frame of qual columns
-#  first 10 column names of header contains names of qualtrics variables and their first row values contain the full qualtrics variable name >
+#  first 10 values of header row 1 contains variable names of qualtrics columns >
+# first 10 values of header row 2 contains the full qualtrics column names >
 # combine both to create dataframe for data dictonary
 
-qual_dict <- data.frame(question = as.character(header[1, 1:10]), variable = colnames(header)[1:10])
+qual_dict <- data.frame(variable = as.character(header[1, 1:10]), 
+                        question = as.character(header[2, 1:10]), stringsAsFactors = F)
+
+# topic col dict
+
+topic_dict <- data.frame(variable = grep("Q22_89_TEXT", header[1, ], value = T), 
+                         question = grep("Q22_89_TEXT", header[2, ], value = T), stringsAsFactors = F)
+
 
 # clean variable names by removing any extra text after dot
 dict$variable <- gsub("\\..*","",dict$variable) %>%
@@ -164,6 +177,12 @@ dict$variable <- gsub("\\..*","",dict$variable) %>%
 # combine dict and qual_dict if both column names are same
 if(identical(sort(colnames(dict)), sort(colnames(qual_dict)))){
   dict <- rbind(dict, qual_dict)
+}
+
+# combine dict and topic_dict if column names are identical
+
+if(identical(sort(colnames(dict)), sort(colnames(topic_dict)))){
+  dict <- rbind(dict, topic_dict)
 }
 
 # find evidence questions (these are questions containing the word - Text)
@@ -176,8 +195,30 @@ dict$variable <- paste(dict$variable, dict$ev, sep = "_") %>%
   gsub("\\_FALSE", "", .) %>%
   gsub("\\_TRUE", "_ev", .)
 
-# dict$question should now be identical to qs(row 1 in header)  >
+
+# dict$question should now be identical to row 2 in header  >
 # check this is true
 
-identical(sort(dict$question), sort(qs$question))
-setdiff(qs$question, dict$question)
+identical(sort(as.character(dict$question)), sort(as.character(header[2, ])))
+
+t_header <- as.data.frame(t(header), stringsAsFactors = F)
+
+# join
+
+if(nrow(anti_join(dict, t_header, by = c("question"= "V2"))) == 0){
+  dict_final <- full_join(dict, t_header, by = c("question"= "V2"))
+} else {
+  stop("some values won't join")
+}
+
+# drop unnecessary columns from dict_final
+
+dict_final$V3 <- NULL
+dict_final$ev <- NULL
+
+colnames(dict_final)[colnames(dict_final) == "V1"] <- "q_num"
+#######
+# excel ####
+#########
+
+write.csv(dict_final, "outputs/extraction_dictionary.csv", row.names = F, fileEncoding = "UTF-8")
