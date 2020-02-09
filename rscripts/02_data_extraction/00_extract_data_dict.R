@@ -185,23 +185,46 @@ if(identical(sort(colnames(dict)), sort(colnames(topic_dict)))){
   dict <- rbind(dict, topic_dict)
 }
 
-# find evidence questions (these are questions containing the word - Text)
+#############################
+# find strobe evidence variables ####
+###########################
 
-dict$ev <- grepl("\\- Text$", dict$question)
+# append ev to all variable names of strobe evidence variables >
+# These are strobe variable with "- Text" in the question text) >
+# non-strobe variables containing Text may be text response options for something that isn't evidence >
+# e.g. name of other reporting guidelines used
 
-# append ev to all variables that indicate evidence questions
+# create ev column 
+dict$ev <- rep(NA)
 
+# find strobe evidence variables
+dict$ev[grepl("^[1-9]{1,2}", dict$variable)] <- grepl("\\- Text$", dict$question[grepl("^[1-9]{1,2}", dict$variable)])
+
+# combine ev and variable cols
 dict$variable <- paste(dict$variable, dict$ev, sep = "_") %>%
-  gsub("\\_FALSE", "", .) %>%
+  # remove false and NA from variables names that aren't strobe evidence variables
+  gsub("\\_FALSE|\\_NA", "", .) %>%
+  # append ev to all strobe evidence variable names
   gsub("\\_TRUE", "_ev", .)
 
 # drop ev col as this has now been used to append variables
 dict$ev <- NULL
 
+##########
+# check ####
+##########
+
 # dict$question should now be identical to row 2 in header  >
 # check this is true >
 
 if(identical(sort(as.character(dict$question)), sort(as.character(header[2, ]))) == F) stop("not identical")
+
+# check all strobe items are in dictionary by importing manually created dictionary of strobe variables
+
+strobe_var <- read.csv("qualtrics_forms/strobe_adapted_items.csv", encoding = "UTF-8",stringsAsFactors = F)
+
+if(sum(strobe_var$Adapted.item.no %in% dict$variable) != length(strobe_var$Adapted.item.no)) stop("incorrect number of strobe items")
+
 
 ########
 # merge ####
@@ -215,7 +238,11 @@ header_real <- read.csv(input, stringsAsFactors = F, encoding = "UTF-8", header 
 # transpose header so all rows become character vectors
 t_header <- as.data.frame(t(header_real), stringsAsFactors = F, row.names = F) 
 # add header back in as this is removed during the transposition
-t_header$import_num <- colnames(header_real)
+t_header$import_num <- colnames(header_real) %>%
+  # remove "V" so can be ordered easily
+  gsub("V", "", .)%>%
+  # set to numeric
+  as.numeric(.)
 
 # join
 
@@ -231,8 +258,10 @@ dict_final$V3 <- NULL
 
 # rename row 1 as qual_q_num indicating these are the variable names qualtrics exports
 colnames(dict_final)[colnames(dict_final) == "V1"] <- "qual_var_name"
+
+
 #######
-# excel ####
+# export ####
 #########
 
 write.csv(dict_final, "outputs/extraction_dictionary.csv", row.names = F, fileEncoding = "UTF-8")
