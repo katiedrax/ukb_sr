@@ -259,6 +259,14 @@ dict_final$V3 <- NULL
 # rename row 1 as qual_q_num indicating these are the variable names qualtrics exports
 colnames(dict_final)[colnames(dict_final) == "V1"] <- "qual_var_name"
 
+# sort by import number
+
+dict_final <- dict_final[order(dict_final$import_num), ]
+
+# check colnames import_nums are sequential
+
+if(all(abs(diff(dict_final$import_num)) != 1)) stop("import_num not sequential")
+if(all(abs(diff(grep("^[1-9]{1,2}", dict_final$import_num)) != 1))) stop("strobe variables' import_num not sequential ")
 
 #######
 # export ####

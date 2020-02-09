@@ -1,4 +1,30 @@
 "variable","question","qual_var_name","import_num"
+"StartDate","Start Date","StartDate",1
+"EndDate","End Date","EndDate",2
+"Status","Response Type","Status",3
+"Progress","Progress","Progress",4
+"Duration (in seconds)","Duration (in seconds)","Duration (in seconds)",5
+"Finished","Finished","Finished",6
+"RecordedDate","Recorded Date","RecordedDate",7
+"ResponseId","Response ID","ResponseId",8
+"DistributionChannel","Distribution Channel","DistributionChannel",9
+"UserLanguage","User Language","UserLanguage",10
+"article_id","article_id. Copy and paste in the article ID from the csv file (do not put in quotes)","Q2",11
+"title","title. Copy and paste the article's title from the online version of the article (do not put in quotes)","Q3",12
+"initials","initials. Select your initials","Q4",13
+"designs","designs. Indicate what the article's designs are from the CSV file.","Q5",14
+"predict","predict. Does the article contain a prediction model analysis? (leave blank if no)","Q6",15
+"strobe","strobe. Did the authors state that they followed STROBE? (Search article & relevant supplementary material for all these terms: 'report' | 'guideline' | 'checklist' | 'STROBE' | 'followed' | 'equator'| 'Elm') - Selected Choice","Q7",16
+"strobe","strobe. Did the authors state that they followed STROBE? (Search article & relevant supplementary material for all these terms: 'report' | 'guideline' | 'checklist' | 'STROBE' | 'followed' | 'equator'| 'Elm') - Other reporting guidelines used - they state they used reporting guidelines other than STROBE. (please specify which reporting guidelines they said they used) - Text","Q7_4_TEXT",17
+"strobe_ev","strobe_ev. Copy and paste in the authors statement regarding their use of reporting guidelines","Q8",18
+"strobe_cite","strobe_cite. If the authors do follow STROBE or other reporting guidelines do they cite these guidelines?","Q9",19
+"reg","reg. Do the authors state that the studies contained in the article were registered? (Search article & relevant supplementary material for all these terms: 'regist' | 'protocol' | 'plan' | 'publis'. Registrations do not include UK Biobank applications which may be referred to as protocols or registrations.)","Q10",20
+"reg_id","reg_id. Copy and paste in the registration's reference number, DOI or other identifier (leave blank if none provided)","Q11",21
+"reg_ev","reg_ev. Copy and paste in the authors' statement regarding registration","Q12",22
+"var_id","var_id. Do the authors reference the UK Biobank ID numbers for all the variables? (Examine any very large numbers found in the methods, results and all supplementary material)","Q13",23
+"ukb_credit","ukb_credit. Do the authors state that “This research has been conducted using the UK Biobank Resource.”? (Search article & relevant supplementary material for all these terms: 'UK' | 'Resource')","Q14",24
+"ukb_credit_ev","ukb_credit_ev. Copy and paste the author's reference to the UK Biobank (if there are multiple references copy and paste the one that closest resembles “This research has been conducted using the UK Biobank Resource.”)","Q15",25
+"code","code. Do the authors provide their code for their analyses of the UK BIobank? (Search the article and supplementary material for “code” |  “availab” | “http”| “www” | “figshare” | ""github” | ""zenodo"")","Q16",26
 "1_a","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 1_a. Indicate the study’s design as cross-sectional, cohort or case-control in the title or the abstract","Q18_1",27
 "1_a_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 1_a. Indicate the study’s design as cross-sectional, cohort or case-control in the title or the abstract - Text","Q18_1_TEXT",28
 "1_b_i","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 1_b_i. Provide in the abstract an informative and balanced summary of what was done","Q18_2",29
@@ -197,37 +223,11 @@
 "22_iii_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 22_iii. If applicable, give the source of funding for the original study on which the present article is based - Text","Q36_19_TEXT",222
 "22_iv","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 22_iv. If applicable, give the the role of the funders for the original study on which the present article is based","Q36_20",223
 "22_iv_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 22_iv. If applicable, give the the role of the funders for the original study on which the present article is based - Text","Q36_20_TEXT",224
-"article_id","article_id. Copy and paste in the article ID from the csv file (do not put in quotes)","Q2",11
-"title","title. Copy and paste the article's title from the online version of the article (do not put in quotes)","Q3",12
-"initials","initials. Select your initials","Q4",13
-"designs","designs. Indicate what the article's designs are from the CSV file.","Q5",14
-"predict","predict. Does the article contain a prediction model analysis? (leave blank if no)","Q6",15
-"strobe","strobe. Did the authors state that they followed STROBE? (Search article & relevant supplementary material for all these terms: 'report' | 'guideline' | 'checklist' | 'STROBE' | 'followed' | 'equator'| 'Elm') - Selected Choice","Q7",16
-"strobe","strobe. Did the authors state that they followed STROBE? (Search article & relevant supplementary material for all these terms: 'report' | 'guideline' | 'checklist' | 'STROBE' | 'followed' | 'equator'| 'Elm') - Other reporting guidelines used - they state they used reporting guidelines other than STROBE. (please specify which reporting guidelines they said they used) - Text","Q7_4_TEXT",17
-"strobe_ev","strobe_ev. Copy and paste in the authors statement regarding their use of reporting guidelines","Q8",18
-"strobe_cite","strobe_cite. If the authors do follow STROBE or other reporting guidelines do they cite these guidelines?","Q9",19
-"reg","reg. Do the authors state that the studies contained in the article were registered? (Search article & relevant supplementary material for all these terms: 'regist' | 'protocol' | 'plan' | 'publis'. Registrations do not include UK Biobank applications which may be referred to as protocols or registrations.)","Q10",20
-"reg_id","reg_id. Copy and paste in the registration's reference number, DOI or other identifier (leave blank if none provided)","Q11",21
-"reg_ev","reg_ev. Copy and paste in the authors' statement regarding registration","Q12",22
-"var_id","var_id. Do the authors reference the UK Biobank ID numbers for all the variables? (Examine any very large numbers found in the methods, results and all supplementary material)","Q13",23
-"ukb_credit","ukb_credit. Do the authors state that “This research has been conducted using the UK Biobank Resource.”? (Search article & relevant supplementary material for all these terms: 'UK' | 'Resource')","Q14",24
-"ukb_credit_ev","ukb_credit_ev. Copy and paste the author's reference to the UK Biobank (if there are multiple references copy and paste the one that closest resembles “This research has been conducted using the UK Biobank Resource.”)","Q15",25
-"code","code. Do the authors provide their code for their analyses of the UK BIobank? (Search the article and supplementary material for “code” |  “availab” | “http”| “www” | “figshare” | ""github” | ""zenodo"")","Q16",26
 "comments","comments.","Q37",225
 "email","email. Corresponding author's email (Search article for ‘corresponding’, ‘@’)","Q38",226
 "country","country. Extract country from corresponding author’s affiliations","Q39",227
 "ukb_app","ukb_app. UK Biobank application number (Search article for all these terms: ‘application’ , ‘approv’ , ‘number’ , ‘Resource’. If not found examine any strings of numbers in article)","Q40",228
 "keywords","keywords. Author keywords (Extract from page 1. If not on page 1 search article for ‘keywords’)","Q41",229
 "coi","coi. Conflict of interest statement (Search article material for all these   terms: ‘competing’, ‘interest’ ,‘conflict’ , ‘disclosure’","Q42",230
-"StartDate","Start Date","StartDate",1
-"EndDate","End Date","EndDate",2
-"Status","Response Type","Status",3
-"Progress","Progress","Progress",4
-"Duration (in seconds)","Duration (in seconds)","Duration (in seconds)",5
-"Finished","Finished","Finished",6
-"RecordedDate","Recorded Date","RecordedDate",7
-"ResponseId","Response ID","ResponseId",8
-"DistributionChannel","Distribution Channel","DistributionChannel",9
-"UserLanguage","User Language","UserLanguage",10
 "Q22_89_TEXT - Parent Topics","Q22_89_TEXT - Parent Topics","Q22_89_TEXT - Parent Topics",231
 "Q22_89_TEXT - Topics","Q22_89_TEXT - Topics","Q22_89_TEXT - Topics",232
