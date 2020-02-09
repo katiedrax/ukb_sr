@@ -4,7 +4,9 @@
 
 library(dplyr)
 library(stringr)
-library(gtools)
+
+# TO DO this code only cleans data for poster the remaining code is copy and pasted from clean_design.R >
+# need to clean properly by adapting copy pasted code
 
 ###############
 # functions ####
@@ -28,31 +30,51 @@ rows_3 <- read.csv(input, encoding = "UTF-8", nrows = 3, stringsAsFactors = F, h
 header <- read.csv("outputs/extraction_dictionary.csv", encoding = "UTF-8", stringsAsFactors = F)
 
 # order by import number so order will match order of headers in row 3
-header <- header[gtools::mixedorder(header$import_num), ]
+header <- header[order(header$import_num), ]
 
 ############
 # import ####
 ###########
 
-# import and remove first three rows
-
 if(identical(as.character(rows_3[2, ]), as.character(header$question))){
-  df <- read.csv(input, encoding = "UTF-8", stringsAsFactors = F, header = F)
+  # if row 2 == question text row import csv and skip first three rows (which contain the qualrics header rows)
+  # set "Not applicable" responses used in strobe item options to missing so won't be included in tables
+  df <- read.csv(input, encoding = "UTF-8", stringsAsFactors = F, header = F, skip = 3, na.strings = c("", " ", "NA"))
+  # assign header$variable as column names as order will now match
   colnames(df) <- header$variable
-  df <- df[-c(1:3), ]
+} else {
+  stop("row 2 in csv != question text row")
 }
 
-#########
-# clean ####
-#########
-
-# remove finished
-
-unfinished <- df[df$Finished == "False", ]
+###################
+# clean for poster ####
+####################
 
 df <- df[df$Finished != "False", ]
 
 
+# drop all evidence boxes for strobe items
+df <- df[, -grep("[1-9]{1,}.*ev", colnames(df))]
+
+# remove finished
+
+df <- df[df$Finished == "True", ]
+
+# standardise initials by lowering and removing punctuation
+
+df$initials <- tolower(df$initials)
+
+# only select katie's data
+
+df <- df[df$initials == "kd", ]
+
+if(sum(df$initials =="kd") != nrow(df)){
+  # stop if dataframe contains initials other than kd
+  stop("df contains more than katie's data")
+  # else drop initials column
+} else {
+  df$initials <- NULL
+}
 # vector of cols automatically outputted by Qualtrics (always first 10 cols if responses anonymised and should be 112 characters)
 
 qual_cols <- colnames(df)[1:10]
@@ -69,10 +91,6 @@ if(sum(str_count(qual_cols)) != 112){
 
 df <- df[order(df$article_id), ]
 
-# column containing clean substring of title for easier matching
-
-df$title_sub <- clean_string(df$title)
-
 # df of all articles in csv_clean_epi.csv on OSF
 
 articles_df <- read.csv("https://osf.io/8uy9w/?action=download", encoding = "UTF-8", stringsAsFactors = F)
@@ -81,10 +99,50 @@ articles_df <- read.csv("https://osf.io/8uy9w/?action=download", encoding = "UTF
 
 articles <- articles_df$id
 
-# standardise initials by lowering and removing punctuation
+# check all article id's are in csv_clean_epi.csv
+if(sum(df$article_id %in% articles) != nrow(df)) stop("some article_ids not in csv_clean_epi")
 
-df$initials <- tolower(df$initials)
+# find all prediction models  - they will have 7_iii (predictors) values or "Yes" predict values
+predict <- df[!is.na(df$`7_iii`),]
+predict <- rbind(predict, df[!is.na(df$predict == "Yes"),])
 
+if(nrow(predict[predict$predict == "Yes"| !is.na(predict$`7_iii`),]) == nrow(predict)){
+  # remove articles in predict if predict df only contains prediction models
+  df <- df[!(df$article_id %in% predict$article_id), ]
+} else {
+  stop("some articles in predict are not prediction models")
+}
+
+
+# check all yes_exact values for ukb_credit_ev are correct
+df$ukb_exact <- grepl("thisresearchhasbeenconductedusingtheukbiobankresource",  clean_string(df$ukb_credit_ev))
+
+if(all(df$ukb_credit[df$ukb_exact == T] == "yes_exact") == F) stop("yes_exact evidence not exact")
+if(all(df$ukb_credit[df$ukb_exact != T] != "yes_exact") == F) stop("some ukb_credit_ev is said to be not exact when it is")
+
+df$ukb_exact <- NULL
+
+# remove "parent topic" columns qualtrics exports if they're empty
+
+if(all(is.na(df$`Q22_89_TEXT - Parent Topics`) && all(is.na(df$`Q22_89_TEXT - Topics`)))){
+  df <- df[, -grep("Q22_89", colnames(df))]
+} else {
+  stop("topic columns not empty")
+}
+
+#####################
+# export for poster ####
+#####################
+
+write.csv(df, "outputs/clean_poster.csv",fileEncoding = "UTF-8", row.names = F)
+
+#################
+# clean properly ####
+#################
+
+# column containing clean substring of title for easier matching
+
+df$title_sub <- clean_string(df$title)
 
 ####################
 # merge prep ####
@@ -172,26 +230,3 @@ both$title_sub.kd <- NULL
 colnames(both)[colnames(both) == "title.mg"] <- "title"
 colnames(both)[colnames(both) == "title_sub.mg"] <- "title_sub"
 
-##################################
-# assign random number list ####
-##############################
-
-# if article ids are identical to those in csv_clean_epi add random number list and names
-
-if(identical(sort(both$article_id), sort(articles))){
-  set.seed(1)
-  both$num <- sample(1:length(both$article_id), length(both$article_id), replace = F)
-  both <- select(both, num, everything())
-} else {
-  stop("article_id's incorrect")
-}
-
-#############
-# export ####
-#############
-
-#sort by random number
-
-both <- both[order(both$num), ]
-
-write.csv(both, "outputs/clean_extraction.csv", row.names = F, fileEncoding = "UTF-8")
