@@ -1,0 +1,100 @@
+﻿Original item no,Original recommendation,Adapted item no,Adapted question (bold words are added)
+1,(a) Indicate the study’s design with a commonly used term in the title or the abstract,1_a,"Indicate the study’s design as cross-sectional, cohort or case-control in the title or the abstract"
+1,(b) Provide in the abstract an informative and balanced summary of what was done and what was found,1_b_i,Provide in the abstract an informative and balanced summary of what was done
+1,,1_b_ii,Provide in the abstract an informative and balanced summary of what was found
+2,Explain the scientific background and rationale for the investigation being reported,2_i,Explain the scientific background for the investigation being reported
+2,,2_ii,Explain the rationale for the investigation being reported
+3,"State specific objectives, including any prespecified hypotheses",3,
+4,Present key elements of study design early in the paper,4,
+5,"Describe the setting, locations, and relevant dates, including periods of recruitment, exposure, follow-up, and data collection",5_i,Describe the setting
+5,,5_ii,Describe the locations
+5,,5_iii,"Describe the relevant dates, including periods of recruitment"
+5,,5_iv,"Describe the relevant dates, including periods of exposure"
+5,,5_v,"Describe the relevant dates, including periods of follow-up"
+5,,5_vi,"Describe the relevant dates, including periods of data collection"
+6,"(a) Cohort study—Give the eligibility criteria, and the sources and methods of selection of participants. Describe methods of follow-up. Case-control study—Give the eligibility criteria, and the sources and methods of case ascertainment and control selection. Give the rationale for the choice of cases and controls. Cross-sectional study—Give the eligibility criteria, and the sources and methods of selection of participants",6_a_i_coh_cs,Cohort and cross-sectional studies – Give the eligibility criteria
+6,,6_a_ii_coh_cs,Cohort and cross-sectional studies – Give the sources of participants.
+6,,6_a_iii_coh_cs,Cohort and cross-sectional studies – Give the methods of selection of participants
+6,,6_a_iv_coh,Cohort study - Describe methods of follow-up
+6,,6_a_i_cc,Case-control study - Give the eligibility criteria
+6,,6_a_ii_cc,Case-control study – Give the sources of case ascertainment and control selection
+6,,6_a_iii_cc,Case-control study – Give the methods of case ascertainment and control selection.
+6,,6_a_iv_cc,Case-control study – Give the rationale for the choice of cases and controls
+6,"(b) Cohort study—For matched studies, give matching criteria and number of exposed and unexposed. Case-control study—For matched studies, give matching criteria and the number of controls per case",6_b_i_coh,"Cohort study - For matched studies, give matching criteria"
+6,,6_b_ii_coh,"Cohort study - For matched studies, give number of exposed and unexposed"
+6,,6_b_i_cc,"Case-control study - For matched studies, give matching criteria"
+6,,6_b_ii_cc,"Case-control study - For matched studies, give the number of controls per case"
+7,"Clearly define all outcomes, exposures, predictors, potential confounders, and effect modifiers. Give diagnostic criteria, if applicable",7_i,Clearly define all outcomes
+7,,7_ii,Clearly define all exposures
+7,,7_iii,Clearly define all predictors
+7,,7_iv,Clearly define all potential confounders
+7,,7_v,Clearly define all effect modifiers
+7,,7_vi,"Give diagnostic criteria, if applicable"
+8*,"For each variable of interest, give sources of data and details of methods of assessment (measurement). Describe comparability of assessment methods if there is more than one group",8starred_i,"For each variable of interest, give sources of data"
+8*,"* Give information separately for cases and controls in case-control studies and, if applicable, for exposed and unexposed groups in cohort and cross-sectional studies.",8_star_i_cc,Case-control studies - Give information separately for cases and controls
+8*,,8_star_i_coh_cs,Cohort and cross-sectional studies - Give information separately for exposed and unexposed groups
+8*,,8starred_ii,"For each variable of interest, give details of methods of assessment (measurement)"
+8*,,8_star_ii_cc,Case-control studies - Give information separately for cases and controls
+8*,,8_star_ii_coh_cs,Cohort and cross-sectional studies - Give information separately for exposed and unexposed groups
+8*,,8starred_iii,Describe comparability of assessment methods if there is more than one group
+8*,,8_star_iii_cc,Case-control studies - Give information separately for cases and controls
+8*,,8_star_iii_coh_cs,Cohort and cross-sectional studies - Give information separately for exposed and unexposed groups
+9,Describe any efforts to address potential sources of bias,9,9. Describe any efforts to address potential sources of bias (does not include any adjustment for confounders)
+10,Explain how the study size was arrived at,10,
+11,"Explain how quantitative variables were handled in the analyses. If applicable, describe which groupings were chosen and why",11_i,Explain how quantitative variables were handled in the analyses
+11,,11_ii,"If applicable, describe which groupings were chosen and why"
+11,,11_iii,"If applicable, describe why groupings were chosen "
+12,"(a) Describe all statistical methods, including those used to control for confounding",12_a,
+12,(b) Describe any methods used to examine subgroups and interactions,12_b_i,Describe any methods used to examine subgroups
+12,,12_b_ii,Describe any methods used to examine interactions
+12,(c) Explain how missing data were addressed,12_c,
+12,"(d) Cohort study—If applicable, explain how loss to follow-up was addressed. Case-control study—If applicable, explain how matching of cases and controls was addressed. Cross-sectional study—If applicable, describe analytical methods taking account of sampling strategy",12_d_coh,"Cohort study—If applicable, explain how loss to follow-up was addressed"
+12,,12_d_cc,"Case-control study—If applicable, explain how matching of cases and controls was addressed"
+12,,12_d_cs,"Cross-sectional study—If applicable, describe analytical methods taking account of sampling strategy"
+12,(e) Describe any sensitivity analyses,12_e,
+13*,"(a) Report numbers of individuals at each stage of study—eg numbers potentially eligible, examined for eligibility, confirmed eligible, included in the study, completing follow-up, and analysed",13starred_a,"Report numbers of individuals at each stage of the present study—eg numbers potentially eligible, examined for eligibility, confirmed eligible, included in the study, completing follow-up, and analysed"
+13*,,13_star_a_cc,Case-control studies - Give information separately for cases and controls
+13*,,13_star_a_coh_cs,Cohort and cross-sectional studies - Give information separately for exposed and unexposed groups
+13*,(b) Give reasons for non-participation at each stage,13starred_b,Give reasons for non-participation at each stage of the present study
+13*,,13_star_b_cc,Case-control studies - Give information separately for cases and controls
+13*,,13_star_b_coh_cs,Cohort and cross-sectional studies - Give information separately for exposed and unexposed groups
+13*,(c) Consider use of a flow diagram,13starred_c,Use a flow diagram if appropriate
+13*,,13_star_c_cc,Case-control studies - Give information separately for cases and controls
+13*,,13_star_c_coh_cs,Cohort and cross-sectional studies - Give information separately for exposed and unexposed groups
+14*,"(a) Give characteristics of study participants (eg demographic, clinical, social) and information on exposures and potential confounders",14starred_a_i,"Give characteristics of study participants (eg demographic, clinical, social)"
+14*,,14_star_a_i_cc,Case-control studies - Give information separately for cases and controls
+14*,,14_star_a_i_coh_cs,Cohort and cross-sectional studies - Give information separately for exposed and unexposed groups
+14*,,14starred_a_ii,Give information on exposures and potential confounders
+14*,,14_star_a_ii_cc,Case-control studies - Give information separately for cases and controls
+14*,,14_star_a_ii_coh_cs,Cohort and cross-sectional studies - Give information separately for exposed and unexposed groups
+14*,(b) Indicate number of participants with missing data for each variable of interest,14starred_b,
+14*,,14_star_b_cc,Case-control studies - Give information separately for cases and controls
+14*,,14_star_b_coh_cs,Cohort and cross-sectional studies - Give information separately for exposed and unexposed groups
+14*,"(c) Cohort study—Summarise follow-up time (eg, average and total amount)",14starred_c_coh,
+14*,,14_star_c_coh,Cohort studies - Give information separately for exposed and unexposed groups
+15*,Cohort study—Report numbers of outcome events or summary measures over time,15starred_coh,
+15*,,15_star_coh,Cohort studies - Give information separately for exposed and unexposed groups
+15*,"Case-control study—Report numbers in each exposure category, or summary measures of exposure",15starred_cc,
+15*,,15_star_cc,Case-control studies - Give information separately for cases and controls
+15*,Cross-sectional study—Report numbers of outcome events or summary measures,15starred_cs,
+15*,,15_star_cs,Cross-sectional studies - Give information separately for exposed and unexposed groups
+16,"(a) Give unadjusted estimates and, if applicable, confounder-adjusted estimates and their precision (eg, 95% confidence interval). Make clear which confounders were adjusted for and why they were included",16_a_i,Give unadjusted estimates
+16,,16_a_ii,"if applicable, give confounder-adjusted estimates "
+16,,16_a_iii,"if applicable, give confounder-adjusted estimates’ their precision (eg, 95% confidence interval)."
+16,,16_a_iv,Make clear which confounders were adjusted for
+16,,16_a_v,Make clear why confounders were included
+16,(b) Report category boundaries when continuous variables were categorized,16_b,
+16,"(c) If relevant, consider translating estimates of relative risk into absolute risk for a meaningful time period",16_c,
+17,"Report other analyses done—eg analyses of subgroups and interactions, and sensitivity analyses",17_i,Report analyses of subgroups
+17,,17_ii,Reports analyses of interactions
+17,,17_iii,Report sensitivity analyses
+17,,17_iv,Report other analyses done
+18,Summarise key results with reference to study objectives,18,
+19,"Discuss limitations of the study, taking into account sources of potential bias or imprecision. Discuss both direction and magnitude of any potential bias",19_i,"Discuss limitations of the study, taking into account sources of potential bias or imprecision."
+19,,19_ii,Discuss both direction and magnitude of any potential bias
+20,"Give a cautious overall interpretation of results considering objectives, limitations, multiplicity of analyses, results from similar studies, and other relevant evidence",20,
+21,Discuss the generalisability (external validity) of the study results,21,
+22,"Give the source of funding and the role of the funders for the present study and, if applicable, for the original study on which the present article is based",22_i,Give the source of funding for the present study
+22,,22_ii,Give the role of the funders for the present study
+22,,22_iii,"If applicable, give the source of funding for the original study on which the present article is based"
+22,,22_iv,"If applicable, give the role of the funders for the original study on which the present article is based"
