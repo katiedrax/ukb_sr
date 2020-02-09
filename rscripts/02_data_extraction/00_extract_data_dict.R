@@ -54,7 +54,7 @@ find_matches <- function(pattern, string){
 
 # assign input file 
 
-input <- "data/data_extraction/Data+Extraction+Form_5+February+2020_16.24.csv"
+input <- "data/data_extraction/Data+Extraction+Form_9+February+2020_11.33.csv"
 
 # Import first three rows of the  Qualtrics csv export
 
@@ -195,13 +195,27 @@ dict$variable <- paste(dict$variable, dict$ev, sep = "_") %>%
   gsub("\\_FALSE", "", .) %>%
   gsub("\\_TRUE", "_ev", .)
 
+# drop ev col as this has now been used to append variables
+dict$ev <- NULL
 
 # dict$question should now be identical to row 2 in header  >
-# check this is true
+# check this is true >
 
-identical(sort(as.character(dict$question)), sort(as.character(header[2, ])))
+if(identical(sort(as.character(dict$question)), sort(as.character(header[2, ]))) == F) stop("not identical")
 
-t_header <- as.data.frame(t(header), stringsAsFactors = F)
+########
+# merge ####
+#########
+
+# need to create key for each variable name so can replace header when read in data extraction csv >
+# read in data extraction csv without a header so the colnames will be sequential variable numbers
+
+header_real <- read.csv(input, stringsAsFactors = F, encoding = "UTF-8", header = F, nrows = 3)
+  
+# transpose header so all rows become character vectors
+t_header <- as.data.frame(t(header_real), stringsAsFactors = F, row.names = F) 
+# add header back in as this is removed during the transposition
+t_header$import_num <- colnames(header_real)
 
 # join
 
@@ -211,12 +225,12 @@ if(nrow(anti_join(dict, t_header, by = c("question"= "V2"))) == 0){
   stop("some values won't join")
 }
 
-# drop unnecessary columns from dict_final
+# drop import id col
 
 dict_final$V3 <- NULL
-dict_final$ev <- NULL
 
-colnames(dict_final)[colnames(dict_final) == "V1"] <- "q_num"
+# rename row 1 as qual_q_num indicating these are the variable names qualtrics exports
+colnames(dict_final)[colnames(dict_final) == "V1"] <- "qual_var_name"
 #######
 # excel ####
 #########
