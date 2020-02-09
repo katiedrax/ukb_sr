@@ -50,15 +50,6 @@ if(identical(as.character(rows_3[2, ]), as.character(header$question))){
 # clean for poster ####
 ####################
 
-df <- df[df$Finished != "False", ]
-
-
-# drop all evidence boxes for strobe items
-df <- df[, -grep("[1-9]{1,}.*ev", colnames(df))]
-
-# remove finished
-
-df <- df[df$Finished == "True", ]
 
 # standardise initials by lowering and removing punctuation
 
@@ -75,6 +66,15 @@ if(sum(df$initials =="kd") != nrow(df)){
 } else {
   df$initials <- NULL
 }
+
+# remove unfinished
+df <- df[df$Finished != "False", ]
+
+
+# drop all evidence boxes for strobe items
+df <- df[, -grep("[1-9]{1,}.*ev", colnames(df))]
+
+
 # vector of cols automatically outputted by Qualtrics (always first 10 cols if responses anonymised and should be 112 characters)
 
 qual_cols <- colnames(df)[1:10]
@@ -113,6 +113,34 @@ if(nrow(predict[predict$predict == "Yes"| !is.na(predict$`7_iii`),]) == nrow(pre
   stop("some articles in predict are not prediction models")
 }
 
+# remove "parent topic" columns qualtrics exports if they're empty
+
+if(all(is.na(df$`Q22_89_TEXT - Parent Topics`) && all(is.na(df$`Q22_89_TEXT - Topics`)))){
+  df <- df[, -grep("Q22_89", colnames(df))]
+} else {
+  stop("topic columns not empty")
+}
+
+######################
+# data quality checks ####
+#####################
+
+# check data is correct once cleaned
+# check all strobe responses are correct
+
+strobe_opts <- c("Partially", "Partially-External", "Unsure", "Yes", "No", NA)
+
+strobe_cols <- grep("^[1-9]{1,2}", colnames(df), value = T)
+
+strobe_values <- stack(sapply(df[, strobe_cols], unique))%>%
+  .$values
+
+if(length(setdiff(strobe_values, strobe_opts)) == 0){
+  print("correct strobe values")
+} else{
+  print(setdiff(strobe_responses, strobe_opts))
+  stop("incorrect strobe values")
+}
 
 # check all yes_exact values for ukb_credit_ev are correct
 df$ukb_exact <- grepl("thisresearchhasbeenconductedusingtheukbiobankresource",  clean_string(df$ukb_credit_ev))
@@ -122,13 +150,6 @@ if(all(df$ukb_credit[df$ukb_exact != T] != "yes_exact") == F) stop("some ukb_cre
 
 df$ukb_exact <- NULL
 
-# remove "parent topic" columns qualtrics exports if they're empty
-
-if(all(is.na(df$`Q22_89_TEXT - Parent Topics`) && all(is.na(df$`Q22_89_TEXT - Topics`)))){
-  df <- df[, -grep("Q22_89", colnames(df))]
-} else {
-  stop("topic columns not empty")
-}
 
 #####################
 # export for poster ####
