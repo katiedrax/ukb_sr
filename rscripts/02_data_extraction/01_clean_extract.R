@@ -20,7 +20,7 @@ source("rscripts/functions/clean-string-fun.R")
 
 # assign input file 
 
-input <- "data/data_extraction/Data+Extraction+Form_7+February+2020_17.21.csv"
+input <- "data/data_extraction/Data+Extraction+Form_9+February+2020_11.33.csv"
 # Import first two rows of the  Qualtrics csv export
 
 rows_3 <- read.csv(input, encoding = "UTF-8", nrows = 3, stringsAsFactors = F, header = F)
@@ -186,7 +186,7 @@ if(identical(sort(both$article_id), sort(articles))){
   stop("article_id's incorrect")
 }
 
-############
+#############
 # export ####
 #############
 
@@ -194,4 +194,4 @@ if(identical(sort(both$article_id), sort(articles))){
 
 both <- both[order(both$num), ]
 
-write.csv(both, "outputs/clean_designs.csv", row.names = F, fileEncoding = "UTF-8")
+write.csv(both, "outputs/clean_extraction.csv", row.names = F, fileEncoding = "UTF-8")
