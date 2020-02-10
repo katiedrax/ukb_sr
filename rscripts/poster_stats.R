@@ -90,64 +90,24 @@ for(i in colnames(s_df)){
 # check cols safely removed
 #if(length(na_cols) +length(colnames(s_df)) != all_s_df_cols) stop("some cols unaccounted for after removing NA cols")
 
-############################################
-# split strobe df by stars and designs ####
-##########################################
+###############################
+# subset star strobe items  ####
+##############################
 
-# separate star first since even though they are design specific >
+# separate star into one df even though they are design specific >
 # this is because the advice is the same (show information separately for 2 groups)>
 # it's just that the 'groups' differ for the designs >
 # cases & controls for cc and exposed & unexposed for coh & cs designs
 
 if(identical(grep("star_", colnames(s_df)), grep("\\_star\\_", colnames(s_df)))){
   star <- grep("star_", colnames(s_df))
+  # subset star cols
   s_star_df <- s_df[,star]
+  # remove star cols from s_df
+  s_df <- s_df[, -star]
 } else {
   stop("star not identical")
 }
-
-# select cohort specific cols
-if(length(grep("coh", colnames(s_df))) == length(grep("\\_coh", colnames(s_df)))){
-  coh <- grep("coh", colnames(s_df))
-  s_coh_df <- s_df[, coh]
-} else {
-  stop("coh different lengths")
-}
-
-# select case control specific cols
-if(length(grep("cc", colnames(s_df))) == length(grep("\\_cc", colnames(s_df)))){
-  cc <- grep("cc", colnames(s_df))
-  s_cc_df <- s_df[, cc]
-}else {
-  stop("cc different lengths")
-}
-
-# select cs specific cols
-if(length(grep("cs", colnames(s_df))) == length(grep("\\_cs", colnames(s_df)))){
-  cs <- grep("cs", colnames(s_df))
-  s_cs_df <- s_df[, cs]
-}else {
-  stop("cs different lengths")
-}
-
-# vector of all column names in design specific dfs and star df
-star_design_cols <- c(colnames(s_cs_df), 
-                      colnames(s_cc_df),
-                      colnames(s_coh_df),
-                      colnames(s_star_df)) %>%
-  unique(.)
-
-# create df that only contains strobe items that are applicable to all designs and are not star items
-s_df_gen <- s_df[, !(colnames(s_df) %in% star_design_cols)]
-
-# vector of all colnames in subset dfs (3 design specifc dfs, 1 star item df, 1 non-design specifc or star item df)
-subset_cols <- c(colnames(s_df_gen), star_design_cols) %>%
-  unique(.) %>%
-  sort(.)
-
-#check subset cols are same as original cols
-
-if(identical(subset_cols, sort(colnames(s_df))) != T) stop("colnames from s_df subsets are different from s_df")
 
 #########################
 # recode strobe factors ####
