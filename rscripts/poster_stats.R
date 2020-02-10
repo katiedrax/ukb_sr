@@ -4,6 +4,7 @@
 library(dplyr)
 library(ggplot2)
 
+
 ######################
 # import & correct ####
 ######################
@@ -18,8 +19,10 @@ df_cols <- colnames(df)
 # manually checked strobe item 10. should all be NA because all studies used all eligible ppts
 df$X10 <- NA
 
-#manually checked strobe item 6 and 12_d_cc, should all be NA because no matched articles
-match_cols <- grep("X6_b|X12_d_cc", colnames(df), value = T)
+#manually checked strobe item 6 and 12d_cc, should all be NA because no matched articles
+match_cols <- grep("X6b|X12d_cc", colnames(df), value = T)
+
+if(sum(is.na(match_cols)) != 0) stop("missing cols in match_cols")
 
 # make all cols in match_cols NA
 for(i in match_cols){
@@ -38,18 +41,20 @@ if(length(which(df == "Partially-External") != 0)) stop("some Partially-External
 
 # replace non-strobe cols indicating if non-strobe items present
 
-df$ukb_app_pres <- is.na(df$ukb_app)
-df$email_pres <- is.na(df$email)
-df$country_pres <- is.na(df$country)
-df$keywords_pres <- is.na(df$keywords)
-df$coi_pres <- is.na(df$coi)
+
+
+df$ukb_app_pres <- !is.na(df$ukb_app)
+df$email_pres <- !is.na(df$email)
+df$country_pres <- !is.na(df$country)
+df$keywords_pres <- !is.na(df$keywords)
+df$coi_pres <- !is.na(df$coi)
 
 ###################################
 # split into strobe and non-strobe ####
 #################################
 
 # find all strobe cols
-strobe_cols <- grep("^X[1-9]{1,2}", colnames(df))
+strobe_cols <- grep("^X[[:digit:]]{1,2}", colnames(df))
 
 # check number of strobe cols is 99
 if(length(!is.na(strobe_cols)) != 99) stop("wrong num of strobe_cols")
@@ -109,12 +114,43 @@ if(identical(grep("star_", colnames(s_df)), grep("\\_star\\_", colnames(s_df))))
   stop("star not identical")
 }
 
+if(all(c(unique(colnames(s_df)), unique(colnames(s_star_df)), unique(colnames(not_s_df))) %in% colnames(df)) == F){
+  stop("df subsets have diff colnames to df")
+}
+
+#######################
+# strobe item completion ####
+########################
+
+# get names of all strobe cols
+strobe_cols <- grep("^X[[:digit:]]{1,2}", colnames(s_df), value = T) 
+
+# vector of numbers in strobe col names
+strobe_nums <- strobe_cols %>%
+  # remove all punctuation and letters
+  gsub("[[:punct:]]|[[:alpha:]]", "", .)%>%
+  # remove duplicates
+  unique()
+
+# check all strobe_nums are in 1-22
+if(identical(unique(gsub("[[:alpha:]]", "", strobe_nums)), as.character(c(1:22))) == F) stop("strobe_nums don't equal 1-22")
+if(sum(duplicated(strobe_nums)) != 0) stop("duplicate strobe_nums")
+
+# extract strobe items that have sub divisions (created by dividing up double questions) >
+# these should only be questions with roman numerals in them after a "_"
+strobe_div <- strobe_cols[grepl("_i|_v", strobe_cols) == T] %>%
+  unique() 
+
+# extract strobe items without sub divisions
+strobe_comp <- strobe_cols[grepl("_i|_v", strobe_cols) == F] %>%
+  unique() 
+
 #########################
 # recode strobe factors ####
 ########################
 
 # find all strobe cols
-strobe_cols <- grep("^X[1-9]{1,2}", colnames(s_df), value =T)
+strobe_cols <- grep("^X[[:digit:]]{1,2}", colnames(s_df), value =T)
 
 # save s_df before recoding factors
 pre_recode <- s_df
