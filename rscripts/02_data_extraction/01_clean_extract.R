@@ -22,7 +22,7 @@ source("rscripts/functions/clean-string-fun.R")
 
 # assign input file 
 
-input <- "data/data_extraction/Data+Extraction+Form_9+February+2020_11.33.csv"
+input <- "data/data_extraction/Data+Extraction+Form_10+February+2020_18.20.csv"
 # Import first two rows of the  Qualtrics csv export
 
 rows_3 <- read.csv(input, encoding = "UTF-8", nrows = 3, stringsAsFactors = F, header = F)
@@ -72,7 +72,7 @@ df <- df[df$Finished != "False", ]
 
 
 # drop all evidence boxes for strobe items
-df <- df[, -grep("[1-9]{1,}.*ev", colnames(df))]
+df <- df[, -grep("[[:digit:]]{1,}.*ev", colnames(df))]
 
 
 # vector of cols automatically outputted by Qualtrics (always first 10 cols if responses anonymised and should be 112 characters)
@@ -130,7 +130,7 @@ if(all(is.na(df$`Q22_89_TEXT - Parent Topics`) && all(is.na(df$`Q22_89_TEXT - To
 
 strobe_opts <- c("Partially", "Partially-External", "Unsure", "Yes", "No", NA)
 
-strobe_cols <- grep("^[1-9]{1,2}", colnames(df), value = T)
+strobe_cols <- grep("^[[:digit:]]{1,2}", colnames(df), value = T)
 
 strobe_values <- stack(sapply(df[, strobe_cols], unique))%>%
   .$values
