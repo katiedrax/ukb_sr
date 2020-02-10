@@ -5,7 +5,7 @@
 library(dplyr)
 library(stringr)
 
-# TO DO this code only cleans data for poster the remaining code is copy and pasted from clean_design.R >
+# TO DO this code is copy and pasted from clean_design.R >
 # need to clean properly by adapting copy pasted code
 
 ###############
@@ -45,117 +45,6 @@ if(identical(as.character(rows_3[2, ]), as.character(header$question))){
 } else {
   stop("row 2 in csv != question text row")
 }
-
-###################
-# clean for poster ####
-####################
-
-
-# standardise initials by lowering and removing punctuation
-
-df$initials <- tolower(df$initials)
-
-# only select katie's data
-
-df <- df[df$initials == "kd", ]
-
-if(sum(df$initials =="kd") != nrow(df)){
-  # stop if dataframe contains initials other than kd
-  stop("df contains more than katie's data")
-  # else drop initials column
-} else {
-  df$initials <- NULL
-}
-
-# remove unfinished
-df <- df[df$Finished != "False", ]
-
-
-# drop all evidence boxes for strobe items
-df <- df[, -grep("[[:digit:]]{1,}.*ev", colnames(df))]
-
-
-# vector of cols automatically outputted by Qualtrics (always first 10 cols if responses anonymised and should be 112 characters)
-
-qual_cols <- colnames(df)[1:10]
-
-if(sum(str_count(qual_cols)) != 112){
-  stop("check qual_cols contains qualtrics columns")
-} else {
-  # remove qual_cols
-  df <- df[, -c(1:10)]
-}
-
-
-#sort by article id
-
-df <- df[order(df$article_id), ]
-
-# df of all articles in csv_clean_epi.csv on OSF
-
-articles_df <- read.csv("https://osf.io/8uy9w/?action=download", encoding = "UTF-8", stringsAsFactors = F)
-
-# vector of all article id's in csv_clean_epi.csv on oSF
-
-articles <- articles_df$id
-
-# check all article id's are in csv_clean_epi.csv
-if(sum(df$article_id %in% articles) != nrow(df)) stop("some article_ids not in csv_clean_epi")
-
-# find all prediction models  - they will have 7_iii (predictors) values or "Yes" predict values
-predict <- df[!is.na(df$`7_iii`),]
-predict <- rbind(predict, df[!is.na(df$predict == "Yes"),])
-
-if(nrow(predict[predict$predict == "Yes"| !is.na(predict$`7_iii`),]) == nrow(predict)){
-  # remove articles in predict if predict df only contains prediction models
-  df <- df[!(df$article_id %in% predict$article_id), ]
-} else {
-  stop("some articles in predict are not prediction models")
-}
-
-# remove "parent topic" columns qualtrics exports if they're empty
-
-if(all(is.na(df$`Q22_89_TEXT - Parent Topics`) && all(is.na(df$`Q22_89_TEXT - Topics`)))){
-  df <- df[, -grep("Q22_89", colnames(df))]
-} else {
-  stop("topic columns not empty")
-}
-
-######################
-# data quality checks ####
-#####################
-
-# check data is correct once cleaned
-# check all strobe responses are correct
-
-strobe_opts <- c("Partially", "Partially-External", "Unsure", "Yes", "No", NA)
-
-strobe_cols <- grep("^[[:digit:]]{1,2}", colnames(df), value = T)
-
-strobe_values <- stack(sapply(df[, strobe_cols], unique))%>%
-  .$values
-
-if(length(setdiff(strobe_values, strobe_opts)) == 0){
-  print("correct strobe values")
-} else{
-  print(setdiff(strobe_responses, strobe_opts))
-  stop("incorrect strobe values")
-}
-
-# check all yes_exact values for ukb_credit_ev are correct
-df$ukb_exact <- grepl("thisresearchhasbeenconductedusingtheukbiobankresource",  clean_string(df$ukb_credit_ev))
-
-if(all(df$ukb_credit[df$ukb_exact == T] == "yes_exact") == F) stop("yes_exact evidence not exact")
-if(all(df$ukb_credit[df$ukb_exact != T] != "yes_exact") == F) stop("some ukb_credit_ev is said to be not exact when it is")
-
-df$ukb_exact <- NULL
-
-
-#####################
-# export for poster ####
-#####################
-
-write.csv(df, "outputs/clean_poster.csv",fileEncoding = "UTF-8", row.names = F)
 
 #################
 # clean properly ####
