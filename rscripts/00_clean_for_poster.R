@@ -147,6 +147,23 @@ if(all(df$ukb_credit[df$ukb_exact != T] != "yes_exact") == F) stop("some ukb_cre
 
 df$ukb_exact <- NULL
 
+#############################
+# manual data quality checks ####
+###############################
+
+# manually checked strobe item 10. should all be NA because all studies used all eligible ppts
+df$X10 <- NA
+
+#manually checked strobe item 6 and 12d_cc, should all be NA because no matched articles
+match_cols <- grep("X6b|X12d_cc", colnames(df), value = T)
+
+if(sum(is.na(match_cols)) != 0) stop("missing cols in match_cols")
+
+# make all cols in match_cols NA
+for(i in match_cols){
+  df[[i]] <- NA
+  if(all(is.na(df[[i]])) == F) stop("all isn't NA in ", i)
+}
 
 #####################
 # export for poster ####
