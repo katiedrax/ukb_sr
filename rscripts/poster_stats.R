@@ -27,6 +27,23 @@ for(i in match_cols){
   if(all(is.na(df[[i]])) == F) stop("all isn't NA in ", i)
 }
 
+# replace remove - from "Partially-External", R doesn't like punctuation in factor levels
+
+df <- data.frame(lapply(df, function(x) {
+  gsub("Partially-External", "PartiallyExternal", x)
+  }))
+
+# check removed
+if(length(which(df == "Partially-External") != 0)) stop("some Partially-External remain")
+
+# replace non-strobe cols indicating if non-strobe items present
+
+df$ukb_app_pres <- is.na(df$ukb_app)
+df$email_pres <- is.na(df$email)
+df$country_pres <- is.na(df$country)
+df$keywords_pres <- is.na(df$keywords)
+df$coi_pres <- is.na(df$coi)
+
 ###################################
 # split into strobe and non-strobe ####
 #################################
@@ -34,16 +51,18 @@ for(i in match_cols){
 # find all strobe cols
 strobe_cols <- grep("^X[1-9]{1,2}", colnames(df))
 
-
-if(length(strobe_cols) == 0) stop("strobe_cols empty")
+# check number of strobe cols is 99
+if(length(!is.na(strobe_cols)) != 99) stop("wrong num of strobe_cols")
 
 if(all(abs(diff(strobe_cols))) == T){
+  # if strobe_cols are sequential separate df into strobe items and non-strobe items
   s_df <- select(df, "article_id", strobe_cols)
   not_s_df <- select(df, -strobe_cols)
 }else {
   stop("strobe col positions not sequential")
 }
 
+# check total ncol of s_df and not_s_df is same as original df +1 because article_id col is in both
 if(ncol(s_df) + ncol(not_s_df) != ncol(df) +1) stop("wrong number of cols in strobe or not_strobe dfs")
 
 #####################################
@@ -54,18 +73,22 @@ if(ncol(s_df) + ncol(not_s_df) != ncol(df) +1) stop("wrong number of cols in str
 
 all_s_df_cols <- ncol(s_df)
 
-# save and remove strobe items that were not applicable for any articles
-
+# creat empty vector for next for loop
 na_cols <- c()
 
+# save strobe col names that were not applicable for any articles
 for(i in colnames(s_df)){
   if(all(is.na(s_df[[i]]))){
+    # if s_df$i contains only NA save i to the na_cols vector
     na_cols <- c(na_cols, i)
-    s_df[[i]] <- NULL
   }
 }
 
-if(length(na_cols) +length(colnames(s_df)) != all_s_df_cols) stop("some cols unaccounted for after removing NA cols")
+# remove empty cols by name
+#s_df <- s_df[, !colnames(s_df)%in%na_cols]
+
+# check cols safely removed
+#if(length(na_cols) +length(colnames(s_df)) != all_s_df_cols) stop("some cols unaccounted for after removing NA cols")
 
 ############################################
 # split strobe df by stars and designs ####
@@ -79,7 +102,6 @@ if(length(na_cols) +length(colnames(s_df)) != all_s_df_cols) stop("some cols una
 if(identical(grep("star_", colnames(s_df)), grep("\\_star\\_", colnames(s_df)))){
   star <- grep("star_", colnames(s_df))
   s_star_df <- s_df[,star]
-  s_df <- s_df[, -star]
 } else {
   stop("star not identical")
 }
@@ -87,7 +109,7 @@ if(identical(grep("star_", colnames(s_df)), grep("\\_star\\_", colnames(s_df))))
 # select cohort specific cols
 if(length(grep("coh", colnames(s_df))) == length(grep("\\_coh", colnames(s_df)))){
   coh <- grep("coh", colnames(s_df))
-  coh_df <- s_df[, coh]
+  s_coh_df <- s_df[, coh]
 } else {
   stop("coh different lengths")
 }
@@ -95,7 +117,7 @@ if(length(grep("coh", colnames(s_df))) == length(grep("\\_coh", colnames(s_df)))
 # select case control specific cols
 if(length(grep("cc", colnames(s_df))) == length(grep("\\_cc", colnames(s_df)))){
   cc <- grep("cc", colnames(s_df))
-  cc_df <- s_df[, cc]
+  s_cc_df <- s_df[, cc]
 }else {
   stop("cc different lengths")
 }
@@ -103,29 +125,113 @@ if(length(grep("cc", colnames(s_df))) == length(grep("\\_cc", colnames(s_df)))){
 # select cs specific cols
 if(length(grep("cs", colnames(s_df))) == length(grep("\\_cs", colnames(s_df)))){
   cs <- grep("cs", colnames(s_df))
-  cs_df <- s_df[, cs]
+  s_cs_df <- s_df[, cs]
 }else {
   stop("cs different lengths")
 }
-design_specific_cols <- c(cs,cc,coh) %>%
+
+# vector of all column names in design specific dfs and star df
+star_design_cols <- c(colnames(s_cs_df), 
+                      colnames(s_cc_df),
+                      colnames(s_coh_df),
+                      colnames(s_star_df)) %>%
   unique(.)
 
-s_df <- s_df[, -design_specific_cols]
+# create df that only contains strobe items that are applicable to all designs and are not star items
+s_df_gen <- s_df[, !(colnames(s_df) %in% star_design_cols)]
+
+# vector of all colnames in subset dfs (3 design specifc dfs, 1 star item df, 1 non-design specifc or star item df)
+subset_cols <- c(colnames(s_df_gen), star_design_cols) %>%
+  unique(.) %>%
+  sort(.)
+
+#check subset cols are same as original cols
+
+if(identical(subset_cols, sort(colnames(s_df))) != T) stop("colnames from s_df subsets are different from s_df")
+
+#########################
+# recode strobe factors ####
+########################
+
+# find all strobe cols
+strobe_cols <- grep("^X[1-9]{1,2}", colnames(s_df), value =T)
+
+# save s_df before recoding factors
+pre_recode <- s_df
+
+# recode all strobe cols in s_df
+for(i in strobe_cols){
+  # set all cols to factor
+  s_df[[i]] <- as.factor(s_df[[i]])
+  #recode all factor levels
+  levels(s_df[[i]]) <- list(Yes = "Yes", PartiallyExternal = "PartiallyExternal",
+                            Partially = "Partially", No = "No", Unsure = "Unsure")
+}
+
+# check recode successful
+
+x <- NULL
+
+for(i in strobe_cols){
+  x <- c(x, all.equal(as.character(s_df[[i]]), 
+                      as.character(pre_recode[[i]])))
+}
+
+if(sum(x) == length(x)){
+  rm(x)
+  rm(pre_recode)
+} else {
+  stop("factor recoded cols in s_df are different to before recoding")
+}
+
+
+###################
+# frequencies all ####
+##################
+
+library(tableone)
+
+for(i in colnames(df)[colnames(df) %in% colnames(not_s_df)]) {
+  df[,i] <- as.character(df[,i])
+}
+
+helpers <- c("article_id", "title", "strobe_ev", "ukb_credit_ev", "reg_ev", "strobe.1", "reg_id",
+             "comments", "keywords", "email", "country", "ukb_app", "coi", "predict")
+
+cats <- df[, sapply(df, class) == 'character'] %>%
+  colnames(.)%>%
+  .[!(. %in% helpers)]
+
+fact <- df[, sapply(df, class) == 'factor']%>%
+  colnames(.)
+
+
+tab1 <- CreateTableOne(vars = colnames(df)[!(colnames(df) %in% helpers)], data = df, factorVars = cats, includeNA = T )%>%
+  print(., noSpaces = T, showAllLevels = T)
+
+write.csv(tab1, "outputs/table1_raw.csv")
+
+######################
+# frequencies strobe ####
+#####################
+
+all_freq_narr <- NULL
+
+# narrow all_freq
+for(i in colnames(df)){
+  x <- data.frame(strobe = i,prop.table(table(df[[i]], useNA = "always")))
+  all_freq_narr <- rbind(all_freq_narr, x)
+  row.names(all_freq_narr) <- c()
+}
 
 #######################
 # frequencies of strobe ####
 ######################
 
-# find all strobe cols, if 
-strobe_cols <- grep("^X[1-9]{1,2}", colnames(s_df), value =T)
 
 strobe_freq_wide <- NULL
 
-# wide strobe_freq
 for(i in strobe_cols){
-  s_df[[i]] <- as.factor(s_df[[i]])
-  levels(s_df[[i]]) <- list(Yes = "Yes", PartiallyExternal = "Partially-External",
-                            Partially = "Partially", No = "No", Unsure = "Unsure")
   x <- prop.table(table(s_df[[i]], useNA = "always"))
   x_df <- data.frame(strobe = i,x[1],x[2],x[3],x[4],x[5], x[6])
   colnames(x_df) <- c("strobe", names(x))
