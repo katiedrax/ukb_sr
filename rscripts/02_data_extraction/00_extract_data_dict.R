@@ -54,7 +54,7 @@ find_matches <- function(pattern, string){
 
 # assign input file 
 
-input <- "data/data_extraction/Data+Extraction+Form_9+February+2020_11.33.csv"
+input <- "data/data_extraction/Data+Extraction+Form_10+February+2020_18.20.csv"
 
 # Import first three rows of the  Qualtrics csv export
 
@@ -89,7 +89,7 @@ if(sum(qual_vars %in% test[1, 1:10]) == 10){
 # so without qual_text, test col names should all contain question numbers in the format Q[1-2 digit number] >
 # warn user if this isn't true
 
-if(sum(grepl("Q[1-9]{1,2}", test[1, ])) != ncol(test)) stop("row 1 contains more than question numbers")
+if(sum(grepl("Q[[:digit:]]{1,2}", test[1, ])) != ncol(test)) stop("row 1 contains more than question numbers")
 
 # row 2 should contain full question text >
 # KD added variable names to all question text by putting "[variable]." at start of all questions >
@@ -138,11 +138,11 @@ var_dot_names <- extract_var(match, var_dot)
 # the strobe item number is the variable name >
 # find strobe item questions by those that contain a strobe item number
 
-var_strobe <- grep("\\- [1-9]{1,}.*\\.", qs$question, value = T)
+var_strobe <- grep("\\- [[:digit:]]{1,}.*\\.", qs$question, value = T)
 
 # find matches for var_strobe
 
-match <- find_matches("\\- [1-9]{1,}.*\\.",var_strobe)
+match <- find_matches("\\- [[:digit:]]{1,}.*\\.",var_strobe)
 
 var_strobe_names <- extract_var(match, var_strobe)
 
@@ -198,7 +198,7 @@ if(identical(sort(colnames(dict)), sort(colnames(topic_dict)))){
 dict$ev <- rep(NA)
 
 # find strobe evidence variables
-dict$ev[grepl("^[1-9]{1,2}", dict$variable)] <- grepl("\\- Text$", dict$question[grepl("^[1-9]{1,2}", dict$variable)])
+dict$ev[grepl("^[[:digit:]]{1,2}", dict$variable)] <- grepl("\\- Text$", dict$question[grepl("^[[:digit:]]{1,2}", dict$variable)])
 
 # combine ev and variable cols
 dict$variable <- paste(dict$variable, dict$ev, sep = "_") %>%
@@ -266,7 +266,7 @@ dict_final <- dict_final[order(dict_final$import_num), ]
 # check colnames import_nums are sequential
 
 if(all(abs(diff(dict_final$import_num)) != 1)) stop("import_num not sequential")
-if(all(abs(diff(grep("^[1-9]{1,2}", dict_final$import_num)) != 1))) stop("strobe variables' import_num not sequential ")
+if(all(abs(diff(grep("^[[:digit:]]{1,2}", dict_final$import_num)) != 1))) stop("strobe variables' import_num not sequential ")
 
 #######
 # export ####
