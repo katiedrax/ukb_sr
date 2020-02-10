@@ -6,7 +6,7 @@ library(ggplot2)
 
 
 ######################
-# import & correct ####
+# import  ####
 ######################
 
 # most variables are unordered factors (nominal with set responses) so read in with stringsAsFactors = T
@@ -16,7 +16,9 @@ df <- read.csv("outputs/clean_poster.csv", encoding = "UTF-8")
 
 df_cols <- colnames(df)
 
-
+#########
+# recode partially external ####
+########
 # replace remove - from "Partially-External", R doesn't like punctuation in factor levels
 
 df <- data.frame(lapply(df, function(x) {
@@ -26,9 +28,11 @@ df <- data.frame(lapply(df, function(x) {
 # check removed
 if(length(which(df == "Partially-External") != 0)) stop("some Partially-External remain")
 
+###################
+# add presence cols ####
+#####################
+
 # replace non-strobe cols indicating if non-strobe items present
-
-
 
 df$ukb_app_pres <- !is.na(df$ukb_app)
 df$email_pres <- !is.na(df$email)
