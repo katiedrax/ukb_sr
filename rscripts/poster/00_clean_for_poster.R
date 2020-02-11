@@ -243,12 +243,9 @@ df_full <- full_join(df, merge_1, by = "article_id")
 
 # want to display frequency stats for open access, corrections, etc - data I extracted individually >
 # get these from epi_access.csv
-access <- read.csv("data/epi_access.csv", stringsAsFactors = F, encoding = "UTF-8") %>%
+access <- read.csv("data/epi_access.csv", stringsAsFactors = F, encoding = "UTF-8", na.strings = c("NA", "", " ")) %>%
   # drop authors,  doi and year
   select(., -c("authors", "doi", "year"))
-
-colnames(access)[which(colnames(access) == "id")] <- "article_id"
-
 
 # subset if article ids all in df_full
 if(sum(access$article_id %in% df_full$article_id) == nrow(df_full)){
@@ -281,6 +278,25 @@ if(identical(clean_string(access$title), clean_string(df_full$title)) == F){
 }
 
 
+#########
+# merge access ####
+##########
+
+if(identical(df_full$article_id, access$article_id)){
+  x <- anti_join(df_full, access, by = "article_id")
+  if(nrow(x) == 0){
+    rm(x)
+    print("all rows will merge in df_full & access")
+  } else {
+    stop("some rows in df_full & access cols won't merge")
+  }
+}
+
+
+# full join 
+df_full <- full_join(df_full, access, by = "article_id")
+
+
 #################
 # jif merge prep####
 ###############
@@ -291,7 +307,7 @@ df_full$journal_clean <- clean_string(df_full$journal)
 jif <- read.csv("data/jif/all_years.csv", stringsAsFactors = F, encoding = "UTF-8")
 jif$JCR.Abbreviated.Title <- clean_string(jif$JCR.Abbreviated.Title)
 
-#subset jif by journal names in df
+#subset jif by journal names in df_full
 
 if(sum(duplicated(jif)) == 0){
   jif_match <- jif[which(jif$JCR.Abbreviated.Title %in% clean_string(df_full$journal)),]
@@ -367,22 +383,56 @@ if(nrow(anti_join(df_full, jif18, by = c("journal_clean", "year"))) != nrow(df_f
   stop("jif contains no relevant journals")
 }
 
+# vector of jif col names
+jif_cols <- colnames(df_full)[grep("jif", colnames(df_full))]
+
 df_full$jif <- paste(df_full$jif2014, df_full$jif2015, df_full$jif2017,df_full$jif2018) %>%
   gsub("NA| ", "", .)
 
+# drop jif cols by name as now all pasted together using jif_cols vector
 df_full <- select(df_full, -jif_cols)
 
+# set empty cells in jif to NA
 df_full$jif[df_full$jif == ""] <- NA
 
+# drop cleaned journal string now jif merged in
 
+df_full$journal_clean <- NULL
+
+if(nrow(anti_join(df_full, scopus, by = c("title" = "Title"))) > 5) {
+  stop("too many rows won't merge to make it worth it")
+}
+
+if(sum(is.na(df_full$jif)) < 23){
+  df_full$jif <- NULL
+  message("removed jif because too much missing")
+}
 ################
 # scopus merge ####
 ################
+# want to verify extracted data using scopus data
 
-scopus <- read.csv("data/scopus.csv", stringsAsFactors = F, encoding = "UTF-8")
+scopus <- read.csv("data/scopus.csv", stringsAsFactors = F, encoding = "UTF-8", na.strings = c("", " ")) 
+
+# add open_access column
+if(unique(scopus$Access.Type[!is.na(scopus$Access.Type)]) == "Open Access"){
+  scopus$open_access <- grepl("Open Access", scopus$Access.Type)
+} else {
+  stop("other access types than open access")
+}
+
+
+# subset by title
+
+scopus <- scopus[which(clean_string(scopus$Title) %in% clean_string(df_full$title)),]%>%
+  select(c("Cited.by", "Author.Keywords", "open_access", "Title"))
+
+if(nrow(anti_join(df_full, scopus, by = c("title" = "Title"))) > 5) {
+  stop("too many rows won't merge to make it worth it")
+}
 
 #####################
 # export for poster ####
 #####################
 
-write.csv(df, "outputs/clean_poster.csv",fileEncoding = "UTF-8", row.names = F)
+write.csv(df_full, "outputs/clean_poster.csv",fileEncoding = "UTF-8", row.names = F)
