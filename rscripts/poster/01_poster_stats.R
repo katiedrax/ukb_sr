@@ -3,25 +3,22 @@
 #############
 library(dplyr)
 library(ggplot2)
-
+library(tableone)
 
 ######################
 # import  ####
 ######################
 
 # most variables are unordered factors (nominal with set responses) so read in with stringsAsFactors = T
-df <- read.csv("outputs/clean_poster.csv", encoding = "UTF-8")
-
-# vector of original column names for checking later
-
-df_cols <- colnames(df)
+df_orig <- read.csv("outputs/clean_poster.csv", encoding = "UTF-8")
 
 #########
-# recode partially external ####
+# recode ####
 ########
+
 # replace remove - from "Partially-External", R doesn't like punctuation in factor levels
 
-df <- data.frame(lapply(df, function(x) {
+df <- data.frame(lapply(df_orig, function(x) {
   gsub("Partially-External", "PartiallyExternal", x)
   }))
 
@@ -36,9 +33,55 @@ if(length(which(df == "Partially-External") != 0)) stop("some Partially-External
 
 df$ukb_app_pres <- !is.na(df$ukb_app)
 df$email_pres <- !is.na(df$email)
-df$country_pres <- !is.na(df$country)
 df$keywords_pres <- !is.na(df$keywords)
 df$coi_pres <- !is.na(df$coi)
+
+############
+# drop non-strobe cols ####
+#############
+
+# drop cols just created presence cols for
+
+df <- select(df, -c("ukb_app", "email", "keywords", "coi"))
+
+# remove predict col if empty
+if(sum(is.na(df$predict)) == nrow(df)){
+  df$predict <- NULL
+}else{
+  stop("predict col not empty")
+}
+
+
+# drop access_article
+
+if(all(df$access_article == "Yes")){
+  df$access_article <- NULL
+} else {
+  stop("access_article not just yes")
+}
+
+# drop not needed cols by name
+
+df <- select(df, -c("title", "comments", "ukb_credit_ev", "journal", "strobe_ev"))
+
+
+# vector of original column names for checking later
+
+if(sum(duplicated(colnames(df))) == 0){
+  df_cols <- colnames(df)
+} else {
+  stop("duplicated col names")
+}
+
+
+# find empty cols
+empty <- colnames(df[colSums(!is.na(df)) == 0]) %>%
+  # select those that aren't strobe items
+  .[grepl("^X[[:digit:]]{1,2}", .) == F]
+
+# drop empty cols
+
+df <- select(df, -c(empty))
 
 ###################################
 # split into strobe and non-strobe ####
@@ -60,6 +103,7 @@ if(all(abs(diff(strobe_cols))) == T){
 
 # check total ncol of s_df and not_s_df is same as original df +1 because article_id col is in both
 if(ncol(s_df) + ncol(not_s_df) != ncol(df) +1) stop("wrong number of cols in strobe or not_strobe dfs")
+
 
 #####################################
 # find not applicable strobe items #####
@@ -173,30 +217,31 @@ if(sum(x) == length(x)){
 
 
 ###################
-# frequencies all ####
+# frequencies non-strobe ####
 ##################
-
-library(tableone)
 
 for(i in colnames(df)[colnames(df) %in% colnames(not_s_df)]) {
   df[,i] <- as.character(df[,i])
 }
 
-helpers <- c("article_id", "title", "strobe_ev", "ukb_credit_ev", "reg_ev", "strobe.1", "reg_id",
-             "comments", "keywords", "email", "country", "ukb_app", "coi", "predict")
+exc <- c("article_id", grep("^X[[:digit:]]{1,2}", colnames(df), value =T))
+
 
 cats <- df[, sapply(df, class) == 'character'] %>%
   colnames(.)%>%
-  .[!(. %in% helpers)]
+  .[!(. %in% exc)]
 
 fact <- df[, sapply(df, class) == 'factor']%>%
   colnames(.)
 
 
-tab1 <- CreateTableOne(vars = colnames(df)[!(colnames(df) %in% helpers)], data = df, factorVars = cats, includeNA = T )%>%
+tab1_levs <- CreateTableOne(vars = colnames(df)[(colnames(df) %in% exc) == F], data = df, factorVars = cats, includeNA = F)%>%
   print(., noSpaces = T, showAllLevels = T)
+tab1_collaps <- CreateTableOne(vars = colnames(df)[(colnames(df) %in% exc) == F], data = df, factorVars = cats, includeNA =F )%>%
+  print(., noSpaces = T)
 
-write.csv(tab1, "outputs/table1_raw.csv")
+write.csv(tab1_levs, "outputs/table1_all_levels.csv")
+write.csv(tab1_collaps, "outputs/table1_no_levels.csv")
 
 ######################
 # frequencies strobe ####
