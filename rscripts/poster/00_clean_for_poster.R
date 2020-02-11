@@ -43,6 +43,7 @@ if(identical(as.character(rows_3[2, ]), as.character(header$question))){
   stop("row 2 in csv != question text row")
 }
 
+
 ###################
 # clean for poster ####
 ####################
@@ -69,7 +70,7 @@ df <- df[df$Finished != "False", ]
 
 
 # drop all evidence boxes for strobe items
-df <- df[, -grep("[[:digit:]]{1,}.*ev", colnames(df))]
+df <- df[, -grep("[[:digit:]]{1,2}.*ev", colnames(df))]
 
 
 # vector of cols automatically outputted by Qualtrics (always first 10 cols if responses anonymised and should be 112 characters)
@@ -100,10 +101,10 @@ articles <- articles_df$id
 if(sum(df$article_id %in% articles) != nrow(df)) stop("some article_ids not in csv_clean_epi")
 
 # find all prediction models  - they will have 7_iii (predictors) values or "Yes" predict values
-predict <- df[!is.na(df$`7_iii`),]
+predict <- df[!is.na(df$X7_iii),]
 predict <- rbind(predict, df[!is.na(df$predict == "Yes"),])
 
-if(nrow(predict[predict$predict == "Yes"| !is.na(predict$`7_iii`),]) == nrow(predict)){
+if(nrow(predict[predict$predict == "Yes"| !is.na(predict$X7_iii),]) == nrow(predict)){
   # remove articles in predict if predict df only contains prediction models
   df <- df[!(df$article_id %in% predict$article_id), ]
 } else {
@@ -127,7 +128,7 @@ if(all(is.na(df$`Q22_89_TEXT - Parent Topics`) && all(is.na(df$`Q22_89_TEXT - To
 
 strobe_opts <- c("Partially", "Partially-External", "Unsure", "Yes", "No", NA)
 
-strobe_cols <- grep("^[[:digit:]]{1,2}", colnames(df), value = T)
+strobe_cols <- grep("^X[[:digit:]]{1,2}", colnames(df), value = T)
 
 strobe_values <- stack(sapply(df[, strobe_cols], unique))%>%
   .$values
@@ -155,15 +156,230 @@ df$ukb_exact <- NULL
 df$X10 <- NA
 
 #manually checked strobe item 6 and 12d_cc, should all be NA because no matched articles
-match_cols <- grep("X6b|X12d_cc", colnames(df), value = T)
+match_cols <- grep("6b|12d_cc", colnames(df), value = T)
 
-if(sum(is.na(match_cols)) != 0) stop("missing cols in match_cols")
+if(length(match_cols) < 5) stop("missing cols in match_cols")
 
 # make all cols in match_cols NA
 for(i in match_cols){
   df[[i]] <- NA
   if(all(is.na(df[[i]])) == F) stop("all isn't NA in ", i)
 }
+
+#############
+# merge_1 prep #####
+#############
+
+# want to display frequency stats for year, journal and supplementary material & article access >
+# get these from first_80 csv on osf
+merge_1 <- read.csv("https://osf.io/9w72e/?action=download", encoding = "UTF-8", stringsAsFactors = F) %>%
+  # select article_id for merging, design & title for checking 
+  select(., c("article_id", "title", "design", "year", "journal",  "access_article", "access_supp"))
+
+# check article ids
+if(all(merge_1$article_id %in% articles_df$id) != T) stop("some article ids in first_80 are not in csv_clean_epi csvs")
+
+
+if(all(df$article_id %in% merge_1$article_id) != T){
+  # don't run if some article_ids difference
+  stop("some df article_ids not in first_80")
+} else {
+  # subset merge_1 to article_ids in df
+  merge_1 <- merge_1[which(merge_1$article_id %in% df$article_id), ] %>%
+    # order by article_id
+    .[order(.$article_id), ]
+  # order df by article_id
+  df <- df[order(df$article_id), ]
+  # check article_id cols identical
+  if(identical(merge_1$article_id, df$article_id) != T) stop("merge_1 & df article_id cols not identical")
+}
+
+# check cleaned title substrings are identical and if not print out title strings that are in one dataframe but not the other
+if(identical(clean_string(merge_1$title), clean_string(df$title)) == F){
+  x <- clean_string(merge_1$title)
+  y <- clean_string(df$title)
+  # manual check showed that one title differs because of unicode characters so ignore false identical if it is just this title
+  if(x[x != y] == "associationsofleglengthtrunklengthandtotaladultheightwithmenierescrosssectionalanalysisintheukbiobank" &&
+     y[y != x] == "associationsofleglengthtrunklengthandtotaladultheightwithmnirescrosssectionalanalysisintheukbiobank"){
+    print("strings only differ because one string contains unicode character and other doesn't")
+    rm(x, y)
+    merge_1$title <- NULL
+    } else {
+    warning("merge_1 titles not in df: ", x[x != y])
+    warning("df titles not in merge_1: ", y[y != x])
+    stop()
+  }
+}
+
+# check designs identical
+if(identical(merge_1$design, tolower(df$designs))){
+  merge_1$design <- NULL
+}else {
+  stop("designs not identical")
+}
+
+#########
+# merge_1 ####
+##########
+
+if(identical(df$article_id, merge_1$article_id)){
+  x <- anti_join(df, merge_1, by = "article_id")
+  if(nrow(x) == 0){
+    rm(x)
+    print("all rows will merge in df & merge_1")
+  } else {
+    stop("some rows in df & merge_1 cols won't merge")
+  }
+}
+
+
+# full join 
+df_full <- full_join(df, merge_1, by = "article_id")
+
+
+###############
+# access merge ###
+##############
+
+# want to display frequency stats for open access, corrections, etc - data I extracted individually >
+# get these from epi_access.csv
+access <- read.csv("data/epi_access.csv", stringsAsFactors = F, encoding = "UTF-8") %>%
+  # drop authors,  doi and year
+  select(., -c("authors", "doi", "year"))
+
+colnames(access)[which(colnames(access) == "id")] <- "article_id"
+
+
+# subset if article ids all in df_full
+if(sum(access$article_id %in% df_full$article_id) == nrow(df_full)){
+  access <- access[which(access$article_id %in% df_full$article_id),] %>%
+    # order by article_id
+    .[order(.$article_id), ]
+  # order df_full by article_id
+  df_full <- df_full[order(df_full$article_id), ]
+  # check article_id cols identical
+  if(identical(access$article_id, df_full$article_id) != T) stop("access & df_full article_id cols not identical")
+} else {
+  stop("some article ids in access are not in df_full")
+}
+
+# check cleaned title substrings are identical and if not print out title strings that are in one dataframe but not the other
+if(identical(clean_string(access$title), clean_string(df_full$title)) == F){
+  x <- clean_string(access$title)
+  y <- clean_string(df_full$title)
+  # manual check showed that one title differs because of unicode characters so ignore false identical if it is just this title
+  if(x[x != y] == "associationsofleglengthtrunklengthandtotaladultheightwithmenierescrosssectionalanalysisintheukbiobank" &&
+     y[y != x] == "associationsofleglengthtrunklengthandtotaladultheightwithmnirescrosssectionalanalysisintheukbiobank"){
+    print("strings only differ because one string contains unicode character and other doesn't")
+    rm(x, y)
+    access$title <- NULL
+  } else {
+    warning("access titles not in df_full: ", x[x != y])
+    warning("df_full titles not in access: ", y[y != x])
+    stop()
+  }
+}
+
+
+#################
+# jif merge prep####
+###############
+
+df_full$journal_clean <- clean_string(df_full$journal)
+# read in jif
+
+jif <- read.csv("data/jif/all_years.csv", stringsAsFactors = F, encoding = "UTF-8")
+jif$JCR.Abbreviated.Title <- clean_string(jif$JCR.Abbreviated.Title)
+
+#subset jif by journal names in df
+
+if(sum(duplicated(jif)) == 0){
+  jif_match <- jif[which(jif$JCR.Abbreviated.Title %in% clean_string(df_full$journal)),]
+  rm(jif)
+  # rename journal column
+  colnames(jif_match)[colnames(jif_match) == "JCR.Abbreviated.Title"] <- "journal_clean"
+  jif_match <- select(jif_match, -c("Rank", "Impact.Factor.without.Journal.Self.Cites", "ISSN", "Full.Journal.Title"))
+} else {
+  stop("jif contains duplicates")
+}
+
+add_year <- function(df, journalcol, jifyear, year){
+  x <- select(df, c(journalcol, jifyear))
+  x$year <- rep(year, nrow(x))
+  return(x)
+}
+
+jif12 <- add_year(jif_match, "journal_clean", "jif2012", 2012)
+jif13 <- add_year(jif_match, "journal_clean", "jif2013", 2013)
+jif14 <- add_year(jif_match, "journal_clean", "jif2014", 2014)
+jif15 <- add_year(jif_match, "journal_clean", "jif2015", 2015)
+jif16 <- add_year(jif_match, "journal_clean", "jif2016", 2016)
+jif17 <- add_year(jif_match, "journal_clean", "jif2017", 2017)
+jif18 <- add_year(jif_match, "journal_clean", "jif2018", 2018)
+
+
+if(nrow(anti_join(df_full, jif12, by = c("journal_clean", "year"))) != nrow(df_full)){
+  df_full <- left_join(df_full, jif12, by = c("journal_clean", "year"))
+  rm(jif12)
+} else {
+  stop("jif contains no relevant journals")
+}
+
+if(nrow(anti_join(df_full, jif13, by = c("journal_clean", "year"))) != nrow(df_full)){
+  df_full <- left_join(df_full, jif13, by = c("journal_clean", "year"))
+  rm(jif13)
+} else {
+  stop("jif contains no relevant journals")
+}
+
+if(nrow(anti_join(df_full, jif14, by = c("journal_clean", "year"))) != nrow(df_full)){
+  df_full <- left_join(df_full, jif14, by = c("journal_clean", "year"))
+  rm(jif14)
+} else {
+  stop("jif contains no relevant journals")
+}
+
+if(nrow(anti_join(df_full, jif15, by = c("journal_clean", "year"))) != nrow(df_full)){
+  df_full <- left_join(df_full, jif15, by = c("journal_clean", "year"))
+  rm(jif15)
+} else {
+  stop("jif contains no relevant journals")
+}
+
+if(nrow(anti_join(df_full, jif16, by = c("journal_clean", "year"))) != nrow(df_full)){
+  df_full <- left_join(df_full, jif16, by = c("journal_clean", "year"))
+  rm(jif16)
+} else {
+  stop("jif contains no relevant journals")
+}
+
+if(nrow(anti_join(df_full, jif17, by = c("journal_clean", "year"))) != nrow(df_full)){
+  df_full <- left_join(df_full, jif17, by = c("journal_clean", "year"))
+  rm(jif17)
+} else {
+  stop("jif contains no relevant journals")
+}
+
+if(nrow(anti_join(df_full, jif18, by = c("journal_clean", "year"))) != nrow(df_full)){
+  df_full <- left_join(df_full, jif18, by = c("journal_clean", "year"))
+  rm(jif18)
+} else {
+  stop("jif contains no relevant journals")
+}
+
+df_full$jif <- paste(df_full$jif2014, df_full$jif2015, df_full$jif2017,df_full$jif2018) %>%
+  gsub("NA| ", "", .)
+
+df_full <- select(df_full, -jif_cols)
+
+df_full$jif[df_full$jif == ""] <- NA
+
+
+################
+# scopus merge ####
+################
+
+scopus <- read.csv("data/scopus.csv", stringsAsFactors = F, encoding = "UTF-8")
 
 #####################
 # export for poster ####
