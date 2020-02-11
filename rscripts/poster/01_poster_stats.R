@@ -153,33 +153,6 @@ if(all(c(unique(colnames(s_df)), unique(colnames(s_star_df)), unique(colnames(no
   stop("df subsets have diff colnames to df")
 }
 
-#######################
-# strobe item completion ####
-########################
-
-# get names of all strobe cols
-strobe_cols <- grep("^X[[:digit:]]{1,2}", colnames(s_df), value = T) 
-
-# vector of numbers in strobe col names
-strobe_nums <- strobe_cols %>%
-  # remove all punctuation and letters
-  gsub("[[:punct:]]|[[:alpha:]]", "", .)%>%
-  # remove duplicates
-  unique()
-
-# check all strobe_nums are in 1-22
-if(identical(unique(gsub("[[:alpha:]]", "", strobe_nums)), as.character(c(1:22))) == F) stop("strobe_nums don't equal 1-22")
-if(sum(duplicated(strobe_nums)) != 0) stop("duplicate strobe_nums")
-
-# extract strobe items that have sub divisions (created by dividing up double questions) >
-# these should only be questions with roman numerals in them after a "_"
-strobe_div <- strobe_cols[grepl("_i|_v", strobe_cols) == T] %>%
-  unique() 
-
-# extract strobe items without sub divisions
-strobe_comp <- strobe_cols[grepl("_i|_v", strobe_cols) == F] %>%
-  unique() 
-
 #########################
 # recode strobe factors ####
 ########################
@@ -195,8 +168,7 @@ for(i in strobe_cols){
   # set all cols to factor
   s_df[[i]] <- as.factor(s_df[[i]])
   #recode all factor levels
-  levels(s_df[[i]]) <- list(Yes = "Yes", PartiallyExternal = "PartiallyExternal",
-                            Partially = "Partially", No = "No", Unsure = "Unsure")
+  levels(s_df[[i]]) <- list(Yes = "Yes", PartiallyExternal = "PartiallyExternal", Partially = "Partially", No = "No", Unsure = "Unsure")
 }
 
 # check recode successful
@@ -205,7 +177,7 @@ x <- NULL
 
 for(i in strobe_cols){
   x <- c(x, all.equal(as.character(s_df[[i]]), 
-                      as.character(pre_recode[[i]])))
+                     as.character(pre_recode[[i]])))
 }
 
 if(sum(x) == length(x)){
@@ -242,6 +214,77 @@ tab1_collaps <- CreateTableOne(vars = colnames(df)[(colnames(df) %in% exc) == F]
 
 write.csv(tab1_levs, "outputs/table1_all_levels.csv")
 write.csv(tab1_collaps, "outputs/table1_no_levels.csv")
+
+
+#######################
+# strobe scores ####
+########################
+
+# recode s_df into numerical binary - yes or not yes
+
+s_df_bin <- s_df
+
+s_df_bin[] <- lapply(s_df, as.character)
+
+# get ids of all strobe cols
+id <- grep("^X[[:digit:]]{1,2}", colnames(s_df_bin)) 
+
+# recode strobe options into yes and no
+
+na_pre <- sum(is.na(s_df_bin))
+
+for(i in id){
+  if(is.character(s_df_bin[, i]) == F) stop(i, "isn't a character")
+  s_df_bin[, i] <-  gsub("^Yes$", 1, s_df_bin[, i]) %>%
+    gsub("^No$|^Partially$|^Unsure$|^PartiallyExternal$", 0, .) %>%
+    as.numeric(.)
+  if(is.numeric(s_df_bin[, i]) == F) stop(i, "not numeric")
+}
+
+
+if(sum(is.na(s_df_bin)) != na_pre) stop("recoding changed number of NAs")
+
+# get names of all strobe cols
+strobe_cols <- grep("^X[[:digit:]]{1,2}", colnames(s_df_bin), value = T) 
+
+# vector of numbers in strobe col names
+strobe_nums <- strobe_cols %>%
+  # remove all punctuation and letters
+  gsub("[[:punct:]]|[[:alpha:]]", "", .)%>%
+  # remove duplicates
+  unique()
+
+# check all strobe_nums are in 1-22
+if(identical(unique(gsub("[[:alpha:]]", "", strobe_nums)), as.character(c(1:22))) == F) stop("strobe_nums don't equal 1-22")
+if(sum(duplicated(strobe_nums)) != 0) stop("duplicate strobe_nums")
+
+# extract strobe items that have sub divisions (created by dividing up double questions) >
+# these should only be questions with roman numerals in them after a "_"
+strobe_div <- strobe_cols[grepl("_i|_v", strobe_cols) == T] %>%
+  unique() 
+
+# extract strobe items without sub divisions
+strobe_comp <- strobe_cols[grepl("_i|_v", strobe_cols) == F] %>%
+  unique() 
+
+if(length(strobe_div) + length(strobe_comp) != sum(grepl("^X[[:digit:]]{1,2}", colnames(s_df_bin)))){
+  stop("number of strobe items with divisions plus those without don't equal number of strobe cols in s_df_bin")
+}
+
+# vector of numbers in strobe col names
+strobe_div_items <- strobe_div %>%
+  # remove everything after first "_"
+  gsub("\\_.*","",.) %>%
+  # remove duplicates
+  unique()
+
+a <- data.frame()
+for(i in strobe_div_items){
+  x <- s_df_bin[,grep(paste(i, "_", sep = ""), colnames(s_df_bin))]
+  comp <- paste(i, "comp", sep = "_")
+  x[[comp]] <- rowSums(x, na.rm = T) / rowSums(!is.na(x))
+  a <- rbind(a, x)
+}
 
 ######################
 # frequencies strobe ####
