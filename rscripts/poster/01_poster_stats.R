@@ -244,6 +244,7 @@ for(i in id){
 
 if(sum(is.na(s_df_bin)) != na_pre) stop("recoding changed number of NAs")
 
+
 # get names of all strobe cols
 strobe_cols <- grep("^X[[:digit:]]{1,2}", colnames(s_df_bin), value = T) 
 
@@ -276,15 +277,58 @@ strobe_div_items <- strobe_div %>%
   # remove everything after first "_"
   gsub("\\_.*","",.) %>%
   # remove duplicates
-  unique()
+  unique() %>%
+  paste(., "_", sep = "")
 
-a <- data.frame()
+# BUG this commented section does not work - error = arguments different lengths BUT does work if run twice sequentially - why? No idea!
+#a <- NULL
+#for(i in strobe_div_items){
+  #x <- s_df_bin[,grep(i, colnames(s_df_bin))]
+  #sum <- paste(i, "sum", sep = "_")
+  #x[[sum]] <- rowSums(x, na.rm = T) / rowSums(!is.na(x))
+  #if(nrow(x) != 32) stop("not 32")
+  #a <- cbind(a, x)
+#}
+
+
 for(i in strobe_div_items){
-  x <- s_df_bin[,grep(paste(i, "_", sep = ""), colnames(s_df_bin))]
-  comp <- paste(i, "comp", sep = "_")
-  x[[comp]] <- rowSums(x, na.rm = T) / rowSums(!is.na(x))
-  a <- rbind(a, x)
+  x <- s_df_bin[,grep(i, colnames(s_df_bin))]
+  sum <- paste(i, "sum", sep = "_")
+  x[[sum]] <- rowSums(x, na.rm = T) / rowSums(!is.na(x))
+  if(nrow(x) != 32) stop("not 32")
+  x <- select(x, sum)
+  x[x < 1] <- 0
+  s_df_bin[[sum]] <- x[[sum]]
 }
+
+##############
+# bar chart ####
+############
+
+
+bar_data <- select(s_df_bin, -c("article_id", strobe_div))
+
+is.nan.data.frame <- function(x)
+  do.call(cbind, lapply(x, is.nan))
+
+bar_data[is.nan(bar_data)] <- NA
+
+colnames(bar_data) <- colnames(bar_data) %>%
+  gsub("^X|__sum|starred", "", .) 
+
+bar_data[] <- lapply(bar_data, as.character)
+
+bar_data <- CreateTableOne(vars = colnames(bar_data), data = bar_data,  factorVars = colnames(bar_data), includeNA = F)%>%
+  print(., noSpaces = T, showAllLevels = T)
+
+test$ind <- factor(test$ind, levels = 
+                     test$ind[gtools::mixedorder(test$ind)])
+
+test %>%ggplot(aes(x=test$ind, y=test$values)) + 
+  geom_bar(stat="identity") +
+  theme_classic() +
+  theme(axis.text.x=element_text(angle=45,hjust=1))
+
 
 ######################
 # frequencies strobe ####
