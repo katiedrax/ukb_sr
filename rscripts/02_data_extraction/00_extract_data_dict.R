@@ -130,6 +130,17 @@ match <- find_matches("^\\w+\\.",var_dot)
 
 var_dot_names <- extract_var(match, var_dot)
 
+# column with "strobe. ... - Text" in question text is the text response for "other reporting guidelines" option in strobe col 
+
+var_dot_names$variable[grep("strobe\\..*- Text", var_dot_names$question)] <- "other_guidelines"
+
+# check no duplicates
+
+if(sum(duplicated(var_dot_names$variable)) != 0){
+  stop("var_dot_names$variable contains ", sum(duplicated(var_dot_names$variable)), " duplicates")
+}
+
+
 ##########################
 # extract strobe variables ####
 ###########################
@@ -145,6 +156,12 @@ var_strobe <- grep("\\- [[:digit:]]{1,}.*\\.", qs$question, value = T)
 match <- find_matches("\\- [[:digit:]]{1,}.*\\.",var_strobe)
 
 var_strobe_names <- extract_var(match, var_strobe)
+
+# R adds X automatically to header values starting with a number >
+# add X to start of colnames starting with number, this will mean X isn't added later on when cleaned csv is read in
+
+var_strobe_names$variable <- paste("X", var_strobe_names$variable, sep = "")
+
 
 #########################
 # create data dictionary ####
@@ -198,7 +215,10 @@ if(identical(sort(colnames(dict)), sort(colnames(topic_dict)))){
 dict$ev <- rep(NA)
 
 # find strobe evidence variables
-dict$ev[grepl("^[[:digit:]]{1,2}", dict$variable)] <- grepl("\\- Text$", dict$question[grepl("^[[:digit:]]{1,2}", dict$variable)])
+dict$ev[grepl("^X[[:digit:]]{1,2}", dict$variable)] <- grepl("\\- Text$", dict$question[grepl("^X[[:digit:]]{1,2}", dict$variable)])
+
+# check created
+if(all(is.na(dict$ev))) stop("ev cols not found")
 
 # combine ev and variable cols
 dict$variable <- paste(dict$variable, dict$ev, sep = "_") %>%
@@ -223,7 +243,7 @@ if(identical(sort(as.character(dict$question)), sort(as.character(header[2, ])))
 
 strobe_var <- read.csv("qualtrics_forms/strobe_adapted_items.csv", encoding = "UTF-8",stringsAsFactors = F)
 
-if(sum(strobe_var$Adapted.item.no %in% dict$variable) != length(strobe_var$Adapted.item.no)) stop("incorrect number of strobe items")
+if(sum(paste("X", strobe_var$Adapted.item.no, sep = "") %in% dict$variable) != length(strobe_var$Adapted.item.no)) stop("incorrect number of strobe items")
 
 
 ########
@@ -266,10 +286,14 @@ dict_final <- dict_final[order(dict_final$import_num), ]
 # check colnames import_nums are sequential
 
 if(all(abs(diff(dict_final$import_num)) != 1)) stop("import_num not sequential")
-if(all(abs(diff(grep("^[[:digit:]]{1,2}", dict_final$import_num)) != 1))) stop("strobe variables' import_num not sequential ")
+if(all(abs(diff(dict_final$import_num[grep("X[[:digit:]]{1,2}", dict_final$variable)])) != 1)) stop("strobe variables' import_num not sequential ")
 
 #######
 # export ####
 #########
 
-write.csv(dict_final, "outputs/extraction_dictionary.csv", row.names = F, fileEncoding = "UTF-8")
+if(sum(duplicated(dict_final$variable)) == 0){
+  write.csv(dict_final, "outputs/extraction_dictionary.csv", row.names = F, fileEncoding = "UTF-8")
+} else {
+  stop("duplicated variables")
+}
