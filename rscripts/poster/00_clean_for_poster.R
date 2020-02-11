@@ -152,18 +152,25 @@ df$ukb_exact <- NULL
 # manual data quality checks ####
 ###############################
 
+# save list of empty cols for checking later
+pre <- colnames(df[colSums(!is.na(df)) == 0])
+
 # manually checked strobe item 10. should all be NA because all studies used all eligible ppts
-df$X10 <- NA
+if(sum(is.na(df$X10)) != nrow(df)){
+  df$X10 <- NA
+} else {
+  stop("df$10 not empty when it should be")
+}
 
 #manually checked strobe item 6 and 12d_cc, should all be NA because no matched articles
-match_cols <- grep("6b|12d_cc", colnames(df), value = T)
+match_cols <- grep("X6b|X12d_cc", colnames(df), value = T)
 
-if(length(match_cols) < 5) stop("missing cols in match_cols")
+if(length(match_cols) != 5) stop("wrong number of cols in match_cols")
 
 # make all cols in match_cols NA
 for(i in match_cols){
   df[[i]] <- NA
-  if(all(is.na(df[[i]])) == F) stop("all isn't NA in ", i)
+  if(sum(is.na(df[[i]])) != nrow(df)) stop("all isn't NA in ", i)
 }
 
 #############
@@ -316,7 +323,7 @@ if(sum(duplicated(jif)) == 0){
   colnames(jif_match)[colnames(jif_match) == "JCR.Abbreviated.Title"] <- "journal_clean"
   jif_match <- select(jif_match, -c("Rank", "Impact.Factor.without.Journal.Self.Cites", "ISSN", "Full.Journal.Title"))
 } else {
-  stop("jif contains duplicates")
+  message("jif duplicates")
 }
 
 add_year <- function(df, journalcol, jifyear, year){
@@ -338,49 +345,49 @@ if(nrow(anti_join(df_full, jif12, by = c("journal_clean", "year"))) != nrow(df_f
   df_full <- left_join(df_full, jif12, by = c("journal_clean", "year"))
   rm(jif12)
 } else {
-  stop("jif contains no relevant journals")
+  message("jif no relevant journals")
 }
 
 if(nrow(anti_join(df_full, jif13, by = c("journal_clean", "year"))) != nrow(df_full)){
   df_full <- left_join(df_full, jif13, by = c("journal_clean", "year"))
   rm(jif13)
 } else {
-  stop("jif contains no relevant journals")
+  message("jif no relevant journals")
 }
 
 if(nrow(anti_join(df_full, jif14, by = c("journal_clean", "year"))) != nrow(df_full)){
   df_full <- left_join(df_full, jif14, by = c("journal_clean", "year"))
   rm(jif14)
 } else {
-  stop("jif contains no relevant journals")
+  message("jif no relevant journals")
 }
 
 if(nrow(anti_join(df_full, jif15, by = c("journal_clean", "year"))) != nrow(df_full)){
   df_full <- left_join(df_full, jif15, by = c("journal_clean", "year"))
   rm(jif15)
 } else {
-  stop("jif contains no relevant journals")
+  message("jif no relevant journals")
 }
 
 if(nrow(anti_join(df_full, jif16, by = c("journal_clean", "year"))) != nrow(df_full)){
   df_full <- left_join(df_full, jif16, by = c("journal_clean", "year"))
   rm(jif16)
 } else {
-  stop("jif contains no relevant journals")
+  message("jif no relevant journals")
 }
 
 if(nrow(anti_join(df_full, jif17, by = c("journal_clean", "year"))) != nrow(df_full)){
   df_full <- left_join(df_full, jif17, by = c("journal_clean", "year"))
   rm(jif17)
 } else {
-  stop("jif contains no relevant journals")
+  message("jif no relevant journals")
 }
 
 if(nrow(anti_join(df_full, jif18, by = c("journal_clean", "year"))) != nrow(df_full)){
   df_full <- left_join(df_full, jif18, by = c("journal_clean", "year"))
   rm(jif18)
 } else {
-  stop("jif contains no relevant journals")
+  message("jif contains no relevant journals")
 }
 
 # vector of jif col names
@@ -399,9 +406,7 @@ df_full$jif[df_full$jif == ""] <- NA
 
 df_full$journal_clean <- NULL
 
-if(nrow(anti_join(df_full, scopus, by = c("title" = "Title"))) > 5) {
-  stop("too many rows won't merge to make it worth it")
-}
+# remove merged jif col if too much missing data
 
 if(sum(is.na(df_full$jif)) < 23){
   df_full$jif <- NULL
@@ -421,14 +426,29 @@ if(unique(scopus$Access.Type[!is.na(scopus$Access.Type)]) == "Open Access"){
   stop("other access types than open access")
 }
 
-
 # subset by title
 
 scopus <- scopus[which(clean_string(scopus$Title) %in% clean_string(df_full$title)),]%>%
   select(c("Cited.by", "Author.Keywords", "open_access", "Title"))
 
 if(nrow(anti_join(df_full, scopus, by = c("title" = "Title"))) > 5) {
-  stop("too many rows won't merge to make it worth it")
+  message("too many rows won't merge to make it worth it")
+}
+
+###################
+# recode logicals ####
+####################
+
+# if link to open_access_other or correction given, set to true
+
+df_full$open_access_other[grep("http", df_full$open_access_other)] <- T
+df_full$correction[grep("http", df_full$correction)] <- T
+
+if(identical(unique(df_full$access_supp), c("Yes", "Not present"))){
+  df_full$access_supp[df_full$access_supp == "Yes"] <- T
+  df_full$access_supp[df_full$access_supp == "Not present"] <- F
+} else {
+  stop("access_supp not just yes or not present")
 }
 
 #####################
