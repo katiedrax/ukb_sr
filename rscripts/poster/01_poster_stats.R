@@ -4,6 +4,7 @@
 library(dplyr)
 library(ggplot2)
 library(tableone)
+library(gtools)
 
 ######################
 # import  ####
@@ -476,7 +477,45 @@ if(sum(bar_data_freq$response, na.rm = T) == sum(!is.na(bar_data_freq$response))
 } else {
   stop("not all responses = 1")
 }
+#############################
+# export data to create bar chart labels ####
+##########################
 
+strobe_qs <- read.csv("outputs/extraction_dictionary.csv") %>%
+  select(., c("question", "variable"))
+
+# select those that are strobe items
+strobe_qs <- strobe_qs[grep("X[[:digit:]]{1,2}", strobe_qs$variable), ]
+strobe_qs1 <-dict[grep("X[[:digit:]]{1,2}", dict$variable), ]
+strobe_qs <- strobe_qs[-grep("\\_ev|\\_star", strobe_qs$variable), ]
+
+strobe_qs$question <- sub("[^0-9]*", "", strobe_qs$question)
+strobe_qs$strobe_item <- sub("\\_.*", "", strobe_qs$variable)
+write.csv(strobe_qs, "outputs/strobe_dict.csv", row.names = F, fileEncoding = "UTF-8")
+
+##############
+## MANUAL ####
+############
+
+# MANUALLY INSTRUCTIONS
+# added text describing the strobe item TO THE strobe_dict.csv AND SAVED IT AS bar_labels.csv
+
+###########################
+# import labels and clean ####
+########################
+
+labels <- read.csv("bar_labels.csv", encoding = "UTF-8", stringsAsFactors = F, na.strings = "") %>%
+  select(c("variable", "bar_label"))
+
+# clean variable names so matches bar_chart_freq colnames (i.e. no subdivisions except for design specific questions)
+
+labels$variable[!grepl("_coh|_cc|cs", labels$variable)] <- gsub("_i.*|_v", "", labels$variable[!grepl("_coh|_cc|cs", labels$variable)])
+
+labels$variable <- gsub("_i|i|X|starred|_v|v", "", labels$variable)
+
+# remove duplicated rows now variables cleaned
+
+labels <- labels[!duplicated(labels),]
 ###################
 # create bar chart ####
 #################
@@ -488,13 +527,20 @@ test <- bar_data_freq[!is.na(bar_data_freq$percent_yes), ]
 test$strobe_item<- factor(test$strobe_item, levels = 
                      test$strobe_item[gtools::mixedorder(test$strobe_item)])
 
-test$strobe_item <- paste(test$strobe_item, " (N = ", test$applic, ")", sep = "")
 
+x_labels <- paste(test$strobe_item, " (n = ", sep = "\n") %>%
+  paste(., test$applic, ")", sep = "") %>%
+  .[gtools::mixedorder(.)]
+  
+strobe_qs <- read.csv("outputs/extraction_dictionary.csv", stringsAsFactors = F, encoding = "UTF-8") %>%
+  select(., c("question", "variable"))
 
-test %>%ggplot(aes(x=reorder(strobe_item, -percent_yes), y=percent_yes)) + 
+labels$variable[grep]
+test %>%ggplot(aes(x=strobe_item, y=percent_yes)) + 
   geom_bar(stat="identity") +
   theme_classic() +
-  theme(axis.text.x=element_text(angle=45,hjust=1))
+  theme(axis.text.x=element_text(angle=45,hjust=1)) +
+  scale_x_discrete(labels= x_labels)
 
 ####################
 # check bar chart ####
