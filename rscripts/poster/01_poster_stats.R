@@ -302,7 +302,7 @@ for(i in strobe_div_items){
 }
 
 ##############
-# bar chart ####
+# bar chart data ####
 ############
 # select composite strobe items and strobe items without subdivisions
 bar_data <- select(s_df_bin, -c("article_id", strobe_div))
@@ -326,85 +326,243 @@ CreateTableOne(vars = colnames(bar_data), data = bar_data,  factorVars = colname
   # export
   write.csv(., "outputs/bar_data.csv")
 
-# count frequencies for bar chart
+# find number that was applicable for each strobe item (this is the number that were not na in each column)
+applic <- sapply(bar_data, function(x) sum(!is.na(x)))
 
-bar_data_df <- CreateTableOne(vars = colnames(bar_data), data = bar_data,  factorVars = colnames(bar_data), includeNA = F)%>%
+applic <- data.frame(strobe = names(applic), applic)
+
+
+# create table one and save as a data.frame
+bar_data_freq <- CreateTableOne(vars = colnames(bar_data), data = bar_data,  factorVars = colnames(bar_data), includeNA = F)%>%
   print(., noSpaces = T) %>%
   as.data.frame()
 
+# check dims
+
+if(ncol(bar_data_freq) != 1){
+  stop("wrong number of cols in bar_data_freq")
+} else {
+  print("bar_data_freq contains 1 col")
+}
+
+#####################
+# create strobe_item col ###
+#######################
+
+# CreateTableOne creates a dataframe of one column with vars vector in row names and the response the frequency values in Overall relate to >
+# means strobe items are in row names and need to be extract >
 # save row names as column name
-bar_data_df$row_name <- row.names(bar_data_df)
-row.names(bar_data_df) <- c()
+bar_data_freq$row_name <- row.names(bar_data_freq)
+
+# remove row.names
+row.names(bar_data_freq) <- c()
+
+# row.names will contain vars vector plus row indicating number of obeservations in data (row.name = n) >
+# remove the row containing the number of observations
+
+nrow <- which(bar_data_freq$row_name == "n")
+
+if(nrow == 1){
+  #remove n_row if is first row
+  test <- bar_data_freq[-nrow, ]
+  if(nrow(test) == nrow(bar_data_freq) - 1){
+    # change bar_data_freq to test is correct number of rows
+    bar_data_freq <- test
+    # remove test
+    rm(test)
+  }
+} else {
+  stop(nrow, "! = 1")
+}
+
+# extract response (1 = yes, 0 = not yes) from row name
+bar_data_freq$response <- gsub(".*\\= | \\(%\\)", "", bar_data_freq$row_name) 
+
+# extract strobe item from row name (located before =)
+bar_data_freq$strobe_item <- gsub(" \\=.*", "", bar_data_freq$row_name)
+
+
+# check strobe items correctly extracted
+
+if(all(bar_data_freq$strobe_item %in% as.character(colnames(bar_data))) ==F){
+  stop("some strobe_items in bar_data_freq not in bar_data col names")
+}
+
+
+####################
+# add in applic col ####
+##################
+
+# want to know how many of the strobe items were applicable
+# any that weren't applicable to any would have been dropped by CreateTableOne because all na
+# vector of cols dropped during CreateTableOne 
+dropped <- sapply(bar_data, function(x) (sum(is.na(x)))) %>%
+  .[.==nrow(bar_data)] %>%
+  names()
+
+if(identical(sort(dropped), sort(c("6b", "10", "12d_cc", "12d_cs")))){
+  print("dropped is all expected empty columns")
+} else {
+  stop("dropped different to expected empty columns")
+}
+
+# vector of cols in bar_data but not bar_data_freq (i.e. dropped during table 1 creation)
+no_freq <- colnames(bar_data)[which(!colnames(bar_data) %in% bar_data_freq$strobe_item)]
+
+# check dropped vector matches no_freq vector
+if(identical(sort(no_freq), sort(dropped)) == F){
+  stop("cols in dropped are not the only dropped cols")
+}
+
+# find number applicable 
+
+applic <- sapply(bar_data, function(x) sum(!is.na(x)))
+# turn into dataframe
+applic <- data.frame(strobe = names(applic), applic)
+
+if(identical(as.character(applic$strobe), bar_data_freq$strobe_item) == F){
+  # check those that are in applic but not bar_data_freq are just those dropped
+  mismatch <- setdiff(applic$strobe, bar_data_freq$strobe_item)
+  if(identical(sort(mismatch), sort(dropped))){
+    applic$strobe <- as.character(applic$strobe)
+    bar_data_freq$strobe_item <- as.character(bar_data_freq$strobe_item)
+  } else {
+    stop("strobe items in applic but not in bar_data_freq are not those dropped by CreateTableOne")
+  }
+}
+
+# merge applic and bar_data_freq
+
+test <- full_join(bar_data_freq, applic, by = c("strobe_item" = "strobe"))
+
+if(identical(test$strobe_item[gtools::mixedorder(test$strobe_item)], 
+             colnames(bar_data)[gtools::mixedorder(colnames(bar_data))])){
+  # if strobe items in test are same as strobe items in bar_data (need to sort both by mixedorder to check identical) >
+  # assign test to bar_data_freq
+  bar_data_freq <- test
+}
+###########################
+# extract percent and count ####
+##########################
 
 # extract percentage from Overal column (contained in brackets)
-bar_data_df$percent <- gsub(".*\\(|\\)", "", bar_data_df$Overall) %>%
+bar_data_freq$percent <- gsub(".*\\(|\\)", "", bar_data_freq$Overall) %>%
   # convert to numeric
   as.numeric()
 
 # extract n from Overall column (located before brackets)
-bar_data_df$n <- gsub(" \\(.*", "", bar_data_df$Overall) %>%
+bar_data_freq$n <- gsub(" \\(.*", "", bar_data_freq$Overall) %>%
   as.numeric()
 
-# extract response (1 = yes, 0 = not yes) from row name
-bar_data_df$response <- gsub(".*\\= | \\(%\\)", "", bar_data_df$row_name) 
+bar_data_freq$response <- as.numeric(bar_data_freq$response)
 
-
-# extract strobe item from row name (located before =)
-bar_data_df$strobe_item <- gsub(" \\=.*", "", bar_data_df$row_name)
-
-# find row containing observations
-n_row <- grep("^n$", bar_data_df$strobe_item)
-
-#remove n_row
-bar_data_df <- bar_data_df[-n_row, ]
-
-bar_data_df$response <- as.numeric(bar_data_df$response)
-
-
-if(all(bar_data_df$strobe_item %in% as.character(colnames(bar_data))) ==F){
-  stop("some strobe_items in bar_data_df not in bar_data col names")
-}
 # drop overall and row_name cols now successfully separated
-bar_data_df <- select(bar_data_df, -c("Overall", "row_name"))
+bar_data_freq <- select(bar_data_freq, -c("Overall", "row_name"))
 
-if(is.numeric(bar_data_df$response)){
+if(is.numeric(bar_data_freq$response)){
   # find percent for no responses
-  no <- which(bar_data_df$response == 0)
+  no <- which(bar_data_freq$response == 0)
 }
 
-if(bar_data_df$percent[no] == 100){
-  bar_data_df$percent[no] <- 0
-  bar_data_df$response[no] <- 1
+if(bar_data_freq$percent[no] == 100){
+  bar_data_freq$percent[no] <- 0
+  bar_data_freq$response[no] <- 1
 }
 
-if(sum(bar_data_df$response) == nrow(bar_data_df)){
+if(sum(bar_data_freq$response, na.rm = T) == sum(!is.na(bar_data_freq$response))){
   # remove response col if it only contains 1s
-  bar_data_df$response <- NULL
-  colnames(bar_data_df)[which(colnames(bar_data_df) == "percent")] <- "percent_yes"
+  bar_data_freq$response <- NULL
+  colnames(bar_data_freq)[which(colnames(bar_data_freq) == "percent")] <- "percent_yes"
+} else {
+  stop("not all responses = 1")
 }
 
-test <- bar_data_df
+###################
+# create bar chart ####
+#################
+
+
+test <- bar_data_freq[!is.na(bar_data_freq$percent_yes), ]
+
+
 test$strobe_item<- factor(test$strobe_item, levels = 
                      test$strobe_item[gtools::mixedorder(test$strobe_item)])
 
-test %>%ggplot(aes(x=strobe_item, y=percent_yes)) + 
+test$strobe_item <- paste(test$strobe_item, " (N = ", test$applic, ")", sep = "")
+
+
+test %>%ggplot(aes(x=reorder(strobe_item, -percent_yes), y=percent_yes)) + 
   geom_bar(stat="identity") +
   theme_classic() +
   theme(axis.text.x=element_text(angle=45,hjust=1))
 
+####################
+# check bar chart ####
+###################
 
-######################
-# frequencies strobe ####
-#####################
+check <- s_df
+# recode all strobe cols in check
+for(i in strobe_cols){
+  # set all cols to factor
+  check[[i]] <- as.factor(check[[i]])
+  #recode all factor levels
+  levels(check[[i]]) <- list(Yes = "Yes", Other = c("PartiallyExternal", "Partially", "No", "Unsure"))
+}
 
-all_freq_narr <- NULL
+check_freq <- NULL
 
 # narrow all_freq
-for(i in colnames(df)){
-  x <- data.frame(strobe = i,prop.table(table(df[[i]], useNA = "always")))
-  all_freq_narr <- rbind(all_freq_narr, x)
-  row.names(all_freq_narr) <- c()
+for(i in colnames(check)[colnames(check) != "article_id"]){
+  x <- data.frame(strobe = i, 
+                  percent = prop.table(table(check[[i]], useNA = "no")), 
+                  count = table(check[[i]], useNA = "no"),
+                  applic = sum(!is.na(check[[i]])))
+  check_freq <- rbind(check_freq, x)
+  row.names(check_freq) <- c()
 }
+
+# check all strobe items have same order of yes and other so can remove counts and percents safely for "Other" values
+if(identical(check_freq$percent.Var1, check_freq$count.Var1) ==F ){
+  stop("percent & count cols don't contain same order of Yes and Other ")
+}
+
+# check all strobe items have percent for Yes and Other values
+if(identical(unique(check_freq$strobe[check_freq$percent.Var1 == "Yes"]),
+             unique(check_freq$strobe[check_freq$percent.Var1 == "Other"])) ==F){
+  stop("not all strobe items have yes and other percents")
+} else {
+  # if passed checks remove Other values
+  test <- check_freq[check_freq$percent.Var1 != "Other",  ]
+  if(identical(test$strobe, unique(check_freq$strobe)) == T){
+    # if stobe col identical after removing other values
+    check_freq <- test
+    # remove test
+    rm(test)
+  } else{
+    stop("strobe col different after removing Other values")
+  }
+}
+
+if(identical(check_freq$percent.Var1, check_freq$count.Var1)){
+  colnames(check_freq)[colnames(check_freq) == "percent.Freq"] <- "percent_yes"
+  colnames(check_freq)[which(colnames(check_freq) == "count.Freq")] <- "count_yes"
+  check_freq$percent.Var1 <- NULL
+  check_freq$count.Var1 <- NULL
+}else{
+  stop("percent.Var1 and count.Var1 not identical")
+}
+
+# create percent col of percent yes out of number applicable to ensure percent calculated correctly
+check_freq$test <- check_freq$count_yes / check_freq$applic
+
+if(identical(check_freq$test, check_freq$percent_yes)){
+  # remove test col if identical
+  check_freq$test <- NULL
+} else {
+  # stop if not
+  stop("test percent col different to percent col")
+}
+
 
 #######################
 # frequencies of strobe ####
