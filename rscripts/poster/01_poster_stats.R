@@ -304,27 +304,90 @@ for(i in strobe_div_items){
 ##############
 # bar chart ####
 ############
-
-
+# select composite strobe items and strobe items without subdivisions
 bar_data <- select(s_df_bin, -c("article_id", strobe_div))
 
+# remove NaN values
 is.nan.data.frame <- function(x)
   do.call(cbind, lapply(x, is.nan))
 
 bar_data[is.nan(bar_data)] <- NA
 
+# clean col names
 colnames(bar_data) <- colnames(bar_data) %>%
   gsub("^X|__sum|starred", "", .) 
 
+# change all to character to create table one
 bar_data[] <- lapply(bar_data, as.character)
 
-bar_data <- CreateTableOne(vars = colnames(bar_data), data = bar_data,  factorVars = colnames(bar_data), includeNA = F)%>%
-  print(., noSpaces = T, showAllLevels = T)
+# create table one showing all levels and export
+CreateTableOne(vars = colnames(bar_data), data = bar_data,  factorVars = colnames(bar_data), includeNA = F)%>%
+  print(., noSpaces = T, showAllLevels = T) %>%
+  # export
+  write.csv(., "outputs/bar_data.csv")
 
-test$ind <- factor(test$ind, levels = 
-                     test$ind[gtools::mixedorder(test$ind)])
+# count frequencies for bar chart
 
-test %>%ggplot(aes(x=test$ind, y=test$values)) + 
+bar_data_df <- CreateTableOne(vars = colnames(bar_data), data = bar_data,  factorVars = colnames(bar_data), includeNA = F)%>%
+  print(., noSpaces = T) %>%
+  as.data.frame()
+
+# save row names as column name
+bar_data_df$row_name <- row.names(bar_data_df)
+row.names(bar_data_df) <- c()
+
+# extract percentage from Overal column (contained in brackets)
+bar_data_df$percent <- gsub(".*\\(|\\)", "", bar_data_df$Overall) %>%
+  # convert to numeric
+  as.numeric()
+
+# extract n from Overall column (located before brackets)
+bar_data_df$n <- gsub(" \\(.*", "", bar_data_df$Overall) %>%
+  as.numeric()
+
+# extract response (1 = yes, 0 = not yes) from row name
+bar_data_df$response <- gsub(".*\\= | \\(%\\)", "", bar_data_df$row_name) 
+
+
+# extract strobe item from row name (located before =)
+bar_data_df$strobe_item <- gsub(" \\=.*", "", bar_data_df$row_name)
+
+# find row containing observations
+n_row <- grep("^n$", bar_data_df$strobe_item)
+
+#remove n_row
+bar_data_df <- bar_data_df[-n_row, ]
+
+bar_data_df$response <- as.numeric(bar_data_df$response)
+
+
+if(all(bar_data_df$strobe_item %in% as.character(colnames(bar_data))) ==F){
+  stop("some strobe_items in bar_data_df not in bar_data col names")
+}
+# drop overall and row_name cols now successfully separated
+bar_data_df <- select(bar_data_df, -c("Overall", "row_name"))
+
+if(is.numeric(bar_data_df$response)){
+  # find percent for no responses
+  no <- which(bar_data_df$response == 0)
+}
+
+if(bar_data_df$percent[no] == 100){
+  bar_data_df$percent[no] <- 0
+  bar_data_df$response[no] <- 1
+}
+
+if(sum(bar_data_df$response) == nrow(bar_data_df)){
+  # remove response col if it only contains 1s
+  bar_data_df$response <- NULL
+  colnames(bar_data_df)[which(colnames(bar_data_df) == "percent")] <- "percent_yes"
+}
+
+test <- bar_data_df
+test$strobe_item<- factor(test$strobe_item, levels = 
+                     test$strobe_item[gtools::mixedorder(test$strobe_item)])
+
+test %>%ggplot(aes(x=strobe_item, y=percent_yes)) + 
   geom_bar(stat="identity") +
   theme_classic() +
   theme(axis.text.x=element_text(angle=45,hjust=1))
