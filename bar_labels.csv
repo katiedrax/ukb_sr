@@ -1,0 +1,78 @@
+question,variable,strobe_item,bar_label
+"1a. Indicate the study’s design as cross-sectional, cohort or case-control in the title or the abstract",X1a,X1a,Design in title/abstract
+1b_i. Provide in the abstract an informative and balanced summary of what was done,X1b_i,X1b,Results and methods in abstract
+1b_ii. Provide in the abstract an informative and balanced summary of what was found,X1b_ii,X1b,Results and methods in abstract
+2_i. Explain the scientific background for the investigation being reported,X2_i,X2,Give background & rationale
+2_ii. Explain the rationale for the investigation being reported,X2_ii,X2,Give background & rationale
+"3. State specific objectives, including any prespecified hypotheses",X3,X3,State objectives
+4. Present key elements of study design early in the paper,X4,X4,Explain design early
+5_i. Describe the setting,X5_i,X5,Give setting & dates
+5_ii. Describe the locations,X5_ii,X5,Give setting & dates
+5_iii. Describe the relevant dates including periods of recruitment,X5_iii,X5,Give setting & dates
+5_iv.  Describe the relevant dates including periods of exposure,X5_iv,X5,Give setting & dates
+5_v. Describe the relevant dates including periods of follow-up,X5_v,X5,Give setting & dates
+5_vi. Describe the relevant dates including periods of data collection,X5_vi,X5,Give setting & dates
+6a_i_coh_cs. Cross-sectional and cohort studies - Give the eligibility criteria,X6a_i_coh_cs,X6a,Give participant eligibility & selection
+6a_ii_coh_cs. Cross-sectional and cohort studies - Give the sources of participants,X6a_ii_coh_cs,X6a,Give participant eligibility & selection
+6a_iii_coh_cs. Cross-sectional and cohort studies - Give the methods of selection of participants,X6a_iii_coh_cs,X6a,Give participant eligibility & selection
+6a_iv_coh. Cohort study - Describe methods of follow-up,X6a_iv_coh,X6a,Give follow up methods
+"6b_i_coh. Cohort study - For matched studies, give matching criteria",X6b_i_coh,X6b,Give participant matching criteria
+"6b_ii_coh. Cohort study - For matched studies, give number of exposed and unexposed",X6b_ii_coh,X6b,Give participant matching criteria
+6a_i_cc. Case-control study - Give the eligibility criteria,X6a_i_cc,X6a,Give case-control eligibility & selection
+6a_ii_cc. Case-control study - Give the sources of case ascertainment and control selection,X6a_ii_cc,X6a,Give case-control eligibility & selection
+6a_iii_cc. Case-control study - Give the methods of case ascertainment and control selection.,X6a_iii_cc,X6a,Give case-control eligibility & selection
+6a_iv_cc. Case-control study - Give the rationale for the choice of cases and controls,X6a_iv_cc,X6a,Give case-control eligibility & selection
+"6b_i_cc. Case-control study - For matched studies, give matching criteria",X6b_i_cc,X6b,Give case-control matching criteria
+"6b_ii_cc. Case-control study - For matched studies, give the number of controls per case",X6b_ii_cc,X6b,Give case-control matching criteria
+7_i. Clearly define all outcomes,X7_i,X7,"Define outcomes, exposures, predictors, confounders, effect modifiers and diagnostic criteria"
+7_ii. Clearly define all exposures,X7_ii,X7,"Define outcomes, exposures, predictors, confounders, effect modifiers and diagnostic criteria"
+7_iii. Clearly define all predictors,X7_iii,X7,"Define outcomes, exposures, predictors, confounders, effect modifiers and diagnostic criteria"
+7_iv. Clearly define all  potential confounders,X7_iv,X7,"Define outcomes, exposures, predictors, confounders, effect modifiers and diagnostic criteria"
+7_v. Clearly define all effect modifiers,X7_v,X7,"Define outcomes, exposures, predictors, confounders, effect modifiers and diagnostic criteria"
+"7_vi. Give diagnostic criteria, if applicable",X7_vi,X7,"Define outcomes, exposures, predictors, confounders, effect modifiers and diagnostic criteria"
+"8starred_i. For each variable of interest, give sources of data",X8starred_i,X8starred,Give variable sources and measurement
+"8starred_ii. For each variable of interest, give details of methods of assessment (measurement)",X8starred_ii,X8starred,Give variable sources and measurement
+8starred_iii. Describe comparability of assessment methods if there is more than one group,X8starred_iii,X8starred,Give variable sources and measurement
+9. Describe any efforts to address potential sources of bias (this does not include  any adjustment for confounders),X9,X9,Address bias
+10. Explain how the study size was arrived at,X10,X10,Justify sample size
+11_i. Explain how quantitative variables were handled in the analyses,X11_i,X11,Explain variable analysis & grouping
+"11_ii. If applicable, describe which groupings were chosen",X11_ii,X11,Explain variable analysis & grouping
+"11_iii. If applicable, describe why groupings were chosen",X11_iii,X11,Explain variable analysis & grouping
+"12a. Describe all statistical methods, including those used to control for confounding",X12a,X12a,Describe statistical methods
+12b_i. Describe any methods used to examine subgroups,X12b_i,X12b,Describe subgroup and interaction analyses
+12b_ii. Describe any methods used to examine interactions,X12b_ii,X12b,Describe subgroup and interaction analyses
+12c. Explain how missing data were addressed,X12c,X12c,Address missing data
+"12d_coh. Cohort study - If applicable, explain how loss to follow-up was addressed",X12d_coh,X12d,Address loss to follow-up
+"12d_cc. Case-control study-If applicable, explain how matching of cases and controls was addressed",X12d_cc,X12d,Explain matching
+"12d_cs. Cross-sectional study-If applicable, describe analytical methods taking account of sampling strategy",X12d_cs,X12d,Account for sampling strategy
+12e. Describe any sensitivity analyses,X12e,X12e,Describe sensitivity analyses
+"13starreda. Report numbers of individuals at each stage of the present study-eg numbers potentially eligible, examined for eligibility, confirmed eligible, included in the study, completing follow-up, and analysed",X13starreda,X13starreda,Report numbers at each stage
+13starredb. Give reasons for non-participation at each stage of the present study,X13starredb,X13starredb,Give reasons for non-participation at each stage
+13starredc. Use a flow diagram if appropriate,X13starredc,X13starredc,Give flow diagram
+"14starreda_i. Give characteristics of study participants (eg demographic, clinical, social)",X14starreda_i,X14starreda,"Give participant characteristics, exposures and confounders"
+14starreda_ii. Give information on exposures and potential confounders,X14starreda_ii,X14starreda,"Give participant characteristics, exposures and confounders"
+14starredb. Indicate number of participants with missing data for each variable of interest,X14starredb,X14starredb,Give missing data per variable
+"14starredc_coh. Cohort study - Summarise follow-up time (eg, average and total amount)",X14starredc_coh,X14starredc,Summarise follow-up time
+15starred_coh. Cohort study-Report numbers of outcome events or summary measures over time,X15starred_coh,X15starred,Summarise outcomes over time
+"15starred_cc. Case-control study-Report numbers in each exposure category, or summary measures of exposure",X15starred_cc,X15starred,Summarise exposure
+15starred_cs. Cross-sectional study-Report numbers of outcome events or summary measures,X15starred_cs,X15starred,Summarise outcomes
+16a_i. Give unadjusted estimates,X16a_i,X16a,"Give unadjusted estimates, adjusted estimates and included confounders and why"
+"16a_ii. If applicable, give confounder-adjusted estimates",X16a_ii,X16a,"Give unadjusted estimates, adjusted estimates and included confounders and why"
+"16a_iii. If applicable, give the confounder-adjusted estimates' precision (eg, 95% confidence interval)",X16a_iii,X16a,"Give unadjusted estimates, adjusted estimates and included confounders and why"
+16a_iv. Make clear which confounders were adjusted for,X16a_iv,X16a,"Give unadjusted estimates, adjusted estimates and included confounders and why"
+16a_v. Make clear why confounders were included,X16a_v,X16a,"Give unadjusted estimates, adjusted estimates and included confounders and why"
+16b. Report category boundaries when continuous variables were categorized,X16b,X16b,Report category boundaries
+"16c. If relevant, consider translating estimates of relative risk into absolute risk for a meaningful time period",X16c,X16c,Give absolute risk
+17_i. Report analyses of subgroups,X17_i,X17,"Report subgroup, interaction, sensitivity and other analyses"
+17_ii. Report analyses interactions,X17_ii,X17,"Report subgroup, interaction, sensitivity and other analyses"
+17_iii. Report sensitivity analyses,X17_iii,X17,"Report subgroup, interaction, sensitivity and other analyses"
+17_iv. Report other analyses done,X17_iv,X17,"Report subgroup, interaction, sensitivity and other analyses"
+18. Summarise key results with reference to study objectives,X18,X18,Summarise results for objectives
+"19_i. Discuss limitations of the study, taking into account sources of potential bias or imprecision",X19_i,X19,Discuss limitations and bias size & direction
+19_ii. Discuss both direction and magnitude of any potential bias,X19_ii,X19,Discuss limitations and bias size & direction
+"20. Give a cautious overall interpretation of results considering objectives, limitations, multiplicity of analyses, results from similar studies, and other relevant evidence",X20,X20,Cautious interpretation
+21. Discuss the generalisability (external validity) of the study results,X21,X21,Generalisability
+22_i. Give the source of funding for the present study,X22_i,X22,Study & UK Biobank funders & their role
+22_ii. Give the the role of the funders for the present study,X22_ii,X22,Study & UK Biobank funders & their role
+"22_iii. If applicable, give the source of funding for the original study on which the present article is based",X22_iii,X22,Study & UK Biobank funders & their role
+"22_iv. If applicable, give the the role of the funders for the original study on which the present article is based",X22_iv,X22,Study & UK Biobank funders & their role
