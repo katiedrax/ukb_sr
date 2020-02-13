@@ -261,25 +261,40 @@ if(identical(unique(gsub("[[:alpha:]]", "", strobe_nums)), as.character(c(1:22))
 if(sum(duplicated(strobe_nums)) != 0) stop("duplicate strobe_nums")
 
 # extract strobe items that have sub divisions (created by dividing up double questions) >
-# these should only be questions with roman numerals in them after a "_"
-strobe_div <- strobe_cols[grepl("_i|_v", strobe_cols) == T] %>%
-  unique() 
+# these should only be questions with roman numerals in them after a "_" and those that are design specific
+strobe_div <- strobe_cols[grepl("_i|_v|coh|cs|cc", strobe_cols) == T] %>%
+  # this will retrieve one strobe item which has no subdivisions > 
+  # remove this non-div item
+  .[-grep("X14starredc", .)]
+
+# check no duplicate items
+if(sum(duplicated(strobe_div)) != 0) stop("duplicates in strobe_div")
 
 # extract strobe items without sub divisions
-strobe_comp <- strobe_cols[grepl("_i|_v", strobe_cols) == F] %>%
-  unique() 
+strobe_comp <- strobe_cols[grepl("_i|_v|coh|cs|cc", strobe_cols) == F] %>%
+  unique()
+# this will fail to retrieve one strobe item which has no subdivisions > 
+# add this non-div item
+strobe_comp <- c(strobe_comp, "X14starredc")
 
 if(length(strobe_div) + length(strobe_comp) != sum(grepl("^X[[:digit:]]{1,2}", colnames(s_df_bin)))){
   stop("number of strobe items with divisions plus those without don't equal number of strobe cols in s_df_bin")
 }
 
 # vector of numbers in strobe col names
-strobe_div_items <- strobe_div %>%
+strobe_div_items  <- strobe_div %>%
   # remove everything after first "_"
   gsub("\\_.*","",.) %>%
-  # remove duplicates
-  unique() %>%
+  # add extra _ to easily remove __sum later
   paste(., "_", sep = "")
+  
+
+# all strobe_div_items should be multiples of the elements in strobe_div >
+# because they should all be multiple sub division of of strobe_div elements
+# check all strobe_div_items have duplicates
+if(sum(strobe_div_items %in% strobe_div_items[duplicated(strobe_div_items)]) != length(strobe_div_items)){
+  stop("some div items not sub-divisions")
+}
 
 # BUG this commented section does not work - error = arguments different lengths BUT does work if run twice sequentially - why? No idea!
 #a <- NULL
@@ -401,7 +416,7 @@ dropped <- sapply(bar_data, function(x) (sum(is.na(x)))) %>%
   .[.==nrow(bar_data)] %>%
   names()
 
-if(identical(sort(dropped), sort(c("6b", "10", "12d_cc", "12d_cs")))){
+if(identical(sort(dropped), sort(c("6b", "10")))){
   print("dropped is all expected empty columns")
 } else {
   stop("dropped different to expected empty columns")
@@ -481,12 +496,11 @@ if(sum(bar_data_freq$response, na.rm = T) == sum(!is.na(bar_data_freq$response))
 # export data to create bar chart labels ####
 ##########################
 
-strobe_qs <- read.csv("outputs/extraction_dictionary.csv") %>%
+strobe_qs <- read.csv("outputs/extraction_dictionary.csv", stringsAsFactors = F, encoding = "UTF-8") %>%
   select(., c("question", "variable"))
 
 # select those that are strobe items
 strobe_qs <- strobe_qs[grep("X[[:digit:]]{1,2}", strobe_qs$variable), ]
-strobe_qs1 <-dict[grep("X[[:digit:]]{1,2}", dict$variable), ]
 strobe_qs <- strobe_qs[-grep("\\_ev|\\_star", strobe_qs$variable), ]
 
 strobe_qs$question <- sub("[^0-9]*", "", strobe_qs$question)
@@ -504,43 +518,169 @@ write.csv(strobe_qs, "outputs/strobe_dict.csv", row.names = F, fileEncoding = "U
 # import labels and clean ####
 ########################
 
-labels <- read.csv("bar_labels.csv", encoding = "UTF-8", stringsAsFactors = F, na.strings = "") %>%
+# import general as these contain generic labels for all strobe items (not design specific)
+labels <- read.csv("bar_labels_general.csv", encoding = "UTF-8", stringsAsFactors = F, na.strings = "") %>%
   select(c("variable", "bar_label"))
 
-# clean variable names so matches bar_chart_freq colnames (i.e. no subdivisions except for design specific questions)
-
-labels$variable[!grepl("_coh|_cc|cs", labels$variable)] <- gsub("_i.*|_v", "", labels$variable[!grepl("_coh|_cc|cs", labels$variable)])
-
-labels$variable <- gsub("_i|i|X|starred|_v|v", "", labels$variable)
+# clean variable names so matches bar_chart_freq colnames (i.e. no subdivisions and no design specific questions) >
+# easiest to do this by cleaning non-cohort specific quesitons first then cohort excluding 14c_coh since this contains no roman numerials and is not a sub division
+labels$variable <- gsub("_i.*|_v.*|starred|X|_cc|_cs", "", labels$variable)
+labels$variable[!grepl("14c_coh", labels$variable)]  <- gsub("_coh", "", labels$variable[!grepl("14c_coh", labels$variable)])
 
 # remove duplicated rows now variables cleaned
 
 labels <- labels[!duplicated(labels),]
-###################
-# create bar chart ####
-#################
+labels <- labels[mixedorder(as.character(labels$variable)),]
+
+bar_data_freq <- bar_data_freq[mixedorder(as.character(bar_data_freq$strobe_item)),]
+
+if(identical(labels$variable, as.character(bar_data_freq$strobe_item))){
+  # if labels = colnames for bar_data_freq data add applic col to labels
+  labels$applic <- bar_data_freq$applic
+} else {
+  stop("not identical")
+}
+
+#######################
+## bar chart for all ####
+##################
+# drop strobe items that didn't apply to any articles so won't be displayed in bar chart
+all_na <- bar_data_freq[which(bar_data_freq$applic == 0), ]
+
+if((is.na(all_na$percent_yes) && is.na(all_na$n)) == F) stop("all_na not empty")
+
+bar_data_freq <- bar_data_freq[which(bar_data_freq$applic != 0), ]
+
+# drop empties from label as well so labels will map to chart but save incase
+labels_na <- labels[which(labels$applic == 0), ]
+labels <- labels[which(labels$applic != 0), ]
+
+# create labels
+if(identical(labels$variable, 
+             as.character(bar_data_freq$strobe_item))){
+  # if labels = colnames for bar_data_freq data add applic col to labels
+  labels$applic <- bar_data_freq$applic
+  # paste variable together with description , separate by space so can gsub later
+  labels$x_labels <- paste(labels$variable, labels$bar_label, sep = " ") %>%
+    # order
+    .[gtools::mixedorder(.)]%>%
+    # wrap
+    stringr::str_wrap(., width = 25) %>%
+    # add n = applicable on a newline
+    paste(., " (n=", labels$applic, ")", sep = "")
+} else {
+  stop("not identical")
+}
 
 
-test <- bar_data_freq[!is.na(bar_data_freq$percent_yes), ]
+# set levels as mixed order so order preserved in ggplot
+bar_data_freq$strobe_item<- factor(bar_data_freq$strobe_item, levels = 
+                                     bar_data_freq$strobe_item[gtools::mixedorder(bar_data_freq$strobe_item)])
 
+# check labels identical to strobe item numbers in labels$x_labels (gsub at the space) to ensure labels will map to chart
+if(identical(gsub(" .*", "", labels$x_labels), as.character(bar_data_freq$strobe_item)) == F) stop("labels won't map")
 
-test$strobe_item<- factor(test$strobe_item, levels = 
-                     test$strobe_item[gtools::mixedorder(test$strobe_item)])
-
-
-x_labels <- paste(test$strobe_item, " (n = ", sep = "\n") %>%
-  paste(., test$applic, ")", sep = "") %>%
-  .[gtools::mixedorder(.)]
-  
-strobe_qs <- read.csv("outputs/extraction_dictionary.csv", stringsAsFactors = F, encoding = "UTF-8") %>%
-  select(., c("question", "variable"))
-
-labels$variable[grep]
-test %>%ggplot(aes(x=strobe_item, y=percent_yes)) + 
-  geom_bar(stat="identity") +
+# strobe item on x axis and plot % yes
+bar_data_freq %>%ggplot(aes(x=strobe_item, y=percent_yes)) + 
+  # blue fill
+  geom_bar(stat="identity", fill = "#A5ECEE") +
   theme_classic() +
-  theme(axis.text.x=element_text(angle=45,hjust=1)) +
-  scale_x_discrete(labels= x_labels)
+  # use labels created previously
+  scale_x_discrete(labels= labels$x_labels) +
+  theme(axis.title.x = element_text(size = 10, hjust = 1)) +
+  # add caption stating which items are not displayed
+  xlab(paste("STROBE items", paste(all_na$strobe_item, collapse = ", "), "not applicable for any articles so not displayed", sep = " ")) + 
+  ylab("Yes (%)") +
+  ggtitle("STROBE item completion") 
+
+###################
+# separate bar charts ####
+#################
+# manuallly type out vectors of intro & methods items and result & discussion items
+
+
+intro_meth <- c("1a", "1b", "2", "3", "4", "5", "6a", "6b", "7", "8", "9", "10", "11", "12a","12b", "12c", "12d", "12e") %>%
+  .[mixedorder(.)]
+
+# separate into results and discussion items
+
+results_diss <- c("13a", "13b", "13c", "14a", "14b", "14c_coh", "15", "16a",
+                "16b", "16c", "17", "18", "19", "20", "21", "22") %>%
+  .[mixedorder(.)]
+
+# remove those that match strobe items in all_na
+
+if(sum(results_diss %in% all_na$strobe_item) != 0){
+  results_diss <- results_diss[-which(results_diss %in% all_na$strobe_item)]
+} else {
+  print("no results_diss items all empty")
+}
+
+if(sum(intro_meth %in% all_na$strobe_item) != 0){
+  intro_meth <- intro_meth[-which(intro_meth %in% all_na$strobe_item)]
+}else {
+  print("no intro_meth items all empty")
+}
+
+if(identical(c(intro_meth, results_diss), as.character(bar_data_freq$strobe_item))){
+  # if all colnames in strobe items create separate dfs for intro & methods items 
+  intro_meth_df <- bar_data_freq[which(bar_data_freq$strobe_item %in% intro_meth), ]
+  # same for results & discussion
+  result_diss_df <- bar_data_freq[which(bar_data_freq$strobe_item %in% results_diss), ]
+} else {
+  stop("colnames in intro_meth and results_diss different to strobe items in bar_data_freq")
+}
+# create labels
+
+intro_meth_labels <- labels$x_labels[which(labels$variable %in% intro_meth_df$strobe_item)]
+result_diss_labels <- labels$x_labels[which(labels$variable %in% result_diss_df$strobe_item)]
+################################
+# plot separate bar charts ####
+############################
+# set levels as mixed order so order preserved in ggplot
+intro_meth_df$strobe_item<- factor(intro_meth_df$strobe_item, levels = 
+                                     intro_meth_df$strobe_item[gtools::mixedorder(intro_meth_df$strobe_item)])
+
+
+# set levels as mixed order so order preserved in ggplot
+result_diss_df$strobe_item<- factor(results_diss$strobe_item, levels = 
+                                    results_diss$strobe_item[gtools::mixedorder(results_diss$strobe_item)])
+
+# check labels identical to strobe item numbers in labels$x_labels (gsub at the space) to ensure labels will map to chart
+if(identical(gsub(" .*", "", intro_meth_labels), as.character(intro_meth_df$strobe_item)) == F) stop("labels won't map")
+
+# strobe item on x axis and plot % yes
+intro_meth_df %>%ggplot(aes(x=strobe_item, y=percent_yes)) + 
+  # blue fill
+  geom_bar(stat="identity", fill = "#A5ECEE") +
+  theme_classic() +
+  # use labels created previously
+  scale_x_discrete(labels= intro_meth_labels) +
+  # leave xlab blank otherwise it will appear
+  xlab("")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ylab("Yes (%)") +
+  ggtitle("STROBE introduction and method items") 
+
+
+# check labels identical to strobe item numbers in labels$x_labels (gsub at the space) to ensure labels will map to chart
+if(identical(gsub(" .*", "", result_diss_labels), as.character(result_diss_df$strobe_item)) == F) stop("labels won't map")
+
+# strobe item on x axis and plot % yes
+result_diss_df %>%ggplot(aes(x=strobe_item, y=percent_yes)) + 
+  # blue fill
+  geom_bar(stat="identity", fill = "#cba5ee") +
+  theme_classic() +
+  # use labels created previously
+  scale_x_discrete(labels= result_diss_labels) +
+  # leave xlab blank otherwise it will appear
+  xlab("")+
+  ylab("Yes (%)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  ggtitle("STROBE results and discussion items") 
+
+
+
 
 ####################
 # check bar chart ####
