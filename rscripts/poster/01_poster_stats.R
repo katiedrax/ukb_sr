@@ -541,6 +541,8 @@ if(identical(labels$variable, as.character(bar_data_freq$strobe_item))){
   stop("not identical")
 }
 
+
+
 #######################
 ## bar chart for all ####
 ##################
@@ -565,7 +567,7 @@ if(identical(labels$variable,
     # order
     .[gtools::mixedorder(.)]%>%
     # wrap
-    stringr::str_wrap(., width = 25) %>%
+    stringr::str_wrap(., width = 55) %>%
     # add n = applicable on a newline
     paste(., " (n=", labels$applic, ")", sep = "")
 } else {
@@ -580,18 +582,20 @@ bar_data_freq$strobe_item<- factor(bar_data_freq$strobe_item, levels =
 # check labels identical to strobe item numbers in labels$x_labels (gsub at the space) to ensure labels will map to chart
 if(identical(gsub(" .*", "", labels$x_labels), as.character(bar_data_freq$strobe_item)) == F) stop("labels won't map")
 
+png("Rplot9.png", width = 1200, height = 1500)
 # strobe item on x axis and plot % yes
 bar_data_freq %>%ggplot(aes(x=strobe_item, y=percent_yes)) + 
   # blue fill
   geom_bar(stat="identity", fill = "#A5ECEE") +
   theme_classic() +
-  # use labels created previously
+  theme(text = element_text(size=30))+
   scale_x_discrete(labels= labels$x_labels) +
-  theme(axis.title.x = element_text(size = 10, hjust = 1)) +
-  # add caption stating which items are not displayed
-  xlab(paste("STROBE items", paste(all_na$strobe_item, collapse = ", "), "not applicable for any articles so not displayed", sep = " ")) + 
+  coord_flip() +
+  xlab("STROBE Item") +
   ylab("Yes (%)") +
-  ggtitle("STROBE item completion") 
+  ggtitle("Figure 1. STROBE completion")+
+  theme(plot.title = element_text(size = 22)) 
+dev.off()
 
 ###################
 # separate bar charts ####
@@ -658,9 +662,9 @@ intro_meth_df %>%ggplot(aes(x=strobe_item, y=percent_yes)) +
   scale_x_discrete(labels= intro_meth_labels) +
   # leave xlab blank otherwise it will appear
   xlab("")+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme(axis.text.x = element_text(angle = 15, hjust = 1)) +
   ylab("Yes (%)") +
-  ggtitle("STROBE introduction and method items") 
+  ggtitle("Figure 1. STROBE introduction and method items") 
 
 
 # check labels identical to strobe item numbers in labels$x_labels (gsub at the space) to ensure labels will map to chart
@@ -676,8 +680,7 @@ result_diss_df %>%ggplot(aes(x=strobe_item, y=percent_yes)) +
   # leave xlab blank otherwise it will appear
   xlab("")+
   ylab("Yes (%)") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
-  ggtitle("STROBE results and discussion items") 
+  ggtitle("Figure 2. STROBE results and discussion items") 
 
 
 
@@ -819,3 +822,23 @@ strobe_yes$Var1 <- NULL
 
 colnames(strobe_yes)[colnames(strobe_yes) == "Freq"] <- "Yes (%)"
 colnames(strobe_yes)[colnames(strobe_yes) == "i"] <- "STROBE item"
+
+#######################################
+#### add completion scores for items #####
+########################################
+
+bar_data_tot <- bar_data
+
+# change bar data to numeric
+bar_data_tot[] <- lapply(bar_data_tot, as.numeric) 
+
+# count row sums without NA (returns NA if contains any NAs)
+
+count_na <- function(x) sum(is.na(x))
+
+bar_data_tot <- bar_data_tot %>%
+  mutate(sums = rowSums(., na.rm = T),
+         count_na = apply(., 1, count_na))
+bar_data_tot$applic <- 32 - bar_data_tot$count_na
+
+bar_data_tot$score <- bar_data_tot$sums/ bar_data_tot$applic
