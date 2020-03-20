@@ -1,0 +1,233 @@
+"variable","question","qual_var_name","import_num"
+"StartDate","Start Date","StartDate",1
+"EndDate","End Date","EndDate",2
+"Status","Response Type","Status",3
+"Progress","Progress","Progress",4
+"Duration (in seconds)","Duration (in seconds)","Duration (in seconds)",5
+"Finished","Finished","Finished",6
+"RecordedDate","Recorded Date","RecordedDate",7
+"ResponseId","Response ID","ResponseId",8
+"DistributionChannel","Distribution Channel","DistributionChannel",9
+"UserLanguage","User Language","UserLanguage",10
+"article_id","article_id. Copy and paste in the article ID from the csv file (do not put in quotes)","Q2",11
+"title","title. Copy and paste the article's title from the online version of the article (do not put in quotes)","Q3",12
+"initials","initials. Select your initials","Q4",13
+"designs","designs. Indicate what the article's designs are from the CSV file.","Q5",14
+"predict","predict. Does the article contain a prediction model analysis? (leave blank if no)","Q6",15
+"strobe","strobe. Did the authors state that they followed STROBE? (Search article & relevant supplementary material for all these terms: 'report' | 'guideline' | 'checklist' | 'STROBE' | 'followed' | 'equator'| 'Elm') - Selected Choice","Q7",16
+"other_guidelines","strobe. Did the authors state that they followed STROBE? (Search article & relevant supplementary material for all these terms: 'report' | 'guideline' | 'checklist' | 'STROBE' | 'followed' | 'equator'| 'Elm') - Other reporting guidelines used - they state they used reporting guidelines other than STROBE. (please specify which reporting guidelines they said they used) - Text","Q7_4_TEXT",17
+"strobe_ev","strobe_ev. Copy and paste in the authors statement regarding their use of reporting guidelines","Q8",18
+"strobe_cite","strobe_cite. If the authors do follow STROBE or other reporting guidelines do they cite these guidelines?","Q9",19
+"reg","reg. Do the authors state that the studies contained in the article were registered? (Search article & relevant supplementary material for all these terms: 'regist' | 'protocol' | 'plan' | 'publis'. Registrations do not include UK Biobank applications which may be referred to as protocols or registrations.)","Q10",20
+"reg_id","reg_id. Copy and paste in the registration's reference number, DOI or other identifier (leave blank if none provided)","Q11",21
+"reg_ev","reg_ev. Copy and paste in the authors' statement regarding registration","Q12",22
+"var_id","var_id. Do the authors reference the UK Biobank ID numbers for all the variables? (Examine any very large numbers found in the methods, results and all supplementary material)","Q13",23
+"ukb_credit","ukb_credit. Do the authors state that “This research has been conducted using the UK Biobank Resource.”? (Search article & relevant supplementary material for all these terms: 'UK' | 'Resource')","Q14",24
+"ukb_credit_ev","ukb_credit_ev. Copy and paste the author's reference to the UK Biobank (if there are multiple references copy and paste the one that closest resembles “This research has been conducted using the UK Biobank Resource.”)","Q15",25
+"code","code. Do the authors provide their code for their analyses of the UK BIobank? (Search the article and supplementary material for “code” |  “availab” | “http”| “www” | “figshare” | ""github” | ""zenodo"")","Q16",26
+"X1a","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 1a. Indicate the study’s design as cross-sectional, cohort or case-control in the title or the abstract","Q18_1",27
+"X1a_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 1a. Indicate the study’s design as cross-sectional, cohort or case-control in the title or the abstract - Text","Q18_1_TEXT",28
+"X1b_i","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 1b_i. Provide in the abstract an informative and balanced summary of what was done","Q18_2",29
+"X1b_i_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 1b_i. Provide in the abstract an informative and balanced summary of what was done - Text","Q18_2_TEXT",30
+"X1b_ii","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 1b_ii. Provide in the abstract an informative and balanced summary of what was found","Q18_3",31
+"X1b_ii_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 1b_ii. Provide in the abstract an informative and balanced summary of what was found - Text","Q18_3_TEXT",32
+"X2_i","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 2_i. Explain the scientific background for the investigation being reported","Q18_4",33
+"X2_i_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 2_i. Explain the scientific background for the investigation being reported - Text","Q18_4_TEXT",34
+"X2_ii","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 2_ii. Explain the rationale for the investigation being reported","Q18_5",35
+"X2_ii_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 2_ii. Explain the rationale for the investigation being reported - Text","Q18_5_TEXT",36
+"X3","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 3. State specific objectives, including any prespecified hypotheses","Q18_6",37
+"X3_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 3. State specific objectives, including any prespecified hypotheses - Text","Q18_6_TEXT",38
+"X4","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 4. Present key elements of study design early in the paper","Q18_7",39
+"X4_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 4. Present key elements of study design early in the paper - Text","Q18_7_TEXT",40
+"X5_i","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 5_i. Describe the setting","Q18_8",41
+"X5_i_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 5_i. Describe the setting - Text","Q18_8_TEXT",42
+"X5_ii","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 5_ii. Describe the locations","Q18_9",43
+"X5_ii_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 5_ii. Describe the locations - Text","Q18_9_TEXT",44
+"X5_iii","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 5_iii. Describe the relevant dates including periods of recruitment","Q18_10",45
+"X5_iii_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 5_iii. Describe the relevant dates including periods of recruitment - Text","Q18_10_TEXT",46
+"X5_iv","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 5_iv.  Describe the relevant dates including periods of exposure","Q18_11",47
+"X5_iv_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 5_iv.  Describe the relevant dates including periods of exposure - Text","Q18_11_TEXT",48
+"X5_v","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 5_v. Describe the relevant dates including periods of follow-up","Q18_12",49
+"X5_v_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 5_v. Describe the relevant dates including periods of follow-up - Text","Q18_12_TEXT",50
+"X5_vi","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 5_vi. Describe the relevant dates including periods of data collection","Q18_13",51
+"X5_vi_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 5_vi. Describe the relevant dates including periods of data collection - Text","Q18_13_TEXT",52
+"X6a_i_coh_cs","Indicate if the authors report the following items for all the cross-sectional and cohort studies in the article - 6a_i_coh_cs. Cross-sectional and cohort studies - Give the eligibility criteria","Q19_1",53
+"X6a_i_coh_cs_ev","Indicate if the authors report the following items for all the cross-sectional and cohort studies in the article - 6a_i_coh_cs. Cross-sectional and cohort studies - Give the eligibility criteria - Text","Q19_1_TEXT",54
+"X6a_ii_coh_cs","Indicate if the authors report the following items for all the cross-sectional and cohort studies in the article - 6a_ii_coh_cs. Cross-sectional and cohort studies - Give the sources of participants","Q19_2",55
+"X6a_ii_coh_cs_ev","Indicate if the authors report the following items for all the cross-sectional and cohort studies in the article - 6a_ii_coh_cs. Cross-sectional and cohort studies - Give the sources of participants - Text","Q19_2_TEXT",56
+"X6a_iii_coh_cs","Indicate if the authors report the following items for all the cross-sectional and cohort studies in the article - 6a_iii_coh_cs. Cross-sectional and cohort studies - Give the methods of selection of participants","Q19_3",57
+"X6a_iii_coh_cs_ev","Indicate if the authors report the following items for all the cross-sectional and cohort studies in the article - 6a_iii_coh_cs. Cross-sectional and cohort studies - Give the methods of selection of participants - Text","Q19_3_TEXT",58
+"X6a_iv_coh","Indicate if the authors report the following items for all the cohort studies in the article - 6a_iv_coh. Cohort study - Describe methods of follow-up","Q20_1",59
+"X6a_iv_coh_ev","Indicate if the authors report the following items for all the cohort studies in the article - 6a_iv_coh. Cohort study - Describe methods of follow-up - Text","Q20_1_TEXT",60
+"X6b_i_coh","Indicate if the authors report the following items for all the cohort studies in the article - 6b_i_coh. Cohort study - For matched studies, give matching criteria","Q21_1",61
+"X6b_i_coh_ev","Indicate if the authors report the following items for all the cohort studies in the article - 6b_i_coh. Cohort study - For matched studies, give matching criteria - Text","Q21_1_TEXT",62
+"X6b_ii_coh","Indicate if the authors report the following items for all the cohort studies in the article - 6b_ii_coh. Cohort study - For matched studies, give number of exposed and unexposed","Q21_2",63
+"X6b_ii_coh_ev","Indicate if the authors report the following items for all the cohort studies in the article - 6b_ii_coh. Cohort study - For matched studies, give number of exposed and unexposed - Text","Q21_2_TEXT",64
+"X6a_i_cc","Indicate if the authors report the following items for all the case-control studies in the article - 6a_i_cc. Case-control study - Give the eligibility criteria","Q22_1",65
+"X6a_i_cc_ev","Indicate if the authors report the following items for all the case-control studies in the article - 6a_i_cc. Case-control study - Give the eligibility criteria - Text","Q22_1_TEXT",66
+"X6a_ii_cc","Indicate if the authors report the following items for all the case-control studies in the article - 6a_ii_cc. Case-control study - Give the sources of case ascertainment and control selection","Q22_2",67
+"X6a_ii_cc_ev","Indicate if the authors report the following items for all the case-control studies in the article - 6a_ii_cc. Case-control study - Give the sources of case ascertainment and control selection - Text","Q22_2_TEXT",68
+"X6a_iii_cc","Indicate if the authors report the following items for all the case-control studies in the article - 6a_iii_cc. Case-control study - Give the methods of case ascertainment and control selection.","Q22_3",69
+"X6a_iii_cc_ev","Indicate if the authors report the following items for all the case-control studies in the article - 6a_iii_cc. Case-control study - Give the methods of case ascertainment and control selection. - Text","Q22_3_TEXT",70
+"X6a_iv_cc","Indicate if the authors report the following items for all the case-control studies in the article - 6a_iv_cc. Case-control study - Give the rationale for the choice of cases and controls","Q22_4",71
+"X6a_iv_cc_ev","Indicate if the authors report the following items for all the case-control studies in the article - 6a_iv_cc. Case-control study - Give the rationale for the choice of cases and controls - Text","Q22_4_TEXT",72
+"X6b_i_cc","Indicate if the authors report the following items for all the case-control studies in the article - 6b_i_cc. Case-control study - For matched studies, give matching criteria","Q23_1",73
+"X6b_i_cc_ev","Indicate if the authors report the following items for all the case-control studies in the article - 6b_i_cc. Case-control study - For matched studies, give matching criteria - Text","Q23_1_TEXT",74
+"X6b_ii_cc","Indicate if the authors report the following items for all the case-control studies in the article - 6b_ii_cc. Case-control study - For matched studies, give the number of controls per case","Q23_2",75
+"X6b_ii_cc_ev","Indicate if the authors report the following items for all the case-control studies in the article - 6b_ii_cc. Case-control study - For matched studies, give the number of controls per case - Text","Q23_2_TEXT",76
+"X7_i","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 7_i. Clearly define all outcomes","Q24_1",77
+"X7_i_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 7_i. Clearly define all outcomes - Text","Q24_1_TEXT",78
+"X7_ii","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 7_ii. Clearly define all exposures","Q24_2",79
+"X7_ii_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 7_ii. Clearly define all exposures - Text","Q24_2_TEXT",80
+"X7_iii","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 7_iii. Clearly define all predictors","Q24_3",81
+"X7_iii_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 7_iii. Clearly define all predictors - Text","Q24_3_TEXT",82
+"X7_iv","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 7_iv. Clearly define all  potential confounders","Q24_4",83
+"X7_iv_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 7_iv. Clearly define all  potential confounders - Text","Q24_4_TEXT",84
+"X7_v","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 7_v. Clearly define all effect modifiers","Q24_5",85
+"X7_v_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 7_v. Clearly define all effect modifiers - Text","Q24_5_TEXT",86
+"X7_vi","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 7_vi. Give diagnostic criteria, if applicable","Q24_6",87
+"X7_vi_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 7_vi. Give diagnostic criteria, if applicable - Text","Q24_6_TEXT",88
+"X8starred_i","_ - 8starred_i. For each variable of interest, give sources of data","Q25_1",89
+"X8starred_i_ev","_ - 8starred_i. For each variable of interest, give sources of data - Text","Q25_1_TEXT",90
+"X8_star_i_cc","_ - 8_star_i_cc. Case-control studies - give the information separately for cases and controls","Q25_2",91
+"X8_star_i_cc_ev","_ - 8_star_i_cc. Case-control studies - give the information separately for cases and controls - Text","Q25_2_TEXT",92
+"X8_star_i_coh_cs","_ - 8_star_i_coh_cs. Cohort and cross-sectional studies - give the information separately for exposed and unexposed groups","Q25_3",93
+"X8_star_i_coh_cs_ev","_ - 8_star_i_coh_cs. Cohort and cross-sectional studies - give the information separately for exposed and unexposed groups - Text","Q25_3_TEXT",94
+"X8starred_ii","_ - 8starred_ii. For each variable of interest, give details of methods of assessment (measurement)","Q26_1",95
+"X8starred_ii_ev","_ - 8starred_ii. For each variable of interest, give details of methods of assessment (measurement) - Text","Q26_1_TEXT",96
+"X8_star_ii_cc","_ - 8_star_ii_cc. Case-control studies - give the information separately for cases and controls","Q26_2",97
+"X8_star_ii_cc_ev","_ - 8_star_ii_cc. Case-control studies - give the information separately for cases and controls - Text","Q26_2_TEXT",98
+"X8_star_ii_coh_cs","_ - 8_star_ii_coh_cs. Cohort and cross-sectional studies - give the information separately for exposed and unexposed groups","Q26_3",99
+"X8_star_ii_coh_cs_ev","_ - 8_star_ii_coh_cs. Cohort and cross-sectional studies - give the information separately for exposed and unexposed groups - Text","Q26_3_TEXT",100
+"X8starred_iii","_ - 8starred_iii. Describe comparability of assessment methods if there is more than one group","Q27_1",101
+"X8starred_iii_ev","_ - 8starred_iii. Describe comparability of assessment methods if there is more than one group - Text","Q27_1_TEXT",102
+"X8_star_iii_cc","_ - 8_star_iii_cc. Case-control studies - give the information separately for cases and controls","Q27_2",103
+"X8_star_iii_cc_ev","_ - 8_star_iii_cc. Case-control studies - give the information separately for cases and controls - Text","Q27_2_TEXT",104
+"X8_star_iii_coh_cs","_ - 8_star_iii_coh_cs. Cohort and cross-sectional studies - give the information separately for exposed and unexposed groups","Q27_3",105
+"X8_star_iii_coh_cs_ev","_ - 8_star_iii_coh_cs. Cohort and cross-sectional studies - give the information separately for exposed and unexposed groups - Text","Q27_3_TEXT",106
+"X9","_ - 9. Describe any efforts to address potential sources of bias (this does not include  any adjustment for confounders)","Q28_1",107
+"X9_ev","_ - 9. Describe any efforts to address potential sources of bias (this does not include  any adjustment for confounders) - Text","Q28_1_TEXT",108
+"X10","_ - 10. Explain how the study size was arrived at","Q28_2",109
+"X10_ev","_ - 10. Explain how the study size was arrived at - Text","Q28_2_TEXT",110
+"X11_i","_ - 11_i. Explain how quantitative variables were handled in the analyses","Q28_3",111
+"X11_i_ev","_ - 11_i. Explain how quantitative variables were handled in the analyses - Text","Q28_3_TEXT",112
+"X11_ii","_ - 11_ii. If applicable, describe which groupings were chosen","Q28_4",113
+"X11_ii_ev","_ - 11_ii. If applicable, describe which groupings were chosen - Text","Q28_4_TEXT",114
+"X11_iii","_ - 11_iii. If applicable, describe why groupings were chosen","Q28_5",115
+"X11_iii_ev","_ - 11_iii. If applicable, describe why groupings were chosen - Text","Q28_5_TEXT",116
+"X12a","_ - 12a. Describe all statistical methods, including those used to control for confounding","Q28_6",117
+"X12a_ev","_ - 12a. Describe all statistical methods, including those used to control for confounding - Text","Q28_6_TEXT",118
+"X12b_i","_ - 12b_i. Describe any methods used to examine subgroups","Q28_7",119
+"X12b_i_ev","_ - 12b_i. Describe any methods used to examine subgroups - Text","Q28_7_TEXT",120
+"X12b_ii","_ - 12b_ii. Describe any methods used to examine interactions","Q28_8",121
+"X12b_ii_ev","_ - 12b_ii. Describe any methods used to examine interactions - Text","Q28_8_TEXT",122
+"X12c","_ - 12c. Explain how missing data were addressed","Q28_9",123
+"X12c_ev","_ - 12c. Explain how missing data were addressed - Text","Q28_9_TEXT",124
+"X12d_coh","_ - 12d_coh. Cohort study - If applicable, explain how loss to follow-up was addressed","Q29_1",125
+"X12d_coh_ev","_ - 12d_coh. Cohort study - If applicable, explain how loss to follow-up was addressed - Text","Q29_1_TEXT",126
+"X12d_cc","_ - 12d_cc. Case-control study-If applicable, explain how matching of cases and controls was addressed","Q30_1",127
+"X12d_cc_ev","_ - 12d_cc. Case-control study-If applicable, explain how matching of cases and controls was addressed - Text","Q30_1_TEXT",128
+"X12d_cs","_ - 12d_cs. Cross-sectional study-If applicable, describe analytical methods taking account of sampling strategy","Q31_1",129
+"X12d_cs_ev","_ - 12d_cs. Cross-sectional study-If applicable, describe analytical methods taking account of sampling strategy - Text","Q31_1_TEXT",130
+"X12e","_ - 12e. Describe any sensitivity analyses","Q32_1",131
+"X12e_ev","_ - 12e. Describe any sensitivity analyses - Text","Q32_1_TEXT",132
+"X13starreda","_ - 13starreda. Report numbers of individuals at each stage of the present study-eg numbers potentially eligible, examined for eligibility, confirmed eligible, included in the study, completing follow-up, and analysed","Q32_2",133
+"X13starreda_ev","_ - 13starreda. Report numbers of individuals at each stage of the present study-eg numbers potentially eligible, examined for eligibility, confirmed eligible, included in the study, completing follow-up, and analysed - Text","Q32_2_TEXT",134
+"X13_star_a_cc","_ - 13_star_a_cc. Case-control studies - give the information separately for cases and controls","Q32_3",135
+"X13_star_a_cc_ev","_ - 13_star_a_cc. Case-control studies - give the information separately for cases and controls - Text","Q32_3_TEXT",136
+"X13_star_a_coh_cs","_ - 13_star_a_coh_cs. Cohort and cross-sectional studies - give the information separately for exposed and unexposed groups","Q32_4",137
+"X13_star_a_coh_cs_ev","_ - 13_star_a_coh_cs. Cohort and cross-sectional studies - give the information separately for exposed and unexposed groups - Text","Q32_4_TEXT",138
+"X13starredb","_ - 13starredb. Give reasons for non-participation at each stage of the present study","Q32_5",139
+"X13starredb_ev","_ - 13starredb. Give reasons for non-participation at each stage of the present study - Text","Q32_5_TEXT",140
+"X13_star_b_cc","_ - 13_star_b_cc. Case-control studies - give the information separately for cases and controls","Q32_6",141
+"X13_star_b_cc_ev","_ - 13_star_b_cc. Case-control studies - give the information separately for cases and controls - Text","Q32_6_TEXT",142
+"X13_star_b_coh_cs","_ - 13_star_b_coh_cs. Cohort and cross-sectional studies - give the information separately for exposed and unexposed groups","Q32_7",143
+"X13_star_b_coh_cs_ev","_ - 13_star_b_coh_cs. Cohort and cross-sectional studies - give the information separately for exposed and unexposed groups - Text","Q32_7_TEXT",144
+"X13starredc","_ - 13starredc. Use a flow diagram if appropriate","Q32_8",145
+"X13starredc_ev","_ - 13starredc. Use a flow diagram if appropriate - Text","Q32_8_TEXT",146
+"X13_star_c_cc","_ - 13_star_c_cc. Case-control studies - give the information separately for cases and controls","Q32_9",147
+"X13_star_c_cc_ev","_ - 13_star_c_cc. Case-control studies - give the information separately for cases and controls - Text","Q32_9_TEXT",148
+"X13_star_c_coh_cs","_ - 13_star_c_coh_cs. Cohort and cross-sectional studies - give the information separately for exposed and unexposed groups","Q32_10",149
+"X13_star_c_coh_cs_ev","_ - 13_star_c_coh_cs. Cohort and cross-sectional studies - give the information separately for exposed and unexposed groups - Text","Q32_10_TEXT",150
+"X14starreda_i","_ - 14starreda_i. Give characteristics of study participants (eg demographic, clinical, social)","Q32_11",151
+"X14starreda_i_ev","_ - 14starreda_i. Give characteristics of study participants (eg demographic, clinical, social) - Text","Q32_11_TEXT",152
+"X14_star_a_i_cc","_ - 14_star_a_i_cc. Case-control studies - give the information separately for cases and controls","Q32_12",153
+"X14_star_a_i_cc_ev","_ - 14_star_a_i_cc. Case-control studies - give the information separately for cases and controls - Text","Q32_12_TEXT",154
+"X14_star_a_i_coh_cs","_ - 14_star_a_i_coh_cs. Cohort and cross-sectional studies - give the information separately for exposed and unexposed groups","Q32_13",155
+"X14_star_a_i_coh_cs_ev","_ - 14_star_a_i_coh_cs. Cohort and cross-sectional studies - give the information separately for exposed and unexposed groups - Text","Q32_13_TEXT",156
+"X14starreda_ii","_ - 14starreda_ii. Give information on exposures and potential confounders","Q32_14",157
+"X14starreda_ii_ev","_ - 14starreda_ii. Give information on exposures and potential confounders - Text","Q32_14_TEXT",158
+"X14_star_a_ii_cc","_ - 14_star_a_ii_cc. Case-control studies - give the information separately for cases and controls","Q32_15",159
+"X14_star_a_ii_cc_ev","_ - 14_star_a_ii_cc. Case-control studies - give the information separately for cases and controls - Text","Q32_15_TEXT",160
+"X14_star_a_ii_coh_cs","_ - 14_star_a_ii_coh_cs. Cohort and cross-sectional studies - give the information separately for exposed and unexposed groups","Q32_16",161
+"X14_star_a_ii_coh_cs_ev","_ - 14_star_a_ii_coh_cs. Cohort and cross-sectional studies - give the information separately for exposed and unexposed groups - Text","Q32_16_TEXT",162
+"X14starredb","_ - 14starredb. Indicate number of participants with missing data for each variable of interest","Q32_17",163
+"X14starredb_ev","_ - 14starredb. Indicate number of participants with missing data for each variable of interest - Text","Q32_17_TEXT",164
+"X14_star_b_cc","_ - 14_star_b_cc. Case-control studies - give the information separately for cases and controls","Q32_18",165
+"X14_star_b_cc_ev","_ - 14_star_b_cc. Case-control studies - give the information separately for cases and controls - Text","Q32_18_TEXT",166
+"X14_star_b_coh_cs","_ - 14_star_b_coh_cs. Cohort and cross-sectional studies - give the information separately for exposed and unexposed groups","Q32_19",167
+"X14_star_b_coh_cs_ev","_ - 14_star_b_coh_cs. Cohort and cross-sectional studies - give the information separately for exposed and unexposed groups - Text","Q32_19_TEXT",168
+"X14starredc_coh","Indicate if the authors report the following items for all the cohort studies in the article - 14starredc_coh. Cohort study - Summarise follow-up time (eg, average and total amount)","Q33_1",169
+"X14starredc_coh_ev","Indicate if the authors report the following items for all the cohort studies in the article - 14starredc_coh. Cohort study - Summarise follow-up time (eg, average and total amount) - Text","Q33_1_TEXT",170
+"X14_star_c_coh","Indicate if the authors report the following items for all the cohort studies in the article - 14_star_c_coh. Cohort studies - give the information separately for exposed and unexposed groups","Q33_2",171
+"X14_star_c_coh_ev","Indicate if the authors report the following items for all the cohort studies in the article - 14_star_c_coh. Cohort studies - give the information separately for exposed and unexposed groups - Text","Q33_2_TEXT",172
+"X15starred_coh","Indicate if the authors report the following items for all the cohort studies in the article - 15starred_coh. Cohort study-Report numbers of outcome events or summary measures over time","Q33_3",173
+"X15starred_coh_ev","Indicate if the authors report the following items for all the cohort studies in the article - 15starred_coh. Cohort study-Report numbers of outcome events or summary measures over time - Text","Q33_3_TEXT",174
+"X15_star_coh","Indicate if the authors report the following items for all the cohort studies in the article - 15_star_coh. Cohort studies - give the information separately for exposed and unexposed groups","Q33_4",175
+"X15_star_coh_ev","Indicate if the authors report the following items for all the cohort studies in the article - 15_star_coh. Cohort studies - give the information separately for exposed and unexposed groups - Text","Q33_4_TEXT",176
+"X15starred_cc","Indicate if the authors report the following items for all the case-control studies in the article - 15starred_cc. Case-control study-Report numbers in each exposure category, or summary measures of exposure","Q34_1",177
+"X15starred_cc_ev","Indicate if the authors report the following items for all the case-control studies in the article - 15starred_cc. Case-control study-Report numbers in each exposure category, or summary measures of exposure - Text","Q34_1_TEXT",178
+"X15_star_cc","Indicate if the authors report the following items for all the case-control studies in the article - 15_star_cc. Case-control studies - give the information separately for cases and controls","Q34_2",179
+"X15_star_cc_ev","Indicate if the authors report the following items for all the case-control studies in the article - 15_star_cc. Case-control studies - give the information separately for cases and controls - Text","Q34_2_TEXT",180
+"X15starred_cs","Indicate if the authors report the following items for all the cross-sectional studies in the article - 15starred_cs. Cross-sectional study-Report numbers of outcome events or summary measures","Q35_1",181
+"X15starred_cs_ev","Indicate if the authors report the following items for all the cross-sectional studies in the article - 15starred_cs. Cross-sectional study-Report numbers of outcome events or summary measures - Text","Q35_1_TEXT",182
+"X15_star_cs","Indicate if the authors report the following items for all the cross-sectional studies in the article - 15_star_cs. Cross-sectional studies - give the information separately for exposed and unexposed groups","Q35_2",183
+"X15_star_cs_ev","Indicate if the authors report the following items for all the cross-sectional studies in the article - 15_star_cs. Cross-sectional studies - give the information separately for exposed and unexposed groups - Text","Q35_2_TEXT",184
+"X16a_i","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 16a_i. Give unadjusted estimates","Q36_1",185
+"X16a_i_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 16a_i. Give unadjusted estimates - Text","Q36_1_TEXT",186
+"X16a_ii","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 16a_ii. If applicable, give confounder-adjusted estimates","Q36_2",187
+"X16a_ii_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 16a_ii. If applicable, give confounder-adjusted estimates - Text","Q36_2_TEXT",188
+"X16a_iii","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 16a_iii. If applicable, give the confounder-adjusted estimates' precision (eg, 95% confidence interval)","Q36_3",189
+"X16a_iii_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 16a_iii. If applicable, give the confounder-adjusted estimates' precision (eg, 95% confidence interval) - Text","Q36_3_TEXT",190
+"X16a_iv","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 16a_iv. Make clear which confounders were adjusted for","Q36_4",191
+"X16a_iv_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 16a_iv. Make clear which confounders were adjusted for - Text","Q36_4_TEXT",192
+"X16a_v","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 16a_v. Make clear why confounders were included","Q36_5",193
+"X16a_v_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 16a_v. Make clear why confounders were included - Text","Q36_5_TEXT",194
+"X16b","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 16b. Report category boundaries when continuous variables were categorized","Q36_6",195
+"X16b_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 16b. Report category boundaries when continuous variables were categorized - Text","Q36_6_TEXT",196
+"X16c","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 16c. If relevant, consider translating estimates of relative risk into absolute risk for a meaningful time period","Q36_7",197
+"X16c_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 16c. If relevant, consider translating estimates of relative risk into absolute risk for a meaningful time period - Text","Q36_7_TEXT",198
+"X17_i","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 17_i. Report analyses of subgroups","Q36_8",199
+"X17_i_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 17_i. Report analyses of subgroups - Text","Q36_8_TEXT",200
+"X17_ii","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 17_ii. Report analyses interactions","Q36_9",201
+"X17_ii_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 17_ii. Report analyses interactions - Text","Q36_9_TEXT",202
+"X17_iii","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 17_iii. Report sensitivity analyses","Q36_10",203
+"X17_iii_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 17_iii. Report sensitivity analyses - Text","Q36_10_TEXT",204
+"X17_iv","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 17_iv. Report other analyses done","Q36_11",205
+"X17_iv_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 17_iv. Report other analyses done - Text","Q36_11_TEXT",206
+"X18","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 18. Summarise key results with reference to study objectives","Q36_12",207
+"X18_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 18. Summarise key results with reference to study objectives - Text","Q36_12_TEXT",208
+"X19_i","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 19_i. Discuss limitations of the study, taking into account sources of potential bias or imprecision","Q36_13",209
+"X19_i_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 19_i. Discuss limitations of the study, taking into account sources of potential bias or imprecision - Text","Q36_13_TEXT",210
+"X19_ii","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 19_ii. Discuss both direction and magnitude of any potential bias","Q36_14",211
+"X19_ii_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 19_ii. Discuss both direction and magnitude of any potential bias - Text","Q36_14_TEXT",212
+"X20","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 20. Give a cautious overall interpretation of results considering objectives, limitations, multiplicity of analyses, results from similar studies, and other relevant evidence","Q36_15",213
+"X20_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 20. Give a cautious overall interpretation of results considering objectives, limitations, multiplicity of analyses, results from similar studies, and other relevant evidence - Text","Q36_15_TEXT",214
+"X21","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 21. Discuss the generalisability (external validity) of the study results","Q36_16",215
+"X21_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 21. Discuss the generalisability (external validity) of the study results - Text","Q36_16_TEXT",216
+"X22_i","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 22_i. Give the source of funding for the present study","Q36_17",217
+"X22_i_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 22_i. Give the source of funding for the present study - Text","Q36_17_TEXT",218
+"X22_ii","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 22_ii. Give the the role of the funders for the present study","Q36_18",219
+"X22_ii_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 22_ii. Give the the role of the funders for the present study - Text","Q36_18_TEXT",220
+"X22_iii","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 22_iii. If applicable, give the source of funding for the original study on which the present article is based","Q36_19",221
+"X22_iii_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 22_iii. If applicable, give the source of funding for the original study on which the present article is based - Text","Q36_19_TEXT",222
+"X22_iv","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 22_iv. If applicable, give the the role of the funders for the original study on which the present article is based","Q36_20",223
+"X22_iv_ev","Indicate if the authors report the following items for all the studies in the article (unless a study design is specified) - 22_iv. If applicable, give the the role of the funders for the original study on which the present article is based - Text","Q36_20_TEXT",224
+"comments","comments.","Q37",225
+"email","email. Corresponding author's email (Search article for ‘corresponding’, ‘@’)","Q38",226
+"country","country. Extract country from corresponding author’s affiliations","Q39",227
+"ukb_app","ukb_app. UK Biobank application number (Search article for all these terms: ‘application’ , ‘approv’ , ‘number’ , ‘Resource’. If not found examine any strings of numbers in article)","Q40",228
+"keywords","keywords. Author keywords (Extract from page 1. If not on page 1 search article for ‘keywords’)","Q41",229
+"coi","coi. Conflict of interest statement (Search article material for all these   terms: ‘competing’, ‘interest’ ,‘conflict’ , ‘disclosure’","Q42",230
+"Q22_89_TEXT - Parent Topics","Q22_89_TEXT - Parent Topics","Q22_89_TEXT - Parent Topics",231
+"Q22_89_TEXT - Topics","Q22_89_TEXT - Topics","Q22_89_TEXT - Topics",232
