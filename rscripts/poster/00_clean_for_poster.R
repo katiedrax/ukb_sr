@@ -19,7 +19,7 @@ source("rscripts/functions/clean-string-fun.R")
 
 # assign input file 
 
-input <- "data/data_extraction/Data+Extraction+Form_10+February+2020_18.20.csv"
+input <- "data/data_extraction/Data+Extraction+Form_20+March+2020_09.21.csv"
 # Import first two rows of the  Qualtrics csv export
 
 rows_3 <- read.csv(input, encoding = "UTF-8", nrows = 3, stringsAsFactors = F, header = F)
@@ -406,9 +406,9 @@ df_full$jif[df_full$jif == ""] <- NA
 
 df_full$journal_clean <- NULL
 
-# remove merged jif col if too much missing data
+# remove merged jif col if too much missing data (30%)
 
-if(sum(is.na(df_full$jif)) < 23){
+if((sum(is.na(df_full$jif)) / nrow(df_full)) >0.3){
   df_full$jif <- NULL
   message("removed jif because too much missing")
 }
