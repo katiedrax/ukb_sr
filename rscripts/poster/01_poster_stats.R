@@ -307,15 +307,21 @@ if(sum(strobe_div_items %in% strobe_div_items[duplicated(strobe_div_items)]) != 
 #}
 
 
+pre <- ncol(s_df_bin)
+
 for(i in strobe_div_items){
   x <- s_df_bin[,grep(i, colnames(s_df_bin))]
   sum <- paste(i, "sum", sep = "_")
   x[[sum]] <- rowSums(x, na.rm = T) / rowSums(!is.na(x))
-  if(nrow(x) != 32) stop("not 32")
+  if(nrow(x) != nrow(df_orig)) stop("missing some assessments")
   x <- select(x, sum)
   x[x < 1] <- 0
   s_df_bin[[sum]] <- x[[sum]]
 }
+
+
+if(ncol(s_df_bin) != pre + length(unique(strobe_div_items)))
+  stop("cols don't equal number of n cols before function plus number of sub-divided strobe items")
 
 ##############
 # bar chart data ####
@@ -416,7 +422,7 @@ dropped <- sapply(bar_data, function(x) (sum(is.na(x)))) %>%
   .[.==nrow(bar_data)] %>%
   names()
 
-if(identical(sort(dropped), sort(c("6b", "10")))){
+if(identical(sort(dropped), sort(c("10", "6b")))){
   print("dropped is all expected empty columns")
 } else {
   stop("dropped different to expected empty columns")
@@ -457,6 +463,7 @@ if(identical(test$strobe_item[gtools::mixedorder(test$strobe_item)],
   # assign test to bar_data_freq
   bar_data_freq <- test
 }
+
 ###########################
 # extract percent and count ####
 ##########################
@@ -479,6 +486,8 @@ if(is.numeric(bar_data_freq$response)){
   # find percent for no responses
   no <- which(bar_data_freq$response == 0)
 }
+
+# if 
 
 if(bar_data_freq$percent[no] == 100){
   bar_data_freq$percent[no] <- 0
@@ -519,7 +528,7 @@ write.csv(strobe_qs, "outputs/strobe_dict.csv", row.names = F, fileEncoding = "U
 ########################
 
 # import general as these contain generic labels for all strobe items (not design specific)
-labels <- read.csv("bar_labels_general.csv", encoding = "UTF-8", stringsAsFactors = F, na.strings = "") %>%
+labels <- read.csv("poster/bar_labels_general.csv", encoding = "UTF-8", stringsAsFactors = F, na.strings = "") %>%
   select(c("variable", "bar_label"))
 
 # clean variable names so matches bar_chart_freq colnames (i.e. no subdivisions and no design specific questions) >
@@ -639,8 +648,9 @@ if(identical(c(intro_meth, results_diss), as.character(bar_data_freq$strobe_item
 intro_meth_labels <- labels$x_labels[which(labels$variable %in% intro_meth_df$strobe_item)]
 result_diss_labels <- labels$x_labels[which(labels$variable %in% result_diss_df$strobe_item)]
 ################################
-# plot separate bar charts ####
-############################
+# plot separate bar charts #####
+# NEED TO FIX LABELS ON PLOTS - THEY ARE WRONG ####
+############################################
 # set levels as mixed order so order preserved in ggplot
 intro_meth_df$strobe_item<- factor(intro_meth_df$strobe_item, levels = 
                                      intro_meth_df$strobe_item[gtools::mixedorder(intro_meth_df$strobe_item)])
@@ -683,6 +693,35 @@ result_diss_df %>%ggplot(aes(x=strobe_item, y=percent_yes)) +
   ggtitle("Figure 2. STROBE results and discussion items") 
 
 
+
+png("Rplot10.png", width = 1200, height = 1500)
+# strobe item on x axis and plot % yes
+result_diss_df %>%ggplot(aes(x=strobe_item, y=percent_yes)) + 
+  # blue fill
+  geom_bar(stat="identity", fill = "#A5ECEE") +
+  theme_classic() +
+  theme(text = element_text(size=30))+
+  scale_x_discrete(labels= labels$x_labels) +
+  coord_flip() +
+  xlab("STROBE Item") +
+  ylab("Yes (%)") +
+  theme(plot.title = element_text(size = 22)) 
+dev.off()
+
+
+png("Rplot11.png", width = 1200, height = 1500)
+# strobe item on x axis and plot % yes
+intro_meth_df %>%ggplot(aes(x=strobe_item, y=percent_yes)) + 
+  # blue fill
+  geom_bar(stat="identity", fill = "#A5ECEE") +
+  theme_classic() +
+  theme(text = element_text(size=30))+
+  scale_x_discrete(labels= labels$x_labels) +
+  coord_flip() +
+  xlab("STROBE Item") +
+  ylab("Yes (%)") +
+  theme(plot.title = element_text(size = 22)) 
+dev.off()
 
 
 ####################
