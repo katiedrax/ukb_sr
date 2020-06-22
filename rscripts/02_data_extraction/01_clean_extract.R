@@ -2,7 +2,7 @@
 # libraries ####
 #############
 
-library(dplyr)
+library(magrittr)
 library(stringr)
 
 # TO DO this code is copy and pasted from clean_design.R >
@@ -22,29 +22,10 @@ source("rscripts/functions/clean-string-fun.R")
 
 # assign input file 
 
-input <- "data/data_extraction/Data+Extraction+Form_10+February+2020_18.20.csv"
-# Import first two rows of the  Qualtrics csv export
+input <- "data/data_extraction_form.csv"
+# Import and set NA 
 
-rows_3 <- read.csv(input, encoding = "UTF-8", nrows = 3, stringsAsFactors = F, header = F)
-
-header <- read.csv("outputs/extraction_dictionary.csv", encoding = "UTF-8", stringsAsFactors = F)
-
-# order by import number so order will match order of headers in row 3
-header <- header[order(header$import_num), ]
-
-############
-# import ####
-###########
-
-if(identical(as.character(rows_3[2, ]), as.character(header$question))){
-  # if row 2 == question text row import csv and skip first three rows (which contain the qualrics header rows)
-  # set "Not applicable" responses used in strobe item options to missing so won't be included in tables
-  df <- read.csv(input, encoding = "UTF-8", stringsAsFactors = F, header = F, skip = 3, na.strings = c("", " ", "NA"))
-  # assign header$variable as column names as order will now match
-  colnames(df) <- header$variable
-} else {
-  stop("row 2 in csv != question text row")
-}
+df <- read.csv(input, encoding = "UTF-8", stringsAsFactors = F, header = T, na.strings = c("", " ", "NA"))
 
 #################
 # clean properly ####
