@@ -129,12 +129,16 @@ if(identical(length(var), ncol(data))){
   stop("wrong length")
 }
 
+# check column's name is in it's q_text value
+
 a <- 1:length(var)
 
 for(i in 1:length(var)){
+  # extract and save q_text value if contains colname
   a[i] <- grep(colnames(data)[i], data["q_text", i], value = T)
 }
 
+# if all q_text values contain colnames then a should be identical to the q_text row, check this
 if(identical(a, as.character(data["q_text", ])) == F) stop("var wrong")
 
 ##################
@@ -168,17 +172,34 @@ if(sum(colnames(data) == "strobe_ev" ) == 2){
   stop("not dups")
 }
 
+#################
+# make data dict and remove qualitrics rows ####
+######################
+
+# make data dictionary so list variables with original question text and the numbers qualtrics assigned them
+dict <- data.frame(variable = colnames(data), question = as.character(data["q_text", ]),
+                   qual_var = as.character(data["q_num", ]), stringsAsFactors = F)
+
+# drop qualtrics rows
+
+data <- data[!rownames(data) %in% c("q_num", "q_text", "import_id"), ]
+
 #######
 # export ####
 #########
+
+# export data if passes checks
 
 if(sum(!is.na(colnames(data))) == ncol(data)){
   # check no colnames start with number cause R doesn't like it
   if(sum(grepl("^[[:digit:]]", colnames(data))) != 0) stop("some colnames(data)s start with 0")
   # check no duplicates
   if(sum(duplicated(colnames(data))) != 0) stop("colnames(data) contains ", sum(duplicated(colnames(data))), " duplicates")
-  write.csv(data, "outputs/clean_data_extract.csv", row.names = F, fileEncoding = "UTF-8")
+  write.csv(data, "outputs/clean_extraction_form.csv", row.names = F, fileEncoding = "UTF-8")
 } else {
   stop("wrong length")
 }
 
+# export extraction dictionary
+
+write.csv(dict, "outputs/extraction_dict.csv", row.names = F, fileEncoding = "UTF-8")
