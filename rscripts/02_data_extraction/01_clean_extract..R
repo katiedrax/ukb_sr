@@ -14,8 +14,8 @@ library(stringr)
 input <- "data/data_extraction_form.csv"
 
 # Import data
-
-data <- read.csv(input, encoding = "UTF-8", stringsAsFactors = F, header = F)
+# read in "" as NA to avoid recognising Not Applicable (NA) values as missing
+data <- read.csv(input, encoding = "UTF-8", stringsAsFactors = F, header = F, na.strings = "")
 
 # vector of question text associated with cols automatically outputted by Qualtrics 
 
@@ -31,7 +31,8 @@ qual_vars <- c("StartDate", "EndDate", "Status", "Progress", "Duration (in secon
 ################
 
 # drop all qual_vars if row 1 contains them 
-if(sum(qual_vars %in% data[1, 1:10]) == 10){
+if(identical(qual_vars, as.character(data[1, 1:10]))){
+  qual_vars_data <- data
   data <- data[, -c(1:10)]
 } else {
   stop("data doesn't contain qual_vars")
@@ -79,17 +80,17 @@ if(sum(grepl("ImportId", data[3,])) != ncol(data)){
 
 topic_col <- grep("topic", data[2,], ignore.case = T)
 
-# check one topic col is empty besides first three rows containing q_num, q_text and 
+# check all topic cols empty besides first three rows containing q_num, q_text and 
 
-if(sum(data[, topic_col[1]] == "") != nrow(data) -3) stop("has more than 3 values")
+for(i in topic_col){
+  if(sum(!is.na(data[, i])) != 3) stop(i, "has more than 3 values")
+}
+
 
 # drop random topic cols if both empty besides first three rows
 
-if(sum(data[, topic_col[1]] == "") == sum(data[, topic_col[1]] == "")){
-  data <- data[, -topic_col]
-} else {
-  stop("topic cols not empty")
-}
+data <- data[, -topic_col]
+
 
 ################
 # extract variable names ####
@@ -184,6 +185,22 @@ dict <- data.frame(variable = colnames(data), question = as.character(data["q_te
 
 data <- data[!rownames(data) %in% c("q_num", "q_text", "import_id"), ]
 
+# create cols for resolving conflicts
+
+
+x <- paste0(colnames(data)[grepl("_ev$", colnames(data)) == F], "_correct")
+correct_cols <- data.frame(matrix(ncol = length(x), nrow = nrow(data)))
+colnames(correct_cols) <- x
+
+#add in correct_cols
+
+data <- cbind(data, correct_cols)
+
+# order columns using mixedorder so strobe items keep numerical order
+
+data <- data[ , gtools::mixedorder(colnames(data))]
+
+
 #######
 # export ####
 #########
@@ -191,15 +208,17 @@ data <- data[!rownames(data) %in% c("q_num", "q_text", "import_id"), ]
 # export data if passes checks
 
 if(sum(!is.na(colnames(data))) == ncol(data)){
+  # check Not applicable values are characters, check this in 7_iii strobe item which should contain lots of Not APplicables
+  if("NA" %in% data$s7_iii == F) stop("not applicables aren't characters")
   # check no colnames start with number cause R doesn't like it
   if(sum(grepl("^[[:digit:]]", colnames(data))) != 0) stop("some colnames(data)s start with 0")
   # check no duplicates
   if(sum(duplicated(colnames(data))) != 0) stop("colnames(data) contains ", sum(duplicated(colnames(data))), " duplicates")
-  write.csv(data, "outputs/clean_extraction_form.csv", row.names = F, fileEncoding = "UTF-8")
+  # export NAs as blanks so don't confuse Not Applicable (NA) response
+  write.csv(data, "outputs/clean_extraction_form.csv", row.names = F, fileEncoding = "UTF-8", na = "")
 } else {
   stop("wrong length")
 }
 
 # export extraction dictionary
-
-write.csv(dict, "outputs/extraction_dict.csv", row.names = F, fileEncoding = "UTF-8")
+write.csv(dict, "outputs/extraction_dict.csv", row.names = F, fileEncoding = "UTF-8", na = "")
