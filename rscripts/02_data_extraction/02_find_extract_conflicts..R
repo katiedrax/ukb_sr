@@ -22,27 +22,46 @@ source("rscripts/functions/clean-string-fun.R")
 
 # assign input file 
 
-input <- "data/data_extraction_form.csv"
-# Import and set NA 
+input <- "outputs/clean_extraction_form.csv"
+# Import and set NA and strip white space to clean free text answers
 
-df <- read.csv(input, encoding = "UTF-8", stringsAsFactors = F, header = T, na.strings = c("", " ", "NA"))
+df <- read.csv(input, encoding = "UTF-8", stringsAsFactors = F, header = T, na.strings = c("", " ", "NA"),strip.white = T)
 
-#################
-# clean properly ####
-#################
-
-# column containing clean substring of title for easier matching
+# add substring of title for easier matching in later checks
 
 df$title_sub <- clean_string(df$title)
 
-####################
-# merge prep ####
-##################
+################################################
+# check all entries have article id and title ####
+##############################
 
-kd <- df[df$initials == "kd", ]
-mg <- df[df$initials == "mg", ]
-rr <- df[df$initials == "rr", ]
-bj <- df[df$initials == "rj", ]
+# some rows may have many NAs because of unforced answers >
+# if rows contain too many NAs  the article any be unidentifiable just incase so remove these rows
+# set limit of 99% NA values
+na_limit <- ncol(df) - (ncol(df) * 0.01)
+
+if(sum(is.na(df$article_id)| is.na(df$title)) != 0){
+  # find all obs missing article_id or title
+  miss <- df[is.na(df$article_id) | is.na(df$title), ]
+  # count number of NAs in each row
+  miss$na_sum <- apply(miss, 1, function(x) sum(is.na(x)))
+} else {
+  print("no articles missing article_id or title")
+}
+
+# check all rows missing article_id or title contain too many NAs to be identifiable and remove them
+if(all(miss$na_sum > na_limit)) {
+  # remove
+  df <- df[!is.na(df$article_id)| !is.na(df$title), ]
+} else {
+  stop("could identify some obs missing id or title")
+}
+
+
+###############
+# check article_id and title ####
+#need to check article_id matches the title
+################
 
 # df of all articles in csv_clean_epi.csv on OSF
 
@@ -51,6 +70,36 @@ articles_df <- read.csv("https://osf.io/8uy9w/?action=download", encoding = "UTF
 # vector of all article id's in csv_clean_epi.csv on oSF
 
 articles <- articles_df$id
+
+# create substring of title in articles_df for easier matching
+
+articles_df$title_sub <- clean_string(articles_df$title)
+
+# get article_ids and title substrings so can check similarities
+
+orig_id <- articles_df[, c("id", "title_sub")]
+df_id <- df[, c("article_id", "title_sub")]
+
+# check all article_ids are right
+
+df_id$article_id[!(df_id$article_id %in% orig_id$id)]
+
+######################
+# remove empty rows ####
+#####################
+
+df$nas <- apply(df, 1, function(x) sum(is.na(x)))
+
+
+####################
+# merge prep ####
+##################
+
+kd <- df[df$initials == "kd", ]
+mg <- df[df$initials == "mg", ]
+rr <- df[df$initials == "rr", ]
+bj <- df[df$initials == "bj", ]
+
 
 ###############################
 # check article id duplicates ####
