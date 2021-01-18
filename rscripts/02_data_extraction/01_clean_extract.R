@@ -17,25 +17,38 @@ input <- "data/data_extraction_form.csv"
 # read in "" as NA to avoid recognising Not Applicable (NA) values as missing
 df <- read.csv(input, encoding = "UTF-8", stringsAsFactors = F, header = F, na.strings = "")
 
+# assign rownames
+rownames(df) <- seq(1:nrow(df))
+
 # vector of question text associated with cols automatically outputted by Qualtrics 
 
-qual_text <- c("Start Date", "End Date", "Response Type", "Progress", "Duration (in seconds)",
+qualtric_text <- c("Start Date", "End Date", "Response Type", "Progress", "Duration (in seconds)",
                "Finished", "Recorded Date", "Response ID", "Distribution Channel", "User Language")
 
-# vector of variable names associated with cols automatically outputted by Qualtrics
-qual_vars <- c("StartDate", "EndDate", "Status", "Progress", "Duration (in seconds)",
-               "Finished", "RecordedDate", "ResponseId", "DistributionChannel", "UserLanguage")
+# vector of my variable names for qualtrics metadata columns
+qualtric_vars <- gsub("[[:punct:]]", "", qualtric_text) %>%
+  gsub("[[:space:]]", "_", .) %>%
+  tolower()
 
 ##############
-# drop qual cols I don't want ####
+# drop qualtric cols I don't want ####
 ################
 
-# drop all qual_vars if row 1 contains them 
-if(identical(qual_vars, as.character(df[1, 1:10]))){
-  qual_vars_data <- df
+# row 2 should contain question text and qualtrics metadata should be in first 10 columns >
+# drop all qualtric_text if in first 10
+
+if(identical(qualtric_text, as.character(df[2, 1:10]))){
+  qual_df <- df
+  colnames(qual_df)[1:10] <- qualtric_vars
+  id <- grep("^article_id", qual_df[2, ])
+  colnames(qual_df)[id] <- "article_id"
   df <- df[, -c(1:10)]
+  qual_df[, colnames(qual_df)]
+  vital_cols <- c("article_id", qualtric_vars)
+  if(all(vital_cols %in% colnames(qual_df)) == F) stop("qualtric_vars and article_id not all in vital_cols")
+  qual_df <- qual_df[, colnames(qual_df) %in% vital_cols]
 } else {
-  stop("df doesn't contain qual_vars")
+  stop("df doesn't contain qualtric_vars")
 }
 
 ###############
@@ -43,7 +56,7 @@ if(identical(qual_vars, as.character(df[1, 1:10]))){
 ###############
 
 # question names were not set in qualtrics  >
-# so without qual_text, df col names should all contain question numbers in the format Q[1-2 digit number] >
+# so without qualtric_text, df col names should all contain question numbers in the format Q[1-2 digit number] >
 # warn user if this isn't true
 
 if(sum(grepl("Q[[:digit:]]{1,2}", df[1, ])) != ncol(df)){
@@ -178,8 +191,8 @@ if(sum(colnames(df) == "strobe_ev" ) == 2){
 ######################
 
 # make df dictionary so list variables with original question text and the numbers qualtrics assigned them
-dict <- df.frame(variable = colnames(df), question = as.character(df["q_text", ]),
-                   qual_var = as.character(df["q_num", ]), stringsAsFactors = F)
+dict <- data.frame(variable = colnames(df), question = as.character(df["q_text", ]),
+                   qualtric_var = as.character(df["q_num", ]), stringsAsFactors = F)
 
 # drop qualtrics rows
 
@@ -189,7 +202,7 @@ df <- df[!rownames(df) %in% c("q_num", "q_text", "import_id"), ]
 
 
 x <- paste0(colnames(df)[grepl("_ev$", colnames(df)) == F], "_correct")
-correct_cols <- df.frame(matrix(ncol = length(x), nrow = nrow(df)))
+correct_cols <- data.frame(matrix(ncol = length(x), nrow = nrow(df)))
 colnames(correct_cols) <- x
 
 #add in correct_cols
@@ -200,6 +213,16 @@ df <- cbind(df, correct_cols)
 
 df <- df[ , gtools::mixedorder(colnames(df))]
 
+########################
+# add qualtric variables in ####
+##########################
+
+# add qualtric_vars back in on rownames
+
+qual_df$rownames <- rownames(qual_df)
+df$rownames <- rownames(df)
+
+b <- dplyr::full_join(df, qual_df, by = c("rownames", "article_id"))
 
 #######
 # export ####
