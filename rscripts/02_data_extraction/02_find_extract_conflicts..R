@@ -5,9 +5,6 @@
 library(magrittr)
 library(stringr)
 
-# TO DO this code is copy and pasted from clean_design.R >
-# need to clean properly by adapting copy pasted code
-
 ###############
 # functions ####
 ##############
@@ -25,7 +22,7 @@ source("rscripts/functions/clean-string-fun.R")
 input <- "outputs/clean_extraction_form.csv"
 # Import and set NA and strip white space to clean free text answers
 
-df <- read.csv(input, encoding = "UTF-8", stringsAsFactors = F, header = T, na.strings = c("", " ", "NA"),strip.white = T)
+df <- read.csv(input, encoding = "UTF-8", stringsAsFactors = F, header = T, na.strings = c("", " "),strip.white = T)
 
 # add substring of title for easier matching in later checks
 
@@ -90,57 +87,70 @@ df_id$article_id[!(df_id$article_id %in% orig_id$id)]
 
 df$nas <- apply(df, 1, function(x) sum(is.na(x)))
 
-
-####################
-# merge prep ####
-##################
-
-kd <- df[df$initials == "kd", ]
-mg <- df[df$initials == "mg", ]
-rr <- df[df$initials == "rr", ]
-bj <- df[df$initials == "bj", ]
-
-
-###############################
-# check article id duplicates ####
-###############################
-
-
-# find Mark's duplicate article_ids
-mg_id_dup <- mg$article_id[duplicated(mg$article_id)]
-mg_id_dup_df <-   mg[mg$article_id %in% mg_id_dup,]
-
-# find Katie's
-kd_id_dup <- kd$article_id[duplicated(kd$article_id)]
-kd_id_dup_df <-   kd[kd$article_id %in% kd_id_dup,]
-
-
-#########################
-# check title duplicates ####
+############################
+# MANUAL remove duplicate articles ####
 #########################
 
-# check there are no duplicate titles
+# I wrote the find_duplicate_articles() function >
+# I manually identified duplicates and found which were incomplete/out of date >
+# wrote a manual function to remove these duplicates
 
-if(length(kd$title[duplicated(kd$title)]) >0 | length(mg$title[duplicated(mg$title)]) >0){
-  print(kd$title[duplicated(kd$title)])
-  print(mg$title[duplicated(mg$title)])
-  stop("kd or mg have duplicated titles")
-} else {
-  print("kd and mg have no duplicate titles")
+MANUAL_remove_duplicate_articles <- function(){
+  # One Foste2018hort00-7 entry by MG is incomplete, 
+  mg_dup <- which(df$article_id =="Foste2018hort00-7" & is.na(df$s1a) & df$initials == "MG")
+  df <- df[-mg_dup, ]
+  # Mulle2017tudy2467 and Peter2018bank8507 are prediction articles >
+  # KD and RR duplicated one of these articles to mark them as prediction articles,after failing to do so >
+  # remove entries not marked as prediction articles
+  kd_dup <- which(df$article_id =="Mulle2017tudy2467" &is.na(df$predict) &df$initials == "KD")
+  df <- df[-kd_dup,]
+  rr_dup <- which(df$article_id =="Peter2018bank8507" &is.na(df$predict) & df$initials == "RR")
+  df <- df[-rr_dup, ]
 }
 
+# apply function 
+df <- MANUAL_remove_duplicate_articles()
+
+# function to find any duplicate articles for each initial
+find_duplicate_articles <- function(){
+  # get vector of unique initials to find duplicate articles for each initial
+  initials <- unique(df$initials)
+  # add names of initials so list output from lapply will have names
+  names(initials) <- initials
+  # loop for each initial
+  a <- lapply(initials, function(x){
+    # find all articles for initial x so can search for duplicates
+    initial_articles <- df[df$initials == x, "article_id"]
+    # find values of duplicated articles so can find position in df 
+    dup_article <- initial_articles[duplicated(initial_articles)]
+    # find position of duplicate articles for each initial
+    dup_article_by_initial <- which(df$initials == x & df$article_id == dup_article)
+    # return
+    return(dup_article_by_initial)
+  })
+  # check there are no duplicate articles for any initials
+  if(any(lengths(a)>0)){
+    warning(paste(names(which(lengths(a) >0)), collapse = " "), " have duplicate article_ids")
+    return(a)
+  } else {
+    print("no data extractor has any duplicate articles")
+  }
+}
+
+# check all duplicates gone
+find_duplicate_articles()
 
 ###########
 # merge####
 ##########
 
 # join sets of articles assessed by md and kd. Add suffix's to indicate who's columns are whos
-both <- full_join(kd, mg, by = "article_id", suffix = c(".kd", ".mg"))
+both <- merge(df[df$initials == "KD", ], df[df$initials == "MG", ], by = "article_id", suffixes = c(".kd", ".mg"))
 
 # order column names alphabetically & put article_id and title first 
 
 both <- both[,order(colnames(both))] %>%
-  select(article_id, title.kd, title.mg, everything())
+  dplyr::select(article_id, title.kd, title.mg, everything())
 
 # drop initials columns as only needed for merge
 
@@ -152,8 +162,7 @@ both$initials.mg <- NULL
 ########################
 
 
-title_cons <- both[which(both$title_sub.kd != both$title_sub.mg), ] %>%
-  select(c(article_id, title.kd, title.mg))
+title_cons <- both[which(both$title_sub.kd != both$title_sub.mg), c("article_id", "title.kd", "title.mg")]
 warning("manually compare titles View(title_cons) to check they are the same")
 
 # titles may all be correct but differ in spelling, unicode characters, etc
