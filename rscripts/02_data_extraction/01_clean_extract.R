@@ -17,7 +17,11 @@ input <- "data/data_extraction_form.csv"
 # read in "" as NA to avoid recognising Not Applicable (NA) values as missing
 df <- read.csv(input, encoding = "UTF-8", stringsAsFactors = F, header = F, na.strings = "")
 
-# assign rownames
+##############
+# drop qualtric cols I don't want ####
+################
+
+# assign rownames so can merge qualtrics cols back in if necessary
 rownames(df) <- seq(1:nrow(df))
 
 # vector of question text associated with cols automatically outputted by Qualtrics 
@@ -29,10 +33,6 @@ qualtric_text <- c("Start Date", "End Date", "Response Type", "Progress", "Durat
 qualtric_vars <- gsub("[[:punct:]]", "", qualtric_text) %>%
   gsub("[[:space:]]", "_", .) %>%
   tolower()
-
-##############
-# drop qualtric cols I don't want ####
-################
 
 # row 2 should contain question text and qualtrics metadata should be in first 10 columns >
 # drop all qualtric_text if in first 10
@@ -209,10 +209,6 @@ colnames(correct_cols) <- x
 
 df <- cbind(df, correct_cols)
 
-# order columns using mixedorder so strobe items keep numerical order
-
-df <- df[ , gtools::mixedorder(colnames(df))]
-
 ########################
 # add qualtric variables in ####
 ##########################
@@ -222,11 +218,22 @@ df <- df[ , gtools::mixedorder(colnames(df))]
 qual_df$rownames <- rownames(qual_df)
 df$rownames <- rownames(df)
 
-b <- dplyr::full_join(df, qual_df, by = c("rownames", "article_id"))
+mismatch <- dplyr::anti_join(qual_df, df,  by = c("rownames", "article_id"))
+
+if(identical(as.character(c(1,2,3)), as.character(mismatch$rownames))){
+  # add in qualtric_vars with
+  df <- merge(df, qual_df, by = c("rownames", "article_id"))
+  # remove merge col as no longer needed
+  df$rownames <- NULL
+}
 
 #######
 # export ####
 #########
+
+# order columns using mixedorder so strobe items keep numerical order
+
+df <- df[ , gtools::mixedorder(colnames(df))]
 
 # export df if passes checks
 
