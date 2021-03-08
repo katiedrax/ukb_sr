@@ -41,6 +41,9 @@ df <- read.csv(input, encoding = "UTF-8", stringsAsFactors = F, header = T, na.s
 # strip white from all columns just incase strip.white read in didn't work
 df <- as.data.frame(lapply(df, trimws, "both"))
 
+# remove survey previews as these are not valid responses
+df <- df[df$response_type != "Survey Preview", ]
+
 ################################################
 # check all entries have article id and title ####
 ##############################
@@ -102,15 +105,16 @@ chk <- merge(df[, chk_cols], osf[, chk_cols],
 # save all article_ids that failed to merge (meaning the titles are wrong in df or osf)
 wrong <- chk[is.na(chk$title.df) | is.na(chk$title.osf), ]
 
+###############
+# MANUAL CHECK ####
+############
+
 # any obs in wrong with NA in title.df mean that the article_id-title pair is only in OSF >
 # this could be because they are mispelt in OSF, and correctly when extracted >
 # MANUAL check this by finding online version of article for article_id and checking spelling in osf
 wrong_osf_id <- wrong$article_id[is.na(wrong$title.df)]
 wrong_osf_title<- osf$title[osf$article_id == wrong_osf_id]
 
-###############
-# MANUAL CHECK ####
-############
 
 # manual check revealed the title in mispelled so correct it
 osf$title[osf$article_id == wrong_osf_id] <-  "Associations of Leg Length, Trunk Length, and Total Adult Height With Ménière's: Cross-Sectional Analysis in the UK Biobank"
@@ -150,12 +154,12 @@ names(wrong_id) <- wrong_id
 # create list of all titles of article_ids in wrong and check titles are correct but just mispelt
 manual_chk <- lapply(wrong_id, function(x){
   # find them in df since all osf titles now corrected
-  y <- df$title_clean[df$article_id == x]
+  y <- df$title[df$article_id == x]
 })
 
 writeLines(unlist(manual_chk), "outputs/manual-chk.txt")
 
-# manual check showed that all titles were the correct, just unicode characters created mismatches and one title in osf was mispelt
+# MANUAL - all titles in manual_chk correct, just unicode characters created mismatches and one title in osf was mispelt
 # manually corrected mispelt title in osf meaning all osf titles now correct >
 # so replace all titles in df with osf titles
 
@@ -190,7 +194,6 @@ if(identical(x, corrected)){
 # MANUAL remove duplicate articles ####
 #########################
 
-# I manually identified duplicates and found which were incomplete/out of date >
 # function to find any duplicate articles for each initial
 find_duplicate_articles <- function(){
   # get vector of unique initials to find duplicate articles for each initial
@@ -198,45 +201,62 @@ find_duplicate_articles <- function(){
   # add names of initials so list output from lapply will have names
   names(initials) <- initials
   # loop for each initial
-  a <- lapply(initials, function(x){
+  dup_list <- lapply(initials, function(initial){
     # find all articles for initial x so can search for duplicates
-    initial_articles <- df[df$initials == x, "article_id"]
+    initial_articles <- df[df$initials == initial, "article_id"]
     # find values of duplicated articles so can find position in df 
     dup_article <- initial_articles[duplicated(initial_articles)]
-    # find position of duplicate articles for each initial
-    dup_article_by_initial <- which(df$initials == x & df$article_id == dup_article)
-    # return
-    return(dup_article_by_initial)
+    # nest for loop to find position of each duplicated article for each initial in df
+    lapply(dup_article, function(x){
+      which(df$initials == initial & df$article_id == x)
+    })
   })
+  # unlist and return dup_list if is same length as initials
+  if(identical(length(dup_list), length(initials))){
+    # unlist if dup_list contains dups/statement of no dups for each coder
+    dups <- unlist(dup_list) 
+    # return 
+    # return dups if numeric vector so can use to find subset of duplicates in df
+    if(is.numeric(dups)) return(dups) 
+    } else {
+      stop("dup_list missing some initials")
+    }
 }
 
-dups <- find_duplicate_articles()
-dups <- df[unlist(dups), ]
+dups <- find_duplicate_articles() %>%
+  # subset df to find dups
+  df[., ]
 
-# manual function to remove these duplicates
+coder <- unique(df$initials)
+names(coder) <- coder
+y <- lapply(coder, function(x){
+  coder_dups <- dups[dups$initials %in% x, ] 
+  predict_id <- coder_dups$article_id[coder_dups$predict %in% "Yes"]
+  which(df$article_id %in% predict_id & !(df$predict %in% "Yes") &df$initials %in% x)
+})
+
+df <- df[-unlist(y),]
+
+# MANUAL - I inspected the duplicates and found which were incomplete/out of date >
+# manual because automating would be complicated >
+# e.g. remove prediction papers by each initial to ensure don't accidentally remove all prediction papers not labelled as such
 
 MANUAL_remove_duplicate_articles <- function(){
-  # One Foste2018hort00-7 entry by MG is incomplete, 
-  mg_dup <- which(df$article_id =="Foste2018hort00-7" & is.na(df$s1a) & df$initials == "MG")
-  df <- df[-mg_dup, ]
-  # Mulle2017tudy2467 and Peter2018bank8507 are prediction articles >
-  # KD and RR duplicated one of these articles to mark them as prediction articles,after failing to do so >
-  # remove entries not marked as prediction articles
-  kd_dup <- which(df$article_id =="Mulle2017tudy2467" &is.na(df$predict) &df$initials == "KD")
-  df <- df[-kd_dup,]
-  rr_dup <- which(df$article_id =="Peter2018bank8507" &is.na(df$predict) & df$initials == "RR")
-  df <- df[-rr_dup, ]
+  # One Foste2018hort00-7 entry by MG is incomplete
+  mg_dup <- which(df$article_id =="Foste2018hort00-7" & df$finished %in% "False" & df$initials == "MG")
+  # one Morri2018bank.496	entry by RR is incomplete
+  rr_dup <- which(df$article_id =="Morri2018bank.496" & df$finished %in% "False" & df$initials == "RR")
+  df <- df[-c(mg_dup, rr_dup),]
 }
 
 # apply function 
 df <- MANUAL_remove_duplicate_articles()
 
 # check there are no duplicate articles for any initials
-a <- find_duplicate_articles()
+dups <- find_duplicate_articles()
 
-if(any(lengths(a)>0)){
-  warning(paste(names(which(lengths(a) >0)), collapse = " "), " have duplicate article_ids")
-  return(a)
+if(length(dups) != 0){
+  warning(paste(names(which(lengths(dups) >0)), collapse = " "), " have duplicate article_ids")
 } else {
   print("no coder has any duplicate articles")
 }
@@ -263,8 +283,9 @@ merge_with_kd <- function(initials_coder_2){
                 by = "article_id", suffixes = c(".kd", suffix_2))
   # create vector of columns to call in select
   cols <- c("article_id", "title.kd", paste0("title", suffix_2))
-  # order column names alphabetically & put article_id and title first 
-  both <- both[,order(colnames(both))] %>%
+  # order columns using mixedorder so strobe items keep numerical order
+  both <- both[ , gtools::mixedorder(colnames(both))] %>%
+    # put article_id and title first >
     # cols is external vector of variable names so need to use all_of to remove ambiguity in tidyverse
     select(all_of(cols), everything())
   # save name of coder 2 initial col
@@ -278,9 +299,23 @@ merge_with_kd <- function(initials_coder_2){
   title_cons <- which(both$title_sub.kd != both[title_sub_2])
   # stop if  are any title_cons, should be none after manual correction
   if(length(title_cons) >0) stop("title_sub cols of KD and ", initials_coder_2, " conflict in rows ", title_cons)
+  # only kd extracted some variables but merge will create a copy for coder 2 >
+  # save vector of variables only kd extractor
+  kd_only <- c("email","country","ukb_app","keywords","coi")
+  # save vector coder 2 copy of kd_only cols
+  drop_2 <- paste0(kd_only, suffix_2)
+  # save names of remaining versions of identical cols so can remove suffix
+  kd_to_rename <- paste0(kd_only, ".kd")
+  # drop drop_2 and emove suffix from kd_to_rename if all in colnames
+  if(all(drop_2 %in% colnames(both)) & all(kd_to_rename %in% colnames(both))){
+    both <- both[, -which(colnames(both) %in% drop_2)]
+    colnames(both)[colnames(both) %in% kd_to_rename] <- gsub("\\..*","", colnames(both)[colnames(both) %in% kd_to_rename])
+  }
   # return
   return(both)
 }
+
+
 
 kd_mg <- merge_with_kd("MG")
 
@@ -299,12 +334,13 @@ kd_bw <- merge_with_kd("BW")
 # export if everything double coded
 
 merged_id <- unique(c(kd_bw$article_id, kd_rr$article_id, kd_mg$article_id))
-
 if(all(df$article_id %in% merged_id)){
   write.csv(kd_bw, "outputs/kd-bw-articles.csv", row.names = F, fileEncoding = "UTF-8", na = "")
   write.csv(kd_mg, "outputs/kd-mg-articles.csv", row.names = F, fileEncoding = "UTF-8", na = "")
   write.csv(kd_rr, "outputs/kd-rr-articles.csv", row.names = F, fileEncoding = "UTF-8", na = "")
 } else {
-  stop("some articles not double coded")
+  # save list of ids only single coded for stop message
+  single <- df$article_id[!(df$article_id %in% merged_id)]
+  # print error
+  stop(length(single)," articles not double coded")
 }
-

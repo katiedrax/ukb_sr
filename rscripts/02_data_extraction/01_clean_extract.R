@@ -4,6 +4,8 @@
 
 library(magrittr)
 library(stringr)
+library(gtools)
+library(dplyr)
 
 ##########
 # import####
@@ -197,17 +199,6 @@ dict <- data.frame(variable = colnames(df), question = as.character(df["q_text",
 # drop qualtrics rows
 
 df <- df[!rownames(df) %in% c("q_num", "q_text", "import_id"), ]
-
-# create cols for resolving conflicts
-
-
-x <- paste0(colnames(df)[grepl("_ev$", colnames(df)) == F], "_correct")
-correct_cols <- data.frame(matrix(ncol = length(x), nrow = nrow(df)))
-colnames(correct_cols) <- x
-
-#add in correct_cols
-
-df <- cbind(df, correct_cols)
 
 ########################
 # add qualtric variables in ####
