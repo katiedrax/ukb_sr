@@ -1,0 +1,41 @@
+---
+title: "The UK Biobank Study: Systematic Review of the Reporting Quality in UK Biobank Studies"
+author: "Emma Anderson, George Davey Smith, Katie Drax, Mark Gibson, Marcus Munafò, Benjamin Woolf, and Rebecca Richmond"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output: 
+  word_document:
+      number_sections: true
+bibliography: manuscript.bib
+csl: apa.csl
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Background
+
+There is a general move towards making data freely accessible, or ‘open’, by academic and governmental institutions alike [@vasilevsky2017; @worldwidewebfoundation2018]. 
+Completely open data allows any individual, regardless of their motivation, discipline or skillset, to access and analyse a dataset for free. 
+This accessibility offers researchers new opportunities but there is also uncertainty about how the nature of open data may impact the reliability of research findings. 
+One method by which the reliability of results from open data may be investigated is through replication. 
+Direct replication of secondary data analyses is aided by the publication of an original analysis plan, in which the authors describe their statistical analysis in full. 
+However, recent evidence suggests that it is unclear whether this is sufficient to ensure direct replicability of findings [@hardwicke2018; @naudet2018]. 
+
+To investigate the reliability of findings from open data, we will attempt to replicate all eligible research articles that use UK Biobank (UKB) data. 
+The UKB is a prospective cohort study which collected a wide range of health data from 500,000 people aged 40-69 in the UK during 2006-2010 [@ukbiobankcoordinatingcentre2007].
+Importantly, UKB data is partially open data because it is only available to bona fide researchers conducting research in the public interest on a cost-recovery basis.
+The UKB reserves the right to reject access applications for projects it deems inappropriate [@ukbiobankcoordinatingcentre2011].
+We first conducted a systematic review to (1) assess the completeness of UKB study reporting, (2) identify articles that are suitable for replication, and (3) inform reporting guidelines for other articles using the UKB and similar resources. 
+We will evaluate reproducibility of studies conducted in the UKB given the abundance of published articles using data from this cohort and their contemporary nature, increasing the likelihood that authors will be contactable.
+Furthermore, they all use the same, professionally collected, maintained and diverse open resource. 
+This guarantees data accessibility and usability and means that differences between the original and replication results cannot be explained by poor data curation or heterogeneity between studies.
+
+Many previous systematic reviews of reporting standards across a range of disciplines used guidelines to assess the completeness of reporting [e.g. @agha2014; @cook2011; @plint2006).
+We used the STROBE (STrengthening the Reporting of Observational Studies in Epidemiology) Statement, which provides reporting guidelines for observational studies, to evaluate articles arising from UKB and to make comparisons between the articles. 
+The STROBE Statement has been endorsed by over 100 journals and, as no major changes have been made to the original version published in 2007 [@cevallos2014], these guidelines are relevant to all studies conducted using the UKB.
+Given that studies conducted using UKB may be cohort, cross-sectional or ‘nested’ case-control, the review used the combined STROBE Statement for cohort, cross-sectional and case-control designs, and its extensions, to assess the reporting standards in UKB articles.
+
+# Methods
+
+# References

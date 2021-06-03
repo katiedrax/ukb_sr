@@ -1,0 +1,19 @@
+# 12/3/21
+exclude "Present but not accessible" in access_article or access_sup
+
+
+# 10/3/21
+
+6a_i - duplicate of 5a because guidance for item 5 says"Information about setting includes recruitment sites or sources (e.g., electoral roll, outpatient clinic, cancer registry, or tertiary care centre)" and item 6 says "Regardless, we advise authors to report all eligibility criteria and also to describe the group from which the study population was selected (e.g., the general population of a region or country), and the method of recruitment (e.g., referral or self-selection through advertisements).
+
+6a_i & 6a_iii - duplicates because eligbility for UK BIobank covered by 5a and eligibility to individual study is same as methods of selection
+
+6a_ii - we took "source" to sources of participants & therefore the UK BIobank. Different from "setting" question because that we took to mean the setting of the UK Biobank itself
+
+8starred_i - "source" not defined in guidance. So initally interpreted as sources of data, this made it a duplicate of 6a sources for each variable would be "UK Biobank", later had to reassess this because we reinterpretted it to mean sources of each variable interms of method of measurement (self-completed questionnaire, interview, clinician measurement)
+
+comparability - guidance says "important to know if groups being compared differed with respect to the way in which the data were collected... For instance, if an interviewer first questions all the cases and then the controls, or vice versa, bias is possible because of the learning curve". So this question will always be "Yes" unless authors unclear that *all particpants* measured in same way. Also often NA because only applies if two or more groups being compared (i.e. exposure not continuous)
+
+10 - to prevent this being a duplicate of the question about exclusion critieria we always considered it NA
+
+Distinguishing - subgroups, interactions, & sensitivity analyses was hard
