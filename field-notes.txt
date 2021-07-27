@@ -4,16 +4,94 @@ exclude "Present but not accessible" in access_article or access_sup
 
 # 10/3/21
 
-6a_i - duplicate of 5a because guidance for item 5 says"Information about setting includes recruitment sites or sources (e.g., electoral roll, outpatient clinic, cancer registry, or tertiary care centre)" and item 6 says "Regardless, we advise authors to report all eligibility criteria and also to describe the group from which the study population was selected (e.g., the general population of a region or country), and the method of recruitment (e.g., referral or self-selection through advertisements).
+s8_star_i_
 
-6a_i & 6a_iii - duplicates because eligbility for UK BIobank covered by 5a and eligibility to individual study is same as methods of selection
+7_iv - ICD-10 codes = Partially-External or Yes in terms of diagnostic criteria
+
+6a_i - NOT duplicate of 5a (but is of 6a_iii) because guidance for item 5 says"Information about setting includes recruitment sites or sources (e.g., electoral roll, outpatient clinic, cancer registry, or tertiary care centre)" and item 6 says "Regardless, we advise authors to report all eligibility criteria and also to describe the group from which the study population was selected (e.g., the general population of a region or country), and the method of recruitment (e.g., referral or self-selection through advertisements). We took this to mean recruitment into UKB. Eligbility in item 6 we took to mean inclusion in analysis
+
+6a_i & 6a_iii - duplicates because eligbility for UK BIobank covered by 5a and eligibility/inclusion to the analysis is same as methods of selection
 
 6a_ii - we took "source" to sources of participants & therefore the UK BIobank. Different from "setting" question because that we took to mean the setting of the UK Biobank itself
 
-8starred_i - "source" not defined in guidance. So initally interpreted as sources of data, this made it a duplicate of 6a sources for each variable would be "UK Biobank", later had to reassess this because we reinterpretted it to mean sources of each variable interms of method of measurement (self-completed questionnaire, interview, clinician measurement)
+5_vi - we took "dates of data collection" to mean if they included all dates for exposure/outcome, recruitment, beginning & end of follow-up (if used) but could they mean something else + this interpretation means that it is simply a duplicate of 5_iii, 5_iv, and 5_v
+
+8starred_i - NOT duplicate as 6a_ii but was treated as such at start. "source" not defined in guidance. So initally interpreted as sources of data, this made it a duplicate of 6a sources for each variable would be "UK Biobank", later had to reassess this because we reinterpretted it to mean sources of each variable interms of method of measurement (self-completed questionnaire, interview, clinician measurement)
 
 comparability - guidance says "important to know if groups being compared differed with respect to the way in which the data were collected... For instance, if an interviewer first questions all the cases and then the controls, or vice versa, bias is possible because of the learning curve". So this question will always be "Yes" unless authors unclear that *all particpants* measured in same way. Also often NA because only applies if two or more groups being compared (i.e. exposure not continuous)
 
 10 - to prevent this being a duplicate of the question about exclusion critieria we always considered it NA
 
 Distinguishing - subgroups, interactions, & sensitivity analyses was hard
+
+
+CHECK dependencies  (if these change during conflict resolution it will create more conflicts down the line)
+* 7_v -> 12b_i, 12b_ii -> 17_i, 17_ii  - effect modifiers used or not. We defined effect modifiers as terms used in subgroup analyses or interactions but this is not how STROBE seem to do it
+* starred items for 8 items = all NA because
+* 12_e -> 17_iii - sensitivity analyses done = results must be reported
+
+For each variable of
+interest give sources of data and details of methods of
+assessment (measurement). Describe comparability of
+assessment methods if there is more than one group 
+
+# Becky
+Rules are to resolve conflicts not to collect new data so they're directed what consistently we coded
+
+Questions for Becky
+* 8_starred_ii & 11_i & 11_ii & 11_iii &12_a, 14starred (all other "all variables" questions)- hard to resolve if other person looked less. Should I just double check all?
+** be conservative and say this
+* is 8_starred_iii - NA for all our studies?
+** everyone had same assessment so yes NA for all
+* 9 = Yes or No? What would be a partially?
+** Yep just binary
+* 10 = Duplicate of 6a_i because eligbility criteria is justification for sample size. NA all?
+** Yes this is a duplicate because it's not an novel study so NA for all
+* 11_ii & 11_iii = I used unsure/Partially when no/some groupings defined but unclear if others were, Mark didn't do this
+** majority of reviewers treated it one way so yes avoid unsure
+
+* if the main results were already separated by a variable (e.g. sex) we treated these as the results not sub-group analyses. We considered sub-group analyses to be those additional to the main analysis (e.g. Malon2016mple7729 the separate analyses are the main analysis)
+** define = repeated analysis with stratification
+*12_e - what defines a sensitivity analysis
+** any check on robustness
+* 13starred_b?
+** not duplicate it is a ustifcations for why numbers went down
+
+* exclude star questions because too many conflicts?
+** restricted to main items because subitems had high conflict rate and 
+** too subjective, unsure when it would apply since practically doing it for multiple or continuous exposures would be ridciulous
+
+MOre questions
+* 16c - is it NA?
+* 19ii - how define it? what is too harsh?
+
+Accepted rule
+* Rule = "prospective" is marked as partially 
+* Rule = missing statistical model is Partially  -- b/c 
+* Rule = if have intro is Yes -- b/c avoids subjectivity 
+* Rule = partially have either recruitment details or states its from the UK Biobank but not both
+* Rule = Partially if don't give name of follow-up data source
+* item 8 star items = all NA because giving info separately for cases/exposed & controls/unexposed would be irrelevant since both sources/measures are same for both = NA for all
+* 13starred_a = Rule = "Yes" if give numbers in UKB, eligible and included
+
+Needs more research
+* 5_i - Rule = , "invited", or "NHS register" get a yes but unsure if "general population" gets a Yes. Need to see how BW and RR marked
+* 5_iv - Becky said no because don't give dates for when people self-reported their exposure. Mark & I interpreted it as date baseline assessments done. Partially Mark & I latter assigned to references to "baseline" 
+( 5_iv also needs tidying up
+* 6a_ii - This is  a duplicate of 8starred_i. Becky & Mark took it to mean UK Biobank, KD took it to mean UKB and follow-up sources but this is covered by the more granular detail of 8starred_i (which KD took to mean just UKB)
+* 8 starred i - need to import & resolve 
+* 12b_i - Rule = "NA" if subgroup analyses are the main analysis as this is covered by other items
+* 12b_ii - Rule = "Partially" if missing statistical tests and don't say how interaction incoroporated into model
+* 12c - Rule = "Partially" if some missing data explained but not clearly for all variables
+
+New rule
+* Item 4 = Rule = Yes if methods described early on in paper but this includes abstract. Dependency on 1b. If 1b is Yes then 4 will be yes because methods fully described in abstract. If 1b is Partially or No then see if conflict in 4 and if yes then reassess.
+* 5_v = Rule = Yes if any follow-up date
+* 6a_iii = all Yes, treated synonymously as 6a_i
+
+# To do
+
+* exposures
+* outcomes
+* papers I haven't reviewed ~2
+* papers others haven't reviewed
