@@ -4,17 +4,6 @@ exclude "Present but not accessible" in access_article or access_sup
 
 # 10/3/21
 
-s8_star_i_
-
-7_iv - ICD-10 codes = Partially-External or Yes in terms of diagnostic criteria
-
-
-6a_ii - we took "source" to sources of participants & therefore the UK BIobank. Different from "setting" question because that we took to mean the setting of the UK Biobank itself
-
-5_vi - we took "dates of data collection" to mean if they included all dates for exposure/outcome, recruitment, beginning & end of follow-up (if used) but could they mean something else + this interpretation means that it is simply a duplicate of 5_iii, 5_iv, and 5_v
-
-8starred_i - NOT duplicate as 6a_ii but was treated as such at start. "source" not defined in guidance. So initally interpreted as sources of data, this made it a duplicate of 6a sources for each variable would be "UK Biobank", later had to reassess this because we reinterpretted it to mean sources of each variable interms of method of measurement (self-completed questionnaire, interview, clinician measurement)
-
 comparability - guidance says "important to know if groups being compared differed with respect to the way in which the data were collected... For instance, if an interviewer first questions all the cases and then the controls, or vice versa, bias is possible because of the learning curve". So this question will always be "Yes" unless authors unclear that *all particpants* measured in same way. Also often NA because only applies if two or more groups being compared (i.e. exposure not continuous)
 
 Distinguishing - subgroups, interactions, & sensitivity analyses was hard
@@ -32,6 +21,11 @@ If 1b is Partially or No then see if conflict in 4 and if yes then reassess.
 * starred items for 8 items = all NA because
 * 12_e -> 17_iii - sensitivity analyses done = results must be reported
 
+General guidelines for Becky & I created
+* 9 - is just binary, no partially because we it's a very subjective judgement of what discussion of bias would be partial. Instead we just made a judgement of if discussion was present
+* all sub(starred) items - exclude all. 
+We are restricting our analysis to main items only because subitems had a high conflict rate in terms of when coders thought they would apply. Apply these items for multiple or continuous exposures would be ridiculous but we did not consistently agree what the limit of groups would be.
+* 11_ii & 11_iii - KD used unsure/Partially when no/some groupings defined but unclear if variables were grouped. All other coders evaluated the completeness of reporting for stated groupings/catergories so did not use "unsure". We used this rule because it is the one the majority of coders used. KD simply reassessed her "Partially" or "unsure" judgements based on uncertainty of whether any other groups existed in line with the majority interpretation then resolved conflicts. FOr other judgements she went with the conservative judgement
 
 Accepted rule I proposed
 * 1a - Rule = "prospective" is marked as partially 
@@ -52,42 +46,27 @@ New rule becky & I created
 * 14starredc - Rule = Yes if give any of mean/range/total
 * 17_ii - Rule = "Yes"if only p-value or significance indicated for interaction
 * 8starred_iii - Rule = "NA" for all studies because everyone had same assessment
-* 7, 8starred_ii & 11_i & 11_ii & 11_iii &12_a, 14starred (maybe 16b?) - Rule = go with conservative estimate which is [insert conservative estimate] because hard to resolve if other person looked less so would require extensive checking and debate
+* all 7 - Rule = go with conservative estimate [insert conservative estimate] because hard to resolve if other person looked less so would require extensive checking and debate
+* 8starred_ii & & 12_a, 14starred (maybe 16b?) - Rule = go with conservative estimate [insert conservative estimate] because hard to resolve if other person looked less so would require extensive checking and debate
+* 11_i - Rule = go with conservative estimate [insert conservative estimate] because hard to resolve if other person looked less so would require extensive checking and debate
+* 11_ii & 11_iii - Rule = go with conservative estimate [insert conservative estimate] if KD assessed stated groups
+*12_e - Rule = NA if no checks on robustness of results
+* 16c - Rule = "NA" if not a binary outcome
+** but will probably be "No" because saw so few instances of this item
+*19ii - Rule = "Yes" if discuss magnitude & direction for some or all of their stated sources of bias because example in STROBE is not too conservative
 
-# Duplicates - Rule = "NA" for all for higher numbered items
-* 6a_ii & 8starred_i - because Becky & Mark took it to mean UK Biobank, KD took it to mean UKB and follow-up sources but this is covered by the more granular detail of 8starred_i (which KD took to mean just UKB)
+
+Duplicates - Rule = "NA" for all for higher numbered items
 * 6a_i & 6a_iii & 10 - took 6a_i to mean inclusion in the analysis and took 6a_iii to mean methods of selection into the analysis, which is the same thing.
 10 is a duplicate of 6a_i and 6a_iii because all included studies are not novel studies so eligbility criteria covered by 6a_i is justification for sample size.
 All of which are the same thing.
-* 6a_i NOT duplicate of 5a because guidance we took "recruitment sites or sources" in item 5 to mean recruitment into UKB and took "eligibility criteria...group from which study population was selected" to mean inclusion in the analysis. 
+* 5_vi composit - we took "dates of data collection" to mean if they included all dates for exposure/outcome, recruitment, beginning & end of follow-up (if used) but could they mean something else + this interpretation means that it is simply a duplicate of 5_iii, 5_iv, and 5_v
 
-# Answered questions
+Not duplicates
+* 6a_i, 5a, & 6a_ii NOT duplicates - we took "recruitment sites or sources" in 5a to mean recruitment into UKB, took 6a_i "eligibility criteria...group from which study population was selected" to mean inclusion in the analysis, and in 6a_ii we took "source to mean mean sources of participants (i.e. statement of UK BIobank). Different from "setting" question because that we took to mean the setting of the UK Biobank itself
+* 13starred_b - not duplicate as it is a justifcations for why numbers went down
+* 6a_ii & 8starred_i not duplicates - treated as duplicate at start. "source" not defined in guidance so KD & MG initally interpreted as sources of data, this made 8starred_i a duplicate of 6a_ii because source for each variable would be "UK Biobank", later had to reassess this because we reinterpretted it to mean sources of each variable interms of method of measurement (self-completed questionnaire, interview, clinician measurement). This meant 6a_ii was the only item to cover a statement of the data being from the UK Biobank
 
-9 = Yes or No? What would be a partially?
-* Yep just binary
-
-
-11_ii & 11_iii = I used unsure/Partially when no/some groupings defined but unclear if others were, Mark didn't do this
-* majority of reviewers treated it one way so yes avoid unsure
-
-if the main results were already separated by a variable (e.g. sex) we treated these as the results not sub-group analyses. We considered sub-group analyses to be those additional to the main analysis (e.g. Malon2016mple7729 the separate analyses are the main analysis)
-* define = repeated analysis with stratification
-
-*12_e - what defines a sensitivity analysis
-* any check on robustness
-
-13starred_b?
-* not duplicate it is a ustifcations for why numbers went down
-
-exclude star questions because too many conflicts?
-* restricted to main items because subitems had high conflict rate and 
-* too subjective, unsure when it would apply since practically doing it for multiple or continuous exposures would be ridciulous
-
-16c - is it NA?
-* NA if not binary outcome, but will probably be No because saw so few
-
-19ii - how define it? what is too harsh?
-* Example is not too conservative so discuss magnitude & direction for some or all of their sources of bias
 
 # to ask becky
 
@@ -105,17 +84,22 @@ exclude star questions because too many conflicts?
 * 12e & 17_iii though not sure this is necessary because we treated all interactions as interactions not sensitivity analyses - Rule = "NA" if sensitivity analysis is an interaction test 
 * 7_vi - Rule = NA if BMI because not a disease outcome
 * 7_vi - Rule = Partially-External if ICD-10 codes given but not ICD diagnostic criteria
-	** what if codes not given and just link to ICD-10?
+** what if codes not given and just link to ICD-10?
 * 5_i - Rule = , "invited", or "NHS register" get a yes but unsure if "general population" gets a Yes. 
 Need to see how BW marked
 * 5_iv - Becky said no because don't give dates for when people self-reported their exposure. 
 Mark & I interpreted it as date baseline assessments done. 
 Partially Mark & I later assigned to references to "baseline" ( 5_iv also needs tidying up)
-* 12b_i - Rule = "NA" if subgroup analyses are the main analysis as this is covered by other items
+* 12b_i - Rule = "NA" if subgroup analyses are the main analysis as this is covered by other items.
+** if the main results were already separated by a variable (e.g. sex) we treated these as the results not sub-group analyses. We defined sub-group analyses as repeat analysis with stratification (e.g. Malon2016mple7729 the separate analyses are the main analysis)
+
 * 12b_ii - Rule = "Partially" if missing statistical tests and don't say how interaction incoroporated into model
 * 12c - Rule = "Partially" if some missing data explained but not clearly for all variables
+* 11_i - conservative rule? but similar situation as 11_ii as what happens when don't distinugih between assessment methods & handling? Do we assume they handled them as assessed unless otherwise stated?
 
 # To do
+
+* clean up MG conflicts - includes item 9, 11_ii, 11_iii, 12_e, 13starred_b, 16c, 
 * 8 starred i - need to import & resolve 
 * exposures
 * outcomes
