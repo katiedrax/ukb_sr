@@ -227,6 +227,9 @@ dups <- find_duplicate_articles() %>%
   # subset df to find dups
   df[., ]
 
+# manual - inspected dups & saw several were prediction articles dups
+
+# remove prediction articles
 coder <- unique(df$initials)
 names(coder) <- coder
 y <- lapply(coder, function(x){
@@ -235,7 +238,14 @@ y <- lapply(coder, function(x){
   which(df$article_id %in% predict_id & !(df$predict %in% "Yes") &df$initials %in% x)
 })
 
+# remove prediciton article dups from df
 df <- df[-unlist(y),]
+
+# find dups again
+dups <- find_duplicate_articles() %>%
+  # subset df to find dups
+  df[., ]
+
 
 # MANUAL - I inspected the duplicates and found which were incomplete/out of date >
 # manual because automating would be complicated >
@@ -243,22 +253,60 @@ df <- df[-unlist(y),]
 
 MANUAL_remove_duplicate_articles <- function(){
   # One Foste2018hort00-7 entry by MG is incomplete
-  mg_dup <- which(df$article_id =="Foste2018hort00-7" & df$finished %in% "False" & df$initials == "MG")
+  mg_dup <- which(df$article_id %in% "Foste2018hort00-7" & df$finished %in% "False" & df$initials %in% "MG")
   # one Morri2018bank.496	entry by RR is incomplete
-  rr_dup <- which(df$article_id =="Morri2018bank.496" & df$finished %in% "False" & df$initials == "RR")
-  df <- df[-c(mg_dup, rr_dup),]
+  rr_dup <- which(df$article_id %in% "Morri2018bank.496" & df$finished %in% "False" & df$initials %in% "RR")
+  # one Sarka2018ants.009	entry by KD is a copy she did quickly in case first entry didn't work, but it did
+  kd_dup <- which(df$article_id %in% "Sarka2018ants.009" & df$duration_in_seconds %in% 517 & df$initials %in% "KD")
+  # one Peter2016bank0007	entry by KD is incomplete
+  kd_dup2 <- which(df$article_id %in% "Peter2016bank0007" & df$duration_in_seconds %in% 70 & df$initials %in% "KD")
+  # combine kd duplicates
+  kd_dup <- c(kd_dup, kd_dup2)
+  # check all dup objects contain 1-2  dups
+  if(all(length(kd_dup) %in% 2, length(rr_dup) %in%1, length(mg_dup) %in%1) == F) stop("some dup lengths not 1")
+  df <- df[-c(mg_dup, rr_dup,kd_dup),]
 }
 
 # apply function 
 df <- MANUAL_remove_duplicate_articles()
 
 # check there are no duplicate articles for any initials
-dups <- find_duplicate_articles()
+dups <- find_duplicate_articles() 
 
 if(length(dups) != 0){
   warning(paste(names(which(lengths(dups) >0)), collapse = " "), " have duplicate article_ids")
 } else {
   print("no coder has any duplicate articles")
+}
+
+#######################
+# find missing supp ####
+######################
+
+# in first_80.csv 3 articles had inaccessible supplementary material (SM)
+# check df doesn't contain these articles because they will be excluded
+
+first_80 <- read.csv("https://osf.io/9w72e/?action=download", encoding = "UTF-8", stringsAsFactors = F)
+
+miss <- first_80$article_id[first_80$access_supp %in% "Present but not accessible"]
+
+if(any(miss %in% df$article_id)){
+  warning(miss[miss %in% df$article_id], " have inaccessible SM but are in df")
+  miss_df <- df[which(df$article_id %in% miss), ]
+  write.csv(miss_df, "outputs/missing-sm.csv", fileEncoding = "UTF-8", row.names = F, na = "")
+}
+
+###################
+# MANUAL CHECK ####
+###################
+
+# check obs in missing-sm.csv and remove if incomplete
+# manual check showed all obs in miss_df empty so remove
+
+if(identical(miss_df$article_id, "Cummi2016bank53-X")) {
+  df <- df[-which(df$article_id %in% miss_df$article_id), ]
+} else {
+  stop("need to repeat manual check")
 }
 
 ###########
@@ -273,7 +321,6 @@ merge_with_kd <- function(initials_coder_2){
   # all init_2 entries should merge with a KD entry >
   # check this using anti_join on init_2, any non-matches should just be KD entires
   just_init_2 <- anti_join(df[df$initials == init_2, ], df[df$initials == "KD", ], by = "article_id")
-  b <- anti_join(df[df$initials == "KD", ], df[df$initials == init_2, ], by = "article_id")
   if(nrow(just_init_2) >0) warning("some ", init_2, " entires not in KD entries")
   # create suffix for init_2
   suffix_2 <- paste0(".", tolower(init_2))
@@ -315,8 +362,6 @@ merge_with_kd <- function(initials_coder_2){
   return(both)
 }
 
-
-
 kd_mg <- merge_with_kd("MG")
 
 # merge kd with RR
@@ -324,6 +369,11 @@ kd_rr <- merge_with_kd("RR")
 
 # merge kd with RR
 kd_bw <- merge_with_kd("BW")
+
+
+just_mg <- anti_join(df[df$initials == "MG", ], df[df$initials == "KD", ], by = "article_id")
+just_bw <- anti_join(df[df$initials == "BW", ], df[df$initials == "KD", ], by = "article_id")
+just_rr <- anti_join(df[df$initials == "RR", ], df[df$initials == "KD", ], by = "article_id")
 
 ###########
 # export ####
