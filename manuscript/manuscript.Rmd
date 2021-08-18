@@ -13,6 +13,41 @@ csl: apa.csl
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# Abstract
+
+Background
+
+Objectives
+
+Data sources
+
+Eligibility criteria
+
+Participants
+
+Intervention
+
+Study appraisal
+
+Synthesis methods
+
+Restuls
+
+Limitations
+
+Conclusions
+
+Implications
+
+```{r, prisma}
+
+# 4. questions picos
+
+
+```
+
+
+
 # Background
 
 There is a general move towards making data freely accessible, or ‘open’, by academic and governmental institutions alike [@vasilevsky2017; @worldwidewebfoundation2018]. 
@@ -36,6 +71,185 @@ We used the STROBE (STrengthening the Reporting of Observational Studies in Epid
 The STROBE Statement has been endorsed by over 100 journals and, as no major changes have been made to the original version published in 2007 [@cevallos2014], these guidelines are relevant to all studies conducted using the UKB.
 Given that studies conducted using UKB may be cohort, cross-sectional or ‘nested’ case-control, the review used the combined STROBE Statement for cohort, cross-sectional and case-control designs, and its extensions, to assess the reporting standards in UKB articles.
 
+We aimed to conduct a systematic review of articles reporting studies using data from the UKB with the aim of answering the following questions:
+
+1. What is the quality of reporting of findings from the UKB (in terms of the detail, clarity and completeness with which authors report their design, analysis and results)?
+2. Does reporting quality vary across the type of studies conducted?
+
 # Methods
+
+## Protocol registration
+
+This study was preregistered before we began to screen the search results [@drax2019].
+
+## Eligibility criteria
+
+Eligible articles are full research articles that report analyses of UKB data. Each article that is excluded at the full-text level of screening will be listed with the reason for exclusion.
+
+Inclusion criteria:
+* Publication date: After 30 March 2012. 
+This is the date the UKB was launched and UKB data was first available beforehand.
+* Publication type: Full research articles (including simulation and modelling articles).
+* Language: English. Relevant studies written in another language may be eligible but, to ensure accurate and precise evaluation, the article would require a professional translation which is not feasible given the review’s resources.
+* Data source: Article’s findings were produced from analysis(es) of data from the UKB. 
+This includes studies which reported findings from other studies alongside findings from UKB data.
+
+Exclusion criteria:
+* Article findings were produced from analysis(es) of pooled data from multiple studies.
+These are studies which have used data from participants from the UKB and other datasets in the same analysis.
+* Meta-analyses; narrative and systematic reviews; preprints; post-prints; replies; letters to the editor; corrections; and any other publication types that are not full research articles.
+* Retracted articles
+
+## Information sources and search strategy
+
+Four databases were electronically searched on 15/01/2019 for UKB articles: PubMed, EMBASE, Web of Science Core Collection (WoSCC) and PsycINFO. 
+The search strategy was limited to articles published from 2012 onwards and there was no restriction on language or publication type.
+
+The full search strategy for each database is included in Appendix A of the protocol [osf ref]. 
+To summarise, the terms "UK Biobank", "UKB", "UKBiobank", and "UKB Resource" were included in the "Title", "Abstract", "Keywords", and "All Fields" fields or equivalent of each database.
+
+
+```{r}
+# is there counts for the number of articles from th eUKB list? 
+
+
+```
+
+## study selection
+
+We conducted four stages of screening for eligibility.
+First, using Endnote, KD removed duplicate results, checked the results for completeness, updated the metadata if necessary, and retrieved the full-texts of all results.
+KD checked completeness using a list of published full research articles that have used the UKB Resource, provided by the UKB on 27 November 2018. 
+Using the full-texts of the results, KD assessed if results were full research articles, and excluded reviews, corrections, conference abstracts, etc.
+
+Second, the results were imported into Rayyan [@ouzzani2016] and screened by BW and KD to determine whether they met the inclusion criteria.
+If insufficient information was available to determine a paper’s eligibility, the authors were contacted to request the required information. 
+If this information was unobtainable, the article was excluded.
+Although contacting the authors was our intention, time constraints meant we excluded some articles with insufficient information without contacting the authors.
+
+```{r}
+# check rayyan
+```
+
+In the protocol, we stated that data extraction would follow screening. 
+During which studies would be "classified according to their data type".
+This was so we could analyse articles according to their appropriate STROBE extension, such as the strengthening the reporting of genetic association studies (STREGA) statement [@little2009].
+Given that it would be too time-consuming to extract data from all studies in all included articles and to design multiple data extraction forms, we decided to extract data and assess the reporting quality of traditional epidemiology studies only. 
+This means the third step was allocating articles to different classification groups according to the type of data they analysed.
+The classification criteria were refined after piloting them on 20 studies were:
+
+*	Traditional epidemiology – studies investigating associations between exposures and health outcomes using the UK Biobank data alone. 
+
+*	Mendelian randomisation – studies that conduct Mendelian randomisation analyses on UK Biobank data alone
+
+*	Other – articles that do not meet the ‘Traditional epidemiology’ or ‘MR’ classification criteria described above or include analyses of genetic or imaging data.
+
+Articles abstracts were classified independently by MG and KD. 
+Full texts were examined where classification is unclear from the abstract.
+Any conflicts were discussed by KD and BW and resolved by mutual consent if possible. 
+If not resolved after discussion RR assign the category.
+Articles could be allocated into more than one classification group.
+
+### Further exclusions
+```{r}
+# add details of articles excluded after study design classification
+```
+KD examined the notices attached to the online version of the observational epidemiology articles
+to identify any retracted articles. 
+None were identified
+
+1 article was incorrectly classified as an ‘observational epidemiology’ study so 177 observational epidemiology articles remain.
+
+## Data collection process
+
+### Study Design Form
+
+Different STROBE items are relevant for cohort, case-control and cross-sectional study designs. 
+To ensure coders completed the same STROBE items for each article KD and MG independently identified the study designs used by each of the 178 “observational epidemiology” articles by completing the Study Design Form for each article.
+In the form, extractors also indicated if all supplementary material can be accessed via University of Bristol subscriptions. 
+Any conflicts were discussed by the two extractors and resolved by mutual consent if possible.
+If not resolved after discussion, RR determined the study designs. 
+The Study Design Form was hosted on
+Qualtrics but a PDF version can be found at https://o
+
+The articles were randomly assigned an ID number from 1-178. 
+The articles with an id number between 1
+and 80 were selected for the first round of data extraction. 
+KD was assigned as the first extractor to all 80 articles. 
+The second extractor was randomly assigned from MG, RR or BW.
+We initially randomly selected 80 articles with the hope that we would randomly select more studies once data extraction for the first 80 were complete.
+Unfortunately we did not have time to assess more studies. 
+
+### Data Extraction Form
+
+The Data Extraction Form was hosted on Qualtrics and piloted twice. 
+This form combined the data items described as part of the "Data Extraction Form" and "Reporting Quality Assessment" in the protocol, but not all were kept.
+In the first, 5 observational epidemiology articles were piloted by MG, KD and/or RR. 
+Major changes were made so the Data Extraction Form will be completed again for the articles in the first pilot. 
+In the second, KD piloted the changed form on 3
+articles. 
+No changes were made so the responses for articles in the second pilot were retained.
+
+The extractors independently completed the Data Extraction Form for each article assigned to them.
+Initially, any conflicts were discussed by the two extractors and resolved by mutual consent if possible. 
+If not resolved after discussion, RR resolved the conflict.
+However, given the number of conflicts this could not be sustained.
+To reduce the time-burden on other authors KD and RR devised a series of "Rules" KD could use to resolve conflicts by herself. 
+This means the majority of conflicts were resolved by these "Rules" or KD's own judgement.
+
+### Other data collection
+
+The items in Table 1 were extracted manually by KD or automatically by Endnote which contained the article’s metadata exported from the database the article was located in.
+
+### Unclear and Missing Information.
+
+In our protocol we planned to locate and examine publications linked to the article, e.g. related full research articles, comments, corrections, etc, so that we could retrieve any missing items in the Data Extraction Form from them.
+If the missing information is not contained in a linked publication we planned to contact the article’s authors.
+However, we realised this would give an inaccurate assessment of the verision of record. 
+Also few articles had linked publications and that there was a lot of missing or unclear information.
+Therefore, we did not attempt to retrieve any missing items in the Data Extraction Form, from either the authors or linked articles. 
+
+# Results 
+
+## Study selection
+
+```{r}
+bw <-read.csv("../outputs//kd-bw-resolved.csv", stringsAsFactors = F, encoding = "UTF-8", na.strings = "")
+mg <-read.csv("../outputs/kd-mg-resolved.csv", stringsAsFactors = F, encoding = "UTF-8", na.strings = "")
+rr <-read.csv("../outputs/kd-rr-resolved.csv", stringsAsFactors = F, encoding = "UTF-8", na.strings = "")
+
+drop_cols <- function(df){
+  suf_drop <- c(".bw", ".rr", ".mg", ".correct")
+  suf_pat <- paste0("\\", suf_drop, "$", collapse ="|")
+  df <- df[, -grep(suf_pat, colnames(df))]
+  return(df)
+}
+
+bw <- drop_cols(bw)
+mg <- drop_cols(mg)
+rr <- drop_cols(rr)
+```
+
+## Study characteristics
+
+## Reporting quality
+
+# Discussion
+
+## Summary
+
+## Limitations
+
+## Conclusions
+
+# Funding Source
+
+This review is being funded by the John Climax Benevolent Fund. 
+The funder will support the conduct of the review by paying KD’s stipend. 
+The funder had no input on any aspect of the project, such the protocol design, data collection, data analysis nor interpretation or publication of results.
+
+
+# Conflicts of Interest
+There are no conflicts of interest to report.
 
 # References
