@@ -19,12 +19,13 @@ CHECK dependencies  (if these change during conflict resolution it will create m
 If 1b is Partially or No then see if conflict in 4 and if yes then reassess.
 * 7_v -> 12b_i -> 17_i  - subgroup analyses used or not. We defined effect modifiers as terms used in subgroup analyses or interactions but this is not how STROBE seem to do it
 * 7_v -> 12_ii -> 17_ii - interaction analyses used or not. We defined effect modifiers as terms used in subgroup analyses or interactions but this is not how STROBE seem to do it
+* 11_ii -> 11_iii -> 16b - groupings, if none then should be NA for all 
 
 * starred items for 8 items = all NA because
 * 12_e -> 17_iii - sensitivity analyses done = results must be reported
 
 General guidelines for Becky & I created
-* 9 - is just binary, no partially because we it's a very subjective judgement of what discussion of bias would be partial. Instead we just made a judgement of if discussion was present
+* 9 - is just binary, don't use partially because we it's a very subjective judgement of what discussion of bias would be partial. Instead we just made a judgement of if discussion was present
 * all sub(starred) items - exclude all. 
 We are restricting our analysis to main items only because subitems had a high conflict rate in terms of when coders thought they would apply. Apply these items for multiple or continuous exposures would be ridiculous but we did not consistently agree what the limit of groups would be.
 * 11_ii & 11_iii - KD used unsure/Partially when no/some groupings defined but unclear if variables were grouped. All other coders evaluated the completeness of reporting for stated groupings/catergories so did not use "unsure". We used this rule because it is the one the majority of coders used. KD simply reassessed her "Partially" or "unsure" judgements based on uncertainty of whether any other groups existed in line with the majority interpretation then resolved conflicts. FOr other judgements she went with the conservative judgement
@@ -61,8 +62,6 @@ New rule becky & I created
 * 8starred_ii - Rule = go with conservative estimate [insert conservative estimate] because hard to resolve if other person looked less so would require extensive checking and debate
 * 12a - Rule = go with conservative estimate [insert conservative estimate] because hard to resolve if other person looked less so would require extensive checking and debate
 * 14starreda  - Rule = go with conservative estimate [insert conservative estimate] because hard to resolve if other person looked less so would require extensive checking and debate
-* (maybe 16b?) - conservative
-* 11_ii & 11_iii - Rule = go with conservative estimate [insert conservative estimate] if KD assessed stated groups
 *12e - Rule = NA if no checks on robustness of results
 * 16c - Rule = "NA" if not a binary outcome
 ** but will probably be "No" because saw so few instances of this item
@@ -124,11 +123,12 @@ Not duplicates
 
 # To do
 
+* remove conservative estiamtes from 11_ii and 11_iii
 * reasess 4 & 16c, 19_ii for all
 * assess x-sec items for Olivo2019tudy.014 with RR
 * needs discussion categories
 * kd to check categories
-* clean up MG conflicts - includes item 9, 11_ii, 11_iii, 12_e, 13starred_b, 16c, 
+* clean up MG conflicts - includes item 9, 11_ii, 11_iii, 12e, 13starred_b, 16c,
 * 8 starred i - need to import & resolve 
 * exposures
 * outcomes
@@ -140,6 +140,6 @@ Not duplicates
 * 12b_ii & 17_ii - Rule = "NA" if not used even though could consider examining interactions advisable (Nah not advisable drop this extra bit of rule
 
 * 12e & 17_iii though not sure this is necessary because we treated all interactions as interactions not sensitivity analyses - Rule = "NA" if sensitivity analysis is an interaction test - adjust this rule a bit to make it clearer
-* 11_i - Similar situation as 11_ii as what happens when don't distinugih between assessment methods & handling? Do we assume they handled them as assessed unless otherwise stated?
-** if 8 measurement is yes assume variables handled as measured unless (i.e. duplicate of 8starred_i) unless otherwise stated. If 11b_i yes and measurement unclear then sort individually but very rare
+* 11_i - Similar situation as 11_ii as what happens when don't distinguish between assessment methods & handling? Do we assume they handled them as assessed unless otherwise stated?
+** if 8starred_ii is yes assume variables handled as measured unless (i.e. duplicate of 8starred_ii) unless otherwise stated. If 11b_i yes and measurement unclear then sort individually but very rare
 ** don't apply conservative rule because already penalised people for 8starred_i - just reassess
