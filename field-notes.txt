@@ -65,7 +65,6 @@ New rule becky & I created
 *12e - Rule = NA if no checks on robustness of results
 * 16c - Rule = "NA" if not a binary outcome
 ** but will probably be "No" because saw so few instances of this item
-*19ii - Rule = "Yes" if discuss magnitude & direction for some or all of their stated sources of bias because example in STROBE is not too conservative
 * 5_v - Rule = NA if cross-sectional
 ** We agreed on the rule "Rule = Yes if follow-up dates" but this gives a potentially unfair extra point to cross-sectionals that report follow up vs those we mark as NA BUT some cross-sectional studies do use follow up measures as covariates
 * 7_vi - Rule = NA if BMI because not a disease outcome
@@ -102,9 +101,9 @@ Not duplicates
 * 19_i - just yes or no for all
 *14starredb - Rule = "No" if dont indicate number of missing data for each variable that they didn't exclude based on missing data
 ** if passed I need to review this item because sometimes i put this as partially if state variables they exclude based on missing data because i judged this as them indicating these variables had no missing data
+* reassess 4?
 
 ## confirmed
-
 * 13starred_a - Rule = "Yes" if give numbers in UKB, eligible and included
 
 * 12d becky its - set a rule, is complete case analysis a way of addressing loss to follow up?
@@ -123,21 +122,21 @@ Not duplicates
 
 # To do
 
-* remove conservative estiamtes from 11_ii and 11_iii
-* reasess 4 & 16c, 19_ii for all
+* remove conservative estiamtes from 11_ii and 11_iii -- done, only applied to conflicts with MG
+* reasess 16c, 19_ii for all -- done, only really applied to conflicts with MG
 * assess x-sec items for Olivo2019tudy.014 with RR
-* needs discussion categories
-* kd to check categories
-* clean up MG conflicts - includes item 9, 11_ii, 11_iii, 12e, 13starred_b, 16c,
-* 8 starred i - need to import & resolve 
+* needs discussion categories -- done
+* "check it"/"kd to check" categories
+* clean up MG conflicts - includes item 9, 11_ii, 11_iii, 12e, 13starred_b, 16c, -- done
+* 8 starred i - need to import & resolve  -- done
 * exposures
 * outcomes
 * papers I haven't reviewed ~2
 * papers others haven't reviewed
 * 17_iv = send to Becky & see if there's 
 * check duplicates are same (e.g. 6a_i and 6a_iii)
-* 12b_i & 17_i - Rule = "NA" if not used even though could consider examining subgroups advisable (Nah not advisable drop this extra bit of rule
-* 12b_ii & 17_ii - Rule = "NA" if not used even though could consider examining interactions advisable (Nah not advisable drop this extra bit of rule
+* 12b_i & 17_i - Rule = "NA" if not used even though could consider examining subgroups advisable (Nah not advisable drop this extra bit of rule -- done
+* 12b_ii & 17_ii - Rule = "NA" if not used even though could consider examining interactions advisable (Nah not advisable drop this extra bit of rule -- done
 
 * 12e & 17_iii though not sure this is necessary because we treated all interactions as interactions not sensitivity analyses - Rule = "NA" if sensitivity analysis is an interaction test - adjust this rule a bit to make it clearer
 * 11_i - Similar situation as 11_ii as what happens when don't distinguish between assessment methods & handling? Do we assume they handled them as assessed unless otherwise stated?
