@@ -33,6 +33,12 @@ We are restricting our analysis to main items only because subitems had a high c
 Emma said no throughout for the same reason
 Mark, Becky & I later interpreted it as date baseline assessments done. 
 We also agreed that "Partially" could be assigned to statements of measurements made at "baseline" 
+* 12d - complete case analysis is not a way of addressing loss to follow up.
+It's more about have they run a competeing risk model & censoring based on loss to follow up
+* 19_ii - authors need to say how stuff would bias it e.g. this could be biased up to 20%
+
+* 11_i - We are going to assume that variables were handled as they were measured unless otherwise stated (i.e. duplicate of 8starred_ii)
+** 8starred_ii and 11_i will not necessarily be duplicates e.g. authors could distinuish between handling and measurement and fully explain how they handled variables (11b_i == Yes) but not how those variables were measured (8starred_ii != Yes) 
 
 Accepted rule I proposed
 * 1a - Rule = "prospective" is marked as partially 
@@ -79,6 +85,11 @@ New rule becky & I created
 * 5_i - Rule = "Yes" if state how "invited", or "NHS register"
 * 5_i - Rule = "Partially" if say "general population" 
 * 10 - Rule = "NA" for all
+* 19_ii - Rule = "Yes" if give a numerical estimation of magnitude & direction for at least 1 source of bias
+* 19_ii - Rule = "Partially" if give non-numerical estimation of magnitude & or direction for at least 1 source of bias
+* 19_ii - Rule = "No" if do not give non-numerical estimation of magnitude or direction for any source of bias
+* 5_iv - Rule = "Partially" if state exposures were measured at baseline but don't give dates of baseline measurements
+* 20 - Rule = "No" if make very strong causal statement or policy recommendation
 
 Duplicates - Rule = "NA" for all for higher numbered items
 * 6a_i & 6a_iii & 10 - took 6a_i to mean inclusion in the analysis and took 6a_iii to mean methods of selection into the analysis, which is the same thing.
@@ -103,23 +114,6 @@ Not duplicates
 ** if passed I need to review this item because sometimes i put this as partially if state variables they exclude based on missing data because i judged this as them indicating these variables had no missing data
 * reassess 4?
 
-## confirmed
-* 13starred_a - Rule = "Yes" if give numbers in UKB, eligible and included
-
-* 12d becky its - set a rule, is complete case analysis a way of addressing loss to follow up?
-** no this is more about have they run a competeing risk model & censoring based on loss to follow up
-
- * 19_ii - we decided on a non conservative rule but becky is harsh in the judgements, why?
-** Yes = give a numerical estimation of magnitude & direction for at least 1 source of bias
-** Rule = "Partially" if give non-numerical estimation of magnitude & or direction for at least 1 source of bias
-** Rule = "No" if do not give non-numerical estimation of magnitude or direction for any source of bias
-** need to say how stuff would bias it e.g. this could be biased up to 20%
-
-* 20 - never put a no because don't want to penalise people for such a subjective judgement?
-** No only when v strong causal statement/policy recommendation
-
-* 5_iv - Rule = "Partially" if state exposures were measured at baseline but don't give dates of baseline measurements
-
 # To do
 
 * remove conservative estiamtes from 11_ii and 11_iii -- done, only applied to conflicts with MG
@@ -139,6 +133,3 @@ Not duplicates
 * 12b_ii & 17_ii - Rule = "NA" if not used even though could consider examining interactions advisable (Nah not advisable drop this extra bit of rule -- done
 
 * 12e & 17_iii though not sure this is necessary because we treated all interactions as interactions not sensitivity analyses - Rule = "NA" if sensitivity analysis is an interaction test - adjust this rule a bit to make it clearer
-* 11_i - Similar situation as 11_ii as what happens when don't distinguish between assessment methods & handling? Do we assume they handled them as assessed unless otherwise stated?
-** if 8starred_ii is yes assume variables handled as measured unless (i.e. duplicate of 8starred_ii) unless otherwise stated. If 11b_i yes and measurement unclear then sort individually but very rare
-** don't apply conservative rule because already penalised people for 8starred_i - just reassess
