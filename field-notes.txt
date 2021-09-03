@@ -36,7 +36,6 @@ We also agreed that "Partially" could be assigned to statements of measurements 
 * 12d - complete case analysis is not a way of addressing loss to follow up.
 It's more about have they run a competeing risk model & censoring based on loss to follow up
 * 19_ii - authors need to say how stuff would bias it e.g. this could be biased up to 20%
-
 * 11_i - We are going to assume that variables were handled as they were measured unless otherwise stated (i.e. duplicate of 8starred_ii)
 ** 8starred_ii and 11_i will not necessarily be duplicates e.g. authors could distinuish between handling and measurement and fully explain how they handled variables (11b_i == Yes) but not how those variables were measured (8starred_ii != Yes) 
 
@@ -63,7 +62,6 @@ New rule becky & I created
 * 7_ii - Rule = go with conservative estimate [insert conservative estimate] because hard to resolve if other person looked less so would require extensive checking and debate
 * 7_iii - Rule = go with conservative estimate [insert conservative estimate] because hard to resolve if other person looked less so would require extensive checking and debate
 * 7_iv - Rule = go with conservative estimate [insert conservative estimate] because hard to resolve if other person looked less so would require extensive checking and debate
-* 7_v - Rule = go with conservative estimate [insert conservative estimate] because hard to resolve if other person looked less so would require extensive checking and debate
 * 7_vi - Rule = go with conservative estimate [insert conservative estimate] because hard to resolve if other person looked less so would require extensive checking and debate
 * 8starred_ii - Rule = go with conservative estimate [insert conservative estimate] because hard to resolve if other person looked less so would require extensive checking and debate
 * 12a - Rule = go with conservative estimate [insert conservative estimate] because hard to resolve if other person looked less so would require extensive checking and debate
@@ -77,9 +75,9 @@ New rule becky & I created
 * 7_vi - Rule = Partially-External if ICD-10 codes given but not ICD diagnostic criteria
 * 7_vi - Rule = Partially if codes not given and just link to ICD-10
 * 17_ii - Rule = "Partially" if some p-values not exact, unless <.001, and no measure of precision given
+* 7_v - Rule = "NA" if subgroup analyses are the main analysis as this is covered by other items.
 * 12b_i - Rule = "NA" if subgroup analyses are the main analysis as this is covered by other items.
 ** if the main results were already separated by a variable (e.g. sex) we treated these as the results not sub-group analyses. We defined sub-group analyses as repeat analysis with stratification (e.g. Malon2016mple7729 the separate analyses are the main analysis)
-* 7_v - Rule = "Yes" if describe variable used in interaction or subgroup analysis
 * 12b_ii - Rule = "Partially" if missing statistical tests and don't say how interaction incoroporated into model
 * 12c - Rule = "Partially" if some missing data explained but not clearly for all variables
 * 5_i - Rule = "Yes" if state how "invited", or "NHS register"
