@@ -28,7 +28,7 @@ General guidelines for Becky & I created
 * 9 - is just binary, don't use partially because we it's a very subjective judgement of what discussion of bias would be partial. Instead we just made a judgement of if discussion was present
 * all sub(starred) items - exclude all. 
 We are restricting our analysis to main items only because subitems had a high conflict rate in terms of when coders thought they would apply. Apply these items for multiple or continuous exposures would be ridiculous but we did not consistently agree what the limit of groups would be.
-* 11_ii & 11_iii - KD used unsure/Partially when no/some groupings defined but unclear if variables were grouped. All other coders evaluated the completeness of reporting for stated groupings/catergories so did not use "unsure". We used this rule because it is the one the majority of coders used. KD simply reassessed her "Partially" or "unsure" judgements based on uncertainty of whether any other groups existed in line with the majority interpretation then resolved conflicts. FOr other judgements she went with the conservative judgement
+* 11_ii & 11_iii - KD used unsure/Partially when no/some groupings defined but unclear if variables were grouped. All other coders evaluated the completeness of reporting for stated groupings/catergories so did not use "unsure". We used this rule because it is the one the majority of coders used. KD simply reassessed her "Partially" or "unsure" judgements based on uncertainty of whether any other groups existed in line with the majority interpretation then resolved conflicts. 
 * 5_iv - Becky & Mark initally said no because don't give dates for when people self-reported their exposure. 
 Emma said no throughout for the same reason
 Mark, Becky & I later interpreted it as date baseline assessments done. 
@@ -38,24 +38,28 @@ It's more about have they run a competeing risk model & censoring based on loss 
 * 19_ii - authors need to say how stuff would bias it e.g. this could be biased up to 20%
 * 11_i - We are going to assume that variables were handled as they were measured unless otherwise stated (i.e. duplicate of 8starred_ii)
 ** 8starred_ii and 11_i will not necessarily be duplicates e.g. authors could distinuish between handling and measurement and fully explain how they handled variables (11b_i == Yes) but not how those variables were measured (8starred_ii != Yes) 
+* We considered results to be "Partially" reported if authors did not give exact p-values, unless p <.001
+* 12e & 17_iii - we treated all interactions as interactions not sensitivity analyses
 
 Accepted rule I proposed
 * 1a - Rule = "prospective" is marked as partially 
-* 1b - Rule = missing statistical model is Partially 
-* 2_i - Rule = if have intro is Yes -- b/c avoids subjectivity 
+* 1b_i - Rule = missing statistical model is Partially 
+* 2_i - Rule = if have intro is Yes
+** b/c avoids subjectivity 
 * 5_i - Rule = partially have either recruitment details or states its from the UK Biobank but not both
 * 6a_iv_coh - Rule = Partially if don't give name of follow-up data source
 * all 8 star items = all NA because giving info separately for cases/exposed & controls/unexposed would be irrelevant since both sources/measures are same for both = NA for all
 * 13starreda - Rule = "Yes" if give numbers in UKB, eligible and included
 * 14starredb - Rule = "NA" if complete case analysis
 * 15starred_coh - Rule = "Yes" if give number of outcome events, don't need rate too
-* 16a_v - Rule = "Partially" if missing Townsend quintile boundaries, but name other boundaries
+* 16b - Rule = "Partially" if missing Townsend quintile boundaries, but name other boundaries
 * 20 - Rule = Partially if make policy recommendations
+* 7_i - Rule = "Yes" if define outcomes but missing ICD criteria
 
 New rule becky & I created
-* 4 - Rule = Yes if methods described early on in paper but this includes abstract. 
+* 4 - Rule = Yes if methods described early on in paper but this includes abstract
 * 5_v - Rule = Yes if any follow-up date
-* 14starredc - Rule = Yes if give any of mean/range/total
+* 14starredc_coh - Rule = Yes if give any of mean/range/total
 * 17_ii - Rule = "Yes"if only p-value or significance indicated for interaction
 * 8starred_iii - Rule = "NA" for all studies because everyone had same assessment
 * 7_i - Rule = go with conservative estimate [insert conservative estimate] because hard to resolve if other person looked less so would require extensive checking and debate
@@ -69,13 +73,13 @@ New rule becky & I created
 *12e - Rule = NA if no checks on robustness of results
 * 16c - Rule = "NA" if not a binary outcome
 ** but will probably be "No" because saw so few instances of this item
+* 16c - Rule = "NA" for case-controls
 * 5_v - Rule = NA if cross-sectional
 ** We agreed on the rule "Rule = Yes if follow-up dates" but this gives a potentially unfair extra point to cross-sectionals that report follow up vs those we mark as NA BUT some cross-sectional studies do use follow up measures as covariates
 * 7_vi - Rule = NA if BMI because not a disease outcome
 * 7_vi - Rule = Partially-External if ICD-10 codes given but not ICD diagnostic criteria
 * 7_vi - Rule = Partially if codes not given and just link to ICD-10
-* 17_ii - Rule = "Partially" if some p-values not exact, unless <.001, and no measure of precision given
-* 7_v - Rule = "NA" if subgroup analyses are the main analysis as this is covered by other items.
+* 7_v - Rule = "NA" if subgroup analyses are the main analysis as this is covered by other items
 * 12b_i - Rule = "NA" if subgroup analyses are the main analysis as this is covered by other items.
 ** if the main results were already separated by a variable (e.g. sex) we treated these as the results not sub-group analyses. We defined sub-group analyses as repeat analysis with stratification (e.g. Malon2016mple7729 the separate analyses are the main analysis)
 * 12b_ii - Rule = "Partially" if missing statistical tests and don't say how interaction incoroporated into model
@@ -88,12 +92,15 @@ New rule becky & I created
 * 19_ii - Rule = "No" if do not give non-numerical estimation of magnitude or direction for any source of bias
 * 5_iv - Rule = "Partially" if state exposures were measured at baseline but don't give dates of baseline measurements
 * 20 - Rule = "No" if make very strong causal statement or policy recommendation
+* 16a_v - Rule = "Partially" if make blanket statement about how covariates were chosen because associated with outcomes
 
 Duplicates - Rule = "NA" for all for higher numbered items
 * 6a_i & 6a_iii & 10 - took 6a_i to mean inclusion in the analysis and took 6a_iii to mean methods of selection into the analysis, which is the same thing.
 10 is a duplicate of 6a_i and 6a_iii because all included studies are not novel studies so eligbility criteria covered by 6a_i is justification for sample size.
 All of which are the same thing.
-* 5_vi composit - we took "dates of data collection" to mean if they included all dates for exposure/outcome, recruitment, beginning & end of follow-up (if used) but could they mean something else + this interpretation means that it is simply a duplicate of 5_iii, 5_iv, and 5_v
+* 5_vi composit - we took "dates of data collection" to mean if they included all dates for exposure/outcome, recruitment, beginning & end of follow-up (if used) but could they mean something else + this interpretation means that it is simply a duplicate of 5_iii, 5_iv, and 5_v. 
+So "Partially" in 5_vi means paper if missing baseline or follow up dates or indicates "baseline" measure but no date
+
 
 Not duplicates
 * 6a_i, 5a, & 6a_ii NOT duplicates - we took "recruitment sites or sources" in 5a to mean recruitment into UKB, took 6a_i "eligibility criteria...group from which study population was selected" to mean inclusion in the analysis, and in 6a_ii we took "source to mean mean sources of participants (i.e. statement of UK BIobank). Different from "setting" question because that we took to mean the setting of the UK Biobank itself
@@ -108,9 +115,12 @@ Not duplicates
 * 7_v becky its
 * 18 - no or yes for all
 * 19_i - just yes or no for all
-*14starredb - Rule = "No" if dont indicate number of missing data for each variable that they didn't exclude based on missing data
+* 14starredb - Rule = "No" if dont indicate number of missing data for each variable that they didn't exclude based on missing data
 ** if passed I need to review this item because sometimes i put this as partially if state variables they exclude based on missing data because i judged this as them indicating these variables had no missing data
 * reassess 4?
+* 1b_ii - Rule = Partially if describe some results but missing all/some numerical results of main statistical tests
+* 1a -  Rule = "Partially" if "longitudinal" referred to
+* 1a - Rule = "baseline" not enough for search so marked as No
 
 # To do
 
@@ -129,5 +139,3 @@ Not duplicates
 * check duplicates are same (e.g. 6a_i and 6a_iii)
 * 12b_i & 17_i - Rule = "NA" if not used even though could consider examining subgroups advisable (Nah not advisable drop this extra bit of rule -- done
 * 12b_ii & 17_ii - Rule = "NA" if not used even though could consider examining interactions advisable (Nah not advisable drop this extra bit of rule -- done
-
-* 12e & 17_iii though not sure this is necessary because we treated all interactions as interactions not sensitivity analyses - Rule = "NA" if sensitivity analysis is an interaction test - adjust this rule a bit to make it clearer
