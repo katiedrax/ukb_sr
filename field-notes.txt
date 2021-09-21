@@ -57,7 +57,7 @@ Accepted rule I proposed
 * 7_i - Rule = "Yes" if define outcomes but missing ICD criteria
 
 New rule becky & I created
-* 4 - Rule = Yes if methods described early on in paper but this includes abstract
+* 4 - Rule = Yes if methods described in abstract
 * 5_v - Rule = Yes if any follow-up date
 * 14starredc_coh - Rule = Yes if give any of mean/range/total
 * 17_ii - Rule = "Yes"if only p-value or significance indicated for interaction
@@ -128,7 +128,7 @@ Not duplicates
 * reasess 16c, 19_ii for all -- done, only really applied to conflicts with MG
 * assess x-sec items for Olivo2019tudy.014 with RR
 * needs discussion categories -- done
-* "check it"/"kd to check" categories
+* "check it"/"kd to check" categories -- done
 * clean up MG conflicts - includes item 9, 11_ii, 11_iii, 12e, 13starred_b, 16c, -- done
 * 8 starred i - need to import & resolve  -- done
 * exposures
