@@ -1,0 +1,49 @@
+Title: General guidelines for resolving conflicts in the data extraction form
+
+These rules are to resolve conflicts not to collect new data so they're directed what consistently we coded.
+
+# Dependencies
+
+Certain items are dependent on each other. 
+Meaning that if these change during conflict resolution it may create conflicts in items that came after them in the form.
+
+* 1b_ii and 4 - If 1b_ii is "Yes" then 4 will be "Yes" because methods would have been fully described in abstract. 
+* 7_v, 12b_i, and 17_i - These items apply if subgroup analyses done. We defined effect modifiers as terms used in subgroup analyses or interactions but this is not how STROBE seem to do it
+* 7_v, 12_ii, and 17_ii - These items apply if interaction analyses used. 
+* 11_ii, 11_iii, and 16b - These items all apply if grouping were created.  
+* 12_e, and 17_iii - These items apply if sensitivity analyses done.
+
+# General guidelines
+
+* 9 - is just binary, don't use partially because we it's a very subjective judgement of what discussion of bias would be partial. Instead we just made a judgement of if discussion was present
+* all sub(starred) items - exclude all. 
+We are restricting our analysis to main items only because subitems had a high conflict rate in terms of when coders thought they would apply. Apply these items for multiple or continuous exposures would be ridiculous but we did not consistently agree what the limit of groups would be.
+* 11_ii & 11_iii - KD used unsure/Partially when no/some groupings defined but unclear if variables were grouped. All other coders evaluated the completeness of reporting for stated groupings/catergories so did not use "unsure". We used this rule because it is the one the majority of coders used. KD simply reassessed her "Partially" or "unsure" judgements based on uncertainty of whether any other groups existed in line with the majority interpretation then resolved conflicts. 
+* 5_iv - Becky & Mark initally said no because don't give dates for when people self-reported their exposure. 
+Emma said no throughout for the same reason
+Mark, Becky & I later interpreted it as date baseline assessments done. 
+We also agreed that "Partially" could be assigned to statements of measurements made at "baseline" 
+* 12d - complete case analysis is not a way of addressing loss to follow up.
+It's more about have they run a competeing risk model & censoring based on loss to follow up
+* 19_ii - authors need to say how stuff would bias it e.g. this could be biased up to 20%
+* 11_i - We are going to assume that variables were handled as they were measured unless otherwise stated (i.e. duplicate of 8starred_ii)
+** 8starred_ii and 11_i will not necessarily be duplicates e.g. authors could distinuish between handling and measurement and fully explain how they handled variables (11b_i == Yes) but not how those variables were measured (8starred_ii != Yes) 
+* We considered results to be "Partially" reported if authors did not give exact p-values, unless p <.001
+* 12e & 17_iii - we treated all interactions as interactions not sensitivity analyses
+
+# Duplicates
+
+Some items are duplicates of each other. 
+Meaning that in the case of observational epidemiological studies using UK Biobank data, these items refered to the same information.
+All duplicated items that came after the first duplicate item in the data extraction form will be "NA". 
+
+* 6a_i, 6a_iii & 10 - took 6a_i to mean inclusion in the analysis and took 6a_iii to mean methods of selection into the analysis, which is the same thing.
+10 is a duplicate of 6a_i and 6a_iii because all included studies are not novel studies so eligbility criteria covered by 6a_i is justification for sample size.
+All of which are the same thing.
+* 5_vi - we took "dates of data collection" to mean if they included all dates for exposure/outcome, recruitment, beginning & end of follow-up (if used) but could they mean something else + this interpretation means that it is simply a duplicate of 5_iii, 5_iv, and 5_v. 
+
+We believe some items could be considered as duplicates but our interpretation meant that they were not.
+
+* 6a_i, 5a, & 6a_ii - we took "recruitment sites or sources" in 5a to mean recruitment into UKB, took 6a_i "eligibility criteria...group from which study population was selected" to mean inclusion in the analysis, and in 6a_ii we took "source to mean mean sources of participants (i.e. statement of UK BIobank). Different from "setting" question because that we took to mean the setting of the UK Biobank itself
+* 13starredb - not duplicate as it is a justifcations for why numbers went down
+* 6a_ii & 8starred_i - we initially treated these as duplicates. "source" was not defined in STROBE E&E so KD & MG initally interpreted as sources of data, this made 8starred_i a duplicate of 6a_ii because source for each variable would be "UK Biobank", later had to reassess this because we reinterpretted it to mean sources of each variable interms of method of measurement (self-completed questionnaire, interview, clinician measurement). This meant 6a_ii was the only item to cover a statement of the data being from the UK Biobank
