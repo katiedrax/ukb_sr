@@ -11,13 +11,11 @@ library(gtools)
 
 import <- function(df_path){
   # import header to check names
-  df <- read.csv(df_path, stringsAsFactors = F, encoding = "UTF-8", nrow = 1, check.names = F)
+  df <- read.csv(df_path, stringsAsFactors = F, encoding = "UTF-8", nrow = 1, check.names = F, na.strings = c("", " "))
   # check no colnames duplicated
   if(any(duplicated(colnames(df)))) stop("duplicated colnames")
-  # check no colnames duplicated
-  if(any(is.na(colnames(df)))) stop("missing colnames")
-  # check no colnames duplicated
-  if(any(colnames(df) %in% c("", " "))) stop("missing colnames")
+  # check no colnames missing
+  if(any(is.na(colnames(df))) | any(colnames(df) %in% c("", " "))) stop("missing colnames")
   # read in if passes name check
   df <- read.csv(df_path, stringsAsFactors = F, encoding = "UTF-8", na.strings = c("", " "))
   return(df)
@@ -87,6 +85,119 @@ check_suf(rr)
 check_suf(bw)
 check_suf(mg)
 
+####################
+# check responses ####
+####################
+
+# catergories should only be a few check this
+
+find_all_values <- function(df){
+  # remove evidence columns 
+  df <- df[, -grep("_ev\\.", colnames(df))]
+  # remove all columns that aren't strobe variables (i.e. don't begin with s[digit])
+  df <- df[, grep("^s[0-9]", colnames(df))]
+  ls <- list()
+  for(i in colnames(df)){
+    ls[[i]] <- unique(df[[i]])
+  }
+  ls <- ls[lengths(ls) != 33]
+  ls <- lapply(ls, `length<-`, max(lengths(ls)))
+  x <- as.data.frame(ls)
+  all_value <- c()
+  for(i in 1:ncol(x)){
+    all_value <- sort(c(all_value, as.character(x[,i])))
+  }
+  return(all_value)
+}
+
+rr_values <- find_all_values(rr)
+mg_values <- find_all_values(mg)
+bw_values <- find_all_values(bw)
+
+rr_rules<- sort(unique(grep("rule", rr_values, value = T, ignore.case = T))) %>%
+  gsub(".*Rule", "Rule", .)
+mg_rules<- sort(unique(grep("rule", mg_values, value = T, ignore.case = T)))%>%
+  gsub(".*Rule", "Rule", .)
+bw_rules<- sort(unique(grep("rule", bw_values, value = T, ignore.case = T)))%>%
+  gsub(".*Rule", "Rule", .)
+
+rules_dict <- read.csv("data/rules.csv", stringsAsFactors = F, encoding = "UTF-8", na.strings = c("", " "), )
+
+rr_rules[which(!rr_rules %in% rules_dict$rule)]
+mg_rules[which(!mg_rules %in% rules_dict$rule)]
+bw_rules[which(!bw_rules %in% rules_dict$rule)]
+
+
+rr_not_rules<- sort(unique(rr_values[grepl("rule", rr_values, ignore.case = T) == F]))
+mg_not_rules<- sort(unique(mg_values[grepl("rule", mg_values, ignore.case = T) == F]))
+bw_not_rules<- sort(unique(bw_values[grepl("rule", bw_values, ignore.case = T) == F]))
+
+################
+# kd to check ####
+##################
+
+find_checks <- function(df){
+  cols_to_check <- c("article_id", "title.kd")
+  for(i in colnames(df)){
+    x <- any(grep("kd to check", df[[i]]))
+    if(x ==T){
+      df[[i]][grepl("kd to check", df[[i]]) == F] <- NA
+      cols_to_check <- c(cols_to_check, i)
+    }
+  }
+  df <- df[, cols_to_check]
+  row_to_check <- c()
+  for(i in 1:nrow(df)){
+    x <- any(grep("kd to check", as.character(df[i, ])))
+    if(x ==T){
+      row_to_check <- c(row_to_check, i)
+    }
+  }
+  df <- df[row_to_check, ]
+  if(identical(cols_to_check, c("article_id", "title.kd"))){
+    print("no kd to check values")
+  } else {
+    return(df)
+  }
+}
+
+
+mg_check <- find_checks(mg)
+rr_check <- find_checks(rr)
+bw_check <- find_checks(bw)
+
+
+find_becky_its <- function(df){
+  cols_to_check <- c("article_id", "title.kd")
+  for(i in colnames(df)){
+    x <- any(grep("becky", df[[i]]))
+    if(x ==T){
+      df[[i]][grepl("becky", df[[i]]) == F] <- NA
+      cols_to_check <- c(cols_to_check, i)
+    }
+  }
+  df <- df[, cols_to_check]
+  row_to_check <- c()
+  for(i in 1:nrow(df)){
+    x <- any(grep("becky", as.character(df[i, ])))
+    if(x ==T){
+      row_to_check <- c(row_to_check, i)
+    }
+  }
+  df <- df[row_to_check, ]
+  return(df)
+  if(identical(cols_to_check, c("article_id", "title.kd"))){
+    print("no becky it values")
+  } else {
+    return(df)
+  }
+}
+
+
+mg_becky_it <- find_becky_its(mg)
+rr_becky_it <- find_becky_its(rr)
+bw_becky_it <- find_becky_its(bw)
+
 ######################
 # drop evidence columns ####
 #######################
@@ -107,11 +218,6 @@ mg <- drop_ev_star(mg)
 # merge ####
 #########
 
-# save suffixes used to indicate which column relates to which coder
-suf <- c(".bw", ".rr", ".kd", ".mg", ".correct")
-# save patterns to find columns containing suffixes at end or not
-suf_pat <- paste0("\\", suf, "$", collapse ="|")
-
 # function to check conflicts
 resolve_conflicts <- function(df, coder_2){
   # save suffixes used to indicate which column relates to which coder
@@ -128,19 +234,24 @@ resolve_conflicts <- function(df, coder_2){
   # for each double coded variable, find the conflicts
   x <- list()
   for(i in cols_stem){
+    # save .kd column that starts with i
     kd_name <- paste0(i, ".kd")
+    # save coder 2 column that starts with i
     b_name <- paste0(i, coder_2)
+    # save correct column - this will be i pasted with .correct
     cor_name <- paste0(i, ".correct")
+    # check kd, coder 2, and correct cols all in df
     if(!(kd_name %in% colnames(df)) & !(b_name %in% colnames(df))) stop(i, " not in df")
     if(!(cor_name %in% colnames(df))){
+      # add correct column so can match on it later
       df[[cor_name]] <- rep(NA, nrow(df))
     }
     if(is.null(df[[kd_name]])) stop(kd_name, " doesn't exist")
     if(is.null(df[[b_name]])) stop(b_name, " doesn't exist")
     if(is.null(df[[cor_name]])) stop(cor_name, " doesn't exist")
-    # create df of coder1 and coder2's columns that don't match and include NAs in matching
+    # create df of kd and coder2's columns that don't match and include NAs in matching
     if(identical(df[[kd_name]], df[[b_name]]) & all(is.na(df[[cor_name]]))){
-      df[[i]] <- df[[cor_name]]
+      df[[i]] <- df[[kd_name]]
       df <- df[, -which(colnames(df) %in% c(kd_name, b_name, cor_name))]
     } else {
       cons <- which((!is.na(df[[kd_name]]) & !is.na(df[[b_name]]) & df[[kd_name]]==df[[b_name]] | is.na(df[[kd_name]]) & is.na(df[[b_name]])) == F)
@@ -159,14 +270,16 @@ resolve_conflicts <- function(df, coder_2){
     }
   }
   df <- df[ , gtools::mixedorder(colnames(df))]
-  return(df)
   if(any(duplicated(colnames(df)))) stop("columns duplicated")
+  return(df)
 }
 
-bw_cons <- resolve_conflicts(bw, ".bw")
-rr_cons <- resolve_conflicts(rr, ".rr")
-mg_cons <- resolve_conflicts(mg, ".mg")
+kd_bw <- resolve_conflicts(bw, ".bw")
+kd_rr <- resolve_conflicts(rr, ".rr")
+kd_mg <- resolve_conflicts(mg, ".mg")
 
-write.csv(kd_bw, "outputs/kd-bw-resolved.csv", row.names = F, fileEncoding = "UTF-8", na = "")
-write.csv(kd_mg, "outputs/kd-mg-resolved.csv", row.names = F, fileEncoding = "UTF-8", na = "")
-write.csv(kd_rr, "outputs/kd-rr-resolved.csv", row.names = F, fileEncoding = "UTF-8", na = "")
+# find any remaining conflicts
+
+grep("\\.kd$", colnames(kd_bw), value = T)
+grep("\\.kd$", colnames(kd_rr), value = T)
+grep("\\.kd$", colnames(kd_mg), value = T)
