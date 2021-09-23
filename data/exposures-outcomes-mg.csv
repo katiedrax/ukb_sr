@@ -1,0 +1,52 @@
+article_id,title.kd,exposure.kd,exposure_ev.kd,outcome.kd,outcome_ev.kd
+O'Sul2018tudy2915,Annual Ambient UVB at Wavelengths that Induce Vitamin D Synthesis is Associated with Reduced Esophageal and Gastric Cancer Risk: A Nested Case-Control Study,No,,No,
+Ander2018ysis.022,Red and processed meat consumption and breast cancer: UK Biobank cohort study and meta-analysis,Yes,Table 3,Yes,"""Meta-analysis was undertaken using a random effects model; stratified by type of meat (red and processed) and outcome (pre-, post-menopausal and overall breast cancer)."""
+Boaky2018antsx102,Tobacco exposure and sleep disturbance in 498 208 UK Biobank participants,Yes,"""A series of logistic regression models were used to investigate the associations between tobacco exposure and sleep characteristics""",No,
+Cassi2017ants7982,"The cardio-metabolic impact of taking commonly prescribed analgesic drugs in 133,401 UK Biobank participants",No,,Yes,"""Individuals with missing data on either BMI, waist cm, or hypertension (main outcomes) were excluded"""
+Celis2017tudy0921,"Associations Between Diabetes and Both Cardiovascular Disease and All-Cause Mortality Are Modified by Grip Strength: Evidence From UK Biobank, a Prospective Population-Based Cohort Study",Yes,"""In this population based study, all-cause and CVD mortality and incident CVD events were the main outcomes, and diabetes was the exposure of interest""",Yes,"""In this population based study, all-cause and CVD mortality and incident CVD events were the main outcomes, and diabetes was the exposure of interest"""
+Cook2018banky224,The prevalence of co-morbidities and their impact on physical activity in people with inflammatory rheumatic diseases compared with the general population: results from the UK Biobank,Yes,""" Study group: no rheumatic/musculoskeletal disease and no morbidity (no RD-noM), no rheumatic/musculoskeletal disease and morbidity (no RD-M), rheumatic/musculoskeletal disease and no co-morbidity (RD-no M), and rheumatic/musculoskeletal disease and co-morbidity (RD-M) is the independent variable.""",Yes,"""Physical activity group (referent = low) is the dependent variable"""
+Davie2018bank79-y,The Causal Effects of Education on Health Outcomes in the UK Biobank,Yes,"""Exposure: left school after age 15""",Yes,"""Outcomes"""
+Elova2017tudy75-0,Contribution of risk factors to excess mortality in isolated and lonely individuals: an analysis of data from the UK Biobank cohort study,Yes,"""isolation and loneliness with mortality, we calculated the percentage of excess risk mediated (PERM) for the following five groups of explanatory variables: (1) biological (BMI, diastolic and systolic blood pressure, and handgrip strength); (2) behavioural (smoking, alcohol consumption, and physical activity); (3) socioeconomic (Townsend deprivation index, education, and household income); (4) psychological factors (depressive symptoms and cognitive performance); and (5) self-rated health. For each risk-factor group, we estimated the percentage of PERM as:21""",Yes,"""The main outcomes were all-cause and cause-specific mortality."""
+Foste2018hort00-7,The effect of socioeconomic deprivation on the association between an extended measurement of unhealthy lifestyle factors and health outcomes: a prospective analysis of the UK Biobank cohort,Yes,"""exposures of interest were lifestyle category and quintiles of area-based deprivation.""",Yes,"""The outcomes assessed in this analysis were all-cause mortality, and cardiovascular disease mortality and incidence;"""
+Harve2018hort3375,Calcium and Vitamin D Supplementation Are Not Associated With Risk of Incident Ischemic Cardiac Events or Death: Findings From the UK Biobank Cohort,Yes,Table 4,Yes,"""Analyses were replicated using death from ischemic heart disease or myocardial infarction as outcomes"""
+Kyle2017bank.001,Sleep and cognitive performance: cross-sectional associations in the UK Biobank,No,,Yes,"""The five tasks involved the following instructions:
+ Reasoning: This task assessed the ability to solve 13 verbal and
+numeric reasoning problems. Each problem had five possible
+response options. The dependent variable was the total number
+of correct answers given (range 0e13) within a 2-min period,
+with higher scores indicating better performance.
+ Basic reaction time: This task was delivered in the style of the
+card game, ‘snap’, and requested participants to respond with a
+button press when they detected the appearance of a matching
+pair of symbols. The dependent variable was the mean response
+time in milliseconds across 12 matching-pair trials. RT values
+were log-transformed because of skewed distribution (ln x).
+ Numeric short-term memory: In this task, a string of numbers
+was presented on the screen, which subsequently disappeared.
+Participants were then asked to enter the number string from
+memory, in the reverse order, through a keypad. The dependent
+variable was the maximum string length recalled correctly
+(range: 0e12), with higher scores indicating better performance.
+The test was discontinued after five successive incorrect
+responses at string length ¼ 2.
+ Visual memory: In this task, six card pairs of symbols were presented
+on-screen in a random pattern. Cards were then turned
+face down on the screen, and participantswere asked to locate as
+many symbol pairs as possible in as fewattempts as possible. The
+dependent variable was the number of errors made during pairs
+matching (range 0e146), which was log-transformed because of
+skewed distribution and zero inflation (ln (x þ 1)).
+ Prospective memory: In this task, participants were asked to
+remember to perform a pre-planned instruction. Specifically, at
+the beginning of the test battery, they were presented with the
+following instruction: ‘At the end of the games we will show you
+four coloured symbols and ask you to touch the blue square.
+However, to test your memory,wewant you to actually touch the
+orange circle instead’. If participants remembered to touch the
+orange circle on first attempt, they were coded as ‘correct’ (1),
+while those failing to do so were set to 0."""
+Littl2016arch.010,Lifestyle factors and prostate-specific antigen (PSA) testing in UK Biobank: Implications for epidemiological research,No,,No,
+Lyall2017antsw528,Associations between single and multiple cardiometabolic diseases and cognitive abilities in 474 129 UK Biobank participants,No,,Yes,"""The cognitive tests were treated as outcome variables in a series of linear regression models."""
+Marti2016tudy7784,"Cardiometabolic disease and features of depression and bipolar disorder: population-based, cross-sectional study",No,,Yes,"""We used separate logistic regression models to examine the associations between mood group and cardiometabolic disease categories (‘any cardiovascular disease’ (not including diabetes), diabetes, hypertension, myocardial infarction, angina or stroke), with controls as the referent group. These primary outcomes were used to provide amore comprehensive analysis of common cardiometabolic"""
+Pan2019tudy.008,Association between musculoskeletal pain at multiple sites and objectively measured physical activity and work capacity: Results from UK Biobank study,No,,No,
+Papag2019omen2359,Muscle mass measures and incident osteoporosis in a large cohort of postmenopausal women,Yes,Figure 2,Yes,"""Assessment of outcome"""
