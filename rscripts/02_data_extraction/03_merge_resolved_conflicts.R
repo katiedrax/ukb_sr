@@ -214,12 +214,69 @@ rr <- drop_ev_star(rr)
 bw <- drop_ev_star(bw)
 mg <- drop_ev_star(mg)
 
-##########
-# merge ####
-#########
+##################
+# merge without prediction papers ####
+####################
+
+# save dfs with prediction papers
+rr_pred <- rr
+bw_pred <- bw
+mg_pred <- mg
+
+# create function to combine double coded variables in dfs if all conflicts resolved
+
+resolve_conflict <- function(df, col_stem, coder_2){
+  # save .kd column that starts with col_stem
+  kd_name <- paste0(col_stem, ".kd")
+  # save coder 2 column that starts with col_stem
+  b_name <- paste0(col_stem, coder_2)
+  # save correct column - this will be col_stem pasted with .correct
+  cor_name <- paste0(col_stem, ".correct")
+  # check kd, coder 2, and correct cols all in df
+  if(!(kd_name %in% colnames(df)) & !(b_name %in% colnames(df))) stop(col_stem, " not in df")
+  if(!(cor_name %in% colnames(df))){
+    # add correct column so can match on it later
+    df[[cor_name]] <- rep(NA, nrow(df))
+  }
+  if(is.null(df[[kd_name]])) stop(kd_name, " doesn't exist")
+  if(is.null(df[[b_name]])) stop(b_name, " doesn't exist")
+  if(is.null(df[[cor_name]])) stop(cor_name, " doesn't exist")
+  # create df of kd and coder2's columns that don't match and include NAs in matching
+  if(identical(df[[kd_name]], df[[b_name]]) & all(is.na(df[[cor_name]]))){
+    df[[col_stem]] <- df[[kd_name]]
+    df <- df[, -which(colnames(df) %in% c(kd_name, b_name, cor_name))]
+  } else {
+    cons <- which((!is.na(df[[kd_name]]) & !is.na(df[[b_name]]) & df[[kd_name]]==df[[b_name]] | is.na(df[[kd_name]]) & is.na(df[[b_name]])) == F)
+    # if all conflicts have a correct value then reolace empty correct values with unconflicted values
+    if(all(!is.na(df[[cor_name]][cons]))) {
+      df[[col_stem]] <- df[[cor_name]]
+      uncon <- which(is.na(df[[col_stem]]))
+      df[[col_stem]][uncon] <- df[[kd_name]][uncon]
+      df <- df[, -which(colnames(df) %in% c(kd_name, b_name, cor_name))]
+    } else {
+      message(col_stem, " has unresolved conflicts")
+    }
+  }
+  if(all(is.na(df[[cor_name]]))){
+    df[[cor_name]] <- NULL
+  }
+  df <- df[ , gtools::mixedorder(colnames(df))]
+  if(any(duplicated(colnames(df)))) stop("columns duplicated")
+  return(df)
+}
+
+# resolve predict conflicts
+rr <- resolve_conflict(rr, "predict", ".rr")
+bw <- resolve_conflict(bw, "predict", ".bw")
+mg <- resolve_conflict(mg, "predict", ".mg")
+
+# remove prediction papers
+rr <- rr[!rr$predict %in% "Yes", ]
+bw <- bw[!bw$predict %in% "Yes", ]
+mg <- mg[!mg$predict %in% "Yes", ]
 
 # function to check conflicts
-resolve_conflicts <- function(df, coder_2){
+save_col_stems <- function(df){
   # save suffixes used to indicate which column relates to which coder
   suf <- c(".bw", ".rr", ".kd", ".mg", ".correct")
   # save patterns to find columns containing suffixes at end or not
@@ -230,56 +287,29 @@ resolve_conflicts <- function(df, coder_2){
     # remove duplicated
     .[!duplicated(.)] %>%
     # remove single coded items since these can't be conflicted
-    .[!. %in% single]
-  # for each double coded variable, find the conflicts
-  x <- list()
-  for(i in cols_stem){
-    # save .kd column that starts with i
-    kd_name <- paste0(i, ".kd")
-    # save coder 2 column that starts with i
-    b_name <- paste0(i, coder_2)
-    # save correct column - this will be i pasted with .correct
-    cor_name <- paste0(i, ".correct")
-    # check kd, coder 2, and correct cols all in df
-    if(!(kd_name %in% colnames(df)) & !(b_name %in% colnames(df))) stop(i, " not in df")
-    if(!(cor_name %in% colnames(df))){
-      # add correct column so can match on it later
-      df[[cor_name]] <- rep(NA, nrow(df))
-    }
-    if(is.null(df[[kd_name]])) stop(kd_name, " doesn't exist")
-    if(is.null(df[[b_name]])) stop(b_name, " doesn't exist")
-    if(is.null(df[[cor_name]])) stop(cor_name, " doesn't exist")
-    # create df of kd and coder2's columns that don't match and include NAs in matching
-    if(identical(df[[kd_name]], df[[b_name]]) & all(is.na(df[[cor_name]]))){
-      df[[i]] <- df[[kd_name]]
-      df <- df[, -which(colnames(df) %in% c(kd_name, b_name, cor_name))]
-    } else {
-      cons <- which((!is.na(df[[kd_name]]) & !is.na(df[[b_name]]) & df[[kd_name]]==df[[b_name]] | is.na(df[[kd_name]]) & is.na(df[[b_name]])) == F)
-      # if all conflicts have a correct value then reolace empty correct values with unconflicted values
-      if(all(!is.na(df[[cor_name]][cons]))) {
-        df[[i]] <- df[[cor_name]]
-        uncon <- which(is.na(df[[i]]))
-        df[[i]][uncon] <- df[[kd_name]][uncon]
-        df <- df[, -which(colnames(df) %in% c(kd_name, b_name, cor_name))]
-      } else {
-        x[[i]] <- cons
-      }
-    }
-    if(all(is.na(df[[cor_name]]))){
-      df[[cor_name]] <- NULL
-    }
-  }
-  df <- df[ , gtools::mixedorder(colnames(df))]
-  if(any(duplicated(colnames(df)))) stop("columns duplicated")
-  return(df)
+    .[!. %in% single] %>%
+    # remove predict because we already resolved these conflicts
+    .[!. %in% "predict"]
+  return(cols_stem)
 }
 
-kd_bw <- resolve_conflicts(bw, ".bw")
-kd_rr <- resolve_conflicts(rr, ".rr")
-kd_mg <- resolve_conflicts(mg, ".mg")
 
-# find any remaining conflicts
+for(i in save_col_stems(bw)){
+  bw <- resolve_conflict(bw, i, ".bw")
+}
 
-grep("\\.kd$", colnames(kd_bw), value = T)
-grep("\\.kd$", colnames(kd_rr), value = T)
-grep("\\.kd$", colnames(kd_mg), value = T)
+for(i in save_col_stems(mg)){
+  mg <- resolve_conflict(mg, i, ".mg")
+}
+
+for(i in save_col_stems(rr)){
+  rr <- resolve_conflict(rr, i, ".rr")
+}
+
+#################
+# find any remaining conflicts ######
+##################
+
+#grep("\\.kd$", colnames(rr), value = T)
+#grep("\\.kd$", colnames(mg), value = T)
+#grep("\\.kd$", colnames(bw), value = T)
