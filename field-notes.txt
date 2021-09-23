@@ -131,6 +131,7 @@ Not duplicates
 * "check it"/"kd to check" categories -- done
 * clean up MG conflicts - includes item 9, 11_ii, 11_iii, 12e, 13starred_b, 16c, -- done
 * 8 starred i - need to import & resolve  -- done
+* 8 starred i - for bw
 * exposures
 * outcomes
 * papers I haven't reviewed ~2
