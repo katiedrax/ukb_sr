@@ -33,7 +33,7 @@ We are restricting our analysis to main items only because subitems had a high c
 Emma said no throughout for the same reason
 Mark, Becky & I later interpreted it as date baseline assessments done. 
 We also agreed that "Partially" could be assigned to statements of measurements made at "baseline" 
-* 12d - complete case analysis is not a way of addressing loss to follow up.
+* 12d_coh - complete case analysis is not a way of addressing loss to follow up.
 It's more about have they run a competeing risk model & censoring based on loss to follow up
 * 19_ii - authors need to say how stuff would bias it e.g. this could be biased up to 20%
 * 11_i - We are going to assume that variables were handled as they were measured unless otherwise stated (i.e. duplicate of 8starred_ii)
@@ -107,7 +107,6 @@ Not duplicates
 * 13starredb - not duplicate as it is a justifcations for why numbers went down
 * 6a_ii & 8starred_i not duplicates - treated as duplicate at start. "source" not defined in guidance so KD & MG initally interpreted as sources of data, this made 8starred_i a duplicate of 6a_ii because source for each variable would be "UK Biobank", later had to reassess this because we reinterpretted it to mean sources of each variable interms of method of measurement (self-completed questionnaire, interview, clinician measurement). This meant 6a_ii was the only item to cover a statement of the data being from the UK Biobank
 
-
 # to ask becky
 
 # questions
@@ -121,22 +120,26 @@ Not duplicates
 * 1b_ii - Rule = Partially if describe some results but missing all/some numerical results of main statistical tests
 * 1a -  Rule = "Partially" if "longitudinal" referred to
 * 1a - Rule = "baseline" not enough for search so marked as No
+* 5_vi - Rule = "NA" because duplicate
+* 6a_iii - Rule = "NA" because duplicate (but only for coh_cs not cc)?
+* set all duplicates to NA (e.g. 6a_i and 6a_iii) ?
+* 12d_cs - Rule = "NA" if include all eligible participants because no sampling strategy used
 
 # To do
 
 * remove conservative estiamtes from 11_ii and 11_iii -- done, only applied to conflicts with MG
 * reasess 16c, 19_ii for all -- done, only really applied to conflicts with MG
-* assess x-sec items for Olivo2019tudy.014 with RR
+* assess x-sec items for Olivo2019tudy.014 with RR -- done
 * needs discussion categories -- done
 * "check it"/"kd to check" categories -- done
 * clean up MG conflicts - includes item 9, 11_ii, 11_iii, 12e, 13starred_b, 16c, -- done
 * 8 starred i - need to import & resolve  -- done
-* 8 starred i - for bw
-* exposures
-* outcomes
+* 8 starred i - for bw -- done
+* exposures -- done
+* outcomes -- done
 * papers I haven't reviewed ~2
+* becky its
 * papers others haven't reviewed
 * 17_iv = send to Becky & see if there's 
-* check duplicates are same (e.g. 6a_i and 6a_iii)
 * 12b_i & 17_i - Rule = "NA" if not used even though could consider examining subgroups advisable (Nah not advisable drop this extra bit of rule -- done
 * 12b_ii & 17_ii - Rule = "NA" if not used even though could consider examining interactions advisable (Nah not advisable drop this extra bit of rule -- done
