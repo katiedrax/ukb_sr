@@ -199,7 +199,7 @@ rr_becky_it <- find_becky_its(rr)
 bw_becky_it <- find_becky_its(bw)
 
 ######################
-# drop evidence columns ####
+# drop evidence and star columns ####
 #######################
 
 drop_ev_star <- function(df){
@@ -215,13 +215,14 @@ bw <- drop_ev_star(bw)
 mg <- drop_ev_star(mg)
 
 ##################
-# merge without prediction papers ####
+# remove prediction papers ####
 ####################
 
 # save dfs with prediction papers
 rr_pred <- rr
 bw_pred <- bw
 mg_pred <- mg
+
 
 # create function to combine double coded variables in dfs if all conflicts resolved
 
@@ -232,8 +233,8 @@ resolve_conflict <- function(df, col_stem, coder_2){
   b_name <- paste0(col_stem, coder_2)
   # save correct column - this will be col_stem pasted with .correct
   cor_name <- paste0(col_stem, ".correct")
-  # check kd, coder 2, and correct cols all in df
-  if(!(kd_name %in% colnames(df)) & !(b_name %in% colnames(df))) stop(col_stem, " not in df")
+  # check kd, coder 2, and correct cols all in df and only 1 match
+  if(length(kd_name %in% colnames(df)) != 1 & length(b_name %in% colnames(df)) != 1) stop(col_stem, " not in df or has multiple matches")
   if(!(cor_name %in% colnames(df))){
     # add correct column so can match on it later
     df[[cor_name]] <- rep(NA, nrow(df))
@@ -275,23 +276,71 @@ rr <- rr[!rr$predict %in% "Yes", ]
 bw <- bw[!bw$predict %in% "Yes", ]
 mg <- mg[!mg$predict %in% "Yes", ]
 
+#####################
+# MANUAL CHECK & TEMPORARY ####
+#####################
+# remove articles that are currently not double coded 
+# Becky is in the process of extracting these
+remove_single_coded <- function(df, coder_2_suffix){
+  df_orig <-df
+  kd_name <- "s20.kd"
+  b_name <- paste0("s20", coder_2_suffix)
+  if(is.null(df[[kd_name]])) stop(kd_name, " doesn't exist")
+  if(is.null(df[[b_name]])) stop(b_name, " doesn't exist")
+  x <- df$article_id[is.na(df[[kd_name]]) |is.na(df[[b_name]])]
+  if(length(x) > 0){
+    warning("removed ", length(x), " single coded articles")
+    df <- df[-which(df$article_id %in% x), ]
+    return(df)
+  } else {
+    print("all articles double coded")
+    if(!identical(df, df_orig)) stop("df changed even though no articles double coded")
+    return(df)
+  }
+}
+
+mg <- remove_single_coded(mg, ".mg")
+bw <- remove_single_coded(bw, ".bw")
+rr <- remove_single_coded(rr, ".rr")
+
+##################
+# merge without prediction papers ####
+################
+
 # function to check conflicts
 save_col_stems <- function(df){
   # save suffixes used to indicate which column relates to which coder
   suf <- c(".bw", ".rr", ".kd", ".mg", ".correct")
   # save patterns to find columns containing suffixes at end or not
   suf_pat <- paste0("\\", suf, "$", collapse ="|")
-  # save single coded items
-  single <- c("email","country","ukb_app","keywords","coi", "article_id")
-  cols_stem <- gsub(suf_pat, "", colnames(df)) %>%
-    # remove duplicated
-    .[!duplicated(.)] %>%
+  #  qualtrics metadata and comments vars are double coded but are unique to each coder >
+  # kd alone extracted some variables so save all these variables single/unique variables
+  kd_only <- c("email","country","ukb_app","keywords","coi", "article_id")
+  qualtrics <- c("distribution_channel", "duration_in_seconds", "end_date", "finished", 
+                 "progress", "recorded_date", "response_id", "response_type", "start_date", "user_language")
+  single <- c(qualtrics, "comments", kd_only)
+  # remove suffixes to leave stems
+  cols_stem <- gsub(suf_pat, "", colnames(df))
+  # read in extraction dictionary to check all colstems in dict
+  dict <- read.csv("outputs/extraction_dict.csv", stringsAsFactors = F, encoding = "UTF-8", na.strings = c("", " "))
+  # remove duplicated
+  cols_stem  <- cols_stem[!duplicated(cols_stem)] %>%
     # remove single coded items since these can't be conflicted
     .[!. %in% single] %>%
     # remove predict because we already resolved these conflicts
-    .[!. %in% "predict"]
-  return(cols_stem)
+    .[!. %in% "predict"] %>%
+    # remove title substring variables
+    .[!. %in% c("title_clean", "title_sub")]
+  if(!all(cols_stem %in% dict$variable)){
+    count <- sum(!cols_stem %in% dict$variable)
+    warning(count, " col stems not in extraction dictionary")
+    return(cols_stem)
+    stop()
+  } else {
+    return(cols_stem)
+  }
 }
+
 
 
 for(i in save_col_stems(bw)){
@@ -305,6 +354,7 @@ for(i in save_col_stems(mg)){
 for(i in save_col_stems(rr)){
   rr <- resolve_conflict(rr, i, ".rr")
 }
+
 
 #################
 # find any remaining conflicts ######
