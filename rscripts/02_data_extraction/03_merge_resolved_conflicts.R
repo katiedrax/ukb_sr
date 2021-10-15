@@ -25,6 +25,18 @@ bw <- import("data/kd-bw-articles_conflicts.csv")
 rr <- import("data/kd-rr-articles_conflicts.csv")
 mg <- import("data/kd-mg-articles_conflicts.csv")
 
+########################
+# save single coded variables ####
+######################
+
+# save stems of variables that were not double coded (and therefore not conflicted)
+# kd alone extracted some variables so save all these variables single/unique variables
+kd_only <- c("email","country","ukb_app","keywords","coi", "article_id")
+#  qualtrics metadata, comments & title substring vars are unique to each coder so stems duplicated but not colnames >
+qualtrics <- c("distribution_channel", "duration_in_seconds", "end_date", "finished", 
+               "progress", "recorded_date", "response_id", "response_type", "start_date", "user_language")
+single <- c(kd_only, qualtrics, "comments", "title_clean", "title_sub")
+
 ################
 # check suffixes all correct ####
 ##############
@@ -60,6 +72,10 @@ check_suf <- function(df){
     gsub(coder_pat, "", .)
   # check all suf_cols are duplicated (i.e. double coded)
   if(all(table(suf_cols) %in% 2)) print("all double coded cols double coded") else stop("double coded not double coded")
+  # check all columns not containing suffixes are the kd_only  >
+  # find colnames not containing coder suffixes
+  match <- x[grepl(suf_pat, x) == F]
+  if(identical(sort(kd_only), sort(match))) print("kd_only cols single coded") else stop("kd only cols not single coded")
   # check all ".correct" cols are duplicates of coder cols>
   # save stem of all cols with .correct suffix
   correct_cols_pat <- grep("\\.correct$", x, value = T) %>%
@@ -70,15 +86,11 @@ check_suf <- function(df){
   # save all cols that have a correct version
   corrected <- grep(correct_cols_pat, x, value = T) %>%
     # remove suffixes
-    gsub(suf_pat, "", .)
+    gsub(suf_pat, "", .) %>%
+    # remove  kd_only from corrected because wasn't double coded so wont be double coded
+    .[!(. %in% kd_only)]
   # check all corrected are duplicated (i.e. double coded)
   if(all(table(corrected) %in% 3)) print(".correct cols triple coded") else warning(".correct cols not triple coded")
-  # check all columns not containing suffixes are the single coded variables >
-  # save single coded variables or those merged in previous code
-  single <- c("email","country","ukb_app","keywords","coi", "article_id")
-  # find colnames not containing coder suffixes
-  match <- x[grepl(suf_pat, x) == F]
-  if(identical(sort(single), sort(match))) print("single coded cols single coded") else stop("single coded cols not single coded")
 }
 
 check_suf(rr)
@@ -176,6 +188,22 @@ rr_pred <- rr
 bw_pred <- bw
 mg_pred <- mg
 
+# create function to update kd only coded variables with corrected value
+
+update_kd_only <- function(df, kd_col){
+  cor_name <- paste0(kd_col, ".correct")
+  if(cor_name %in% colnames(df)){
+    # check sing_col and correct cols all in df and only 1 match
+    if(length(cor_name %in% colnames(df)) != 1 & length(kd_col %in% colnames(df)) != 1) stop(kd_col, " not in df or has multiple matches")
+    # find values that have a corrected value
+    cors <- which(!is.na(df[[cor_name]]))
+    # correct values by replacing with corrected one
+    df[[kd_col]][cors] <- df[[cor_name]][cors]
+    # drop correct col
+    df <- df[, -which(colnames(df) %in% c(cor_name))]
+  }
+  return(df)
+}
 
 # create function to combine double coded variables in dfs if all conflicts resolved
 
@@ -266,13 +294,6 @@ save_col_stems <- function(df){
   suf <- c(".bw", ".rr", ".kd", ".mg", ".correct")
   # save patterns to find columns containing suffixes at end or not
   suf_pat <- paste0("\\", suf, "$", collapse ="|")
-  #  qualtrics metadata, comments & title substring vars are double coded but are unique to each coder >
-  # kd alone extracted some variables so save all these variables single/unique variables
-  kd_only <- c("email","country","ukb_app","keywords","coi", "article_id")
-  qualtrics <- c("distribution_channel", "duration_in_seconds", "end_date", "finished", 
-                 "progress", "recorded_date", "response_id", "response_type", "start_date", "user_language")
-  unique <- c(qualtrics, "comments", "title_clean", "title_sub")
-  single <- c(unique, kd_only)
   # remove suffixes to leave stems
   cols_stem <- gsub(suf_pat, "", colnames(df))
   # read in extraction dictionary to check all colstems in dict
@@ -293,7 +314,17 @@ save_col_stems <- function(df){
   }
 }
 
+for(i in kd_only){
+  bw <- update_kd_only(bw, i)
+}
 
+for(i in kd_only){
+  rr <- update_kd_only(rr, i)
+}
+
+for(i in kd_only){
+  mg <- update_kd_only(mg, i)
+}
 
 for(i in save_col_stems(bw)){
   bw <- resolve_conflict(bw, i, ".bw")
@@ -376,8 +407,6 @@ for(i in colnames(df)){
     ids <- grep(pat, x, ignore.case = T)
     x[ids] <- gsub(" .*$", "", x[ids])
     df[[i]] <- x
-  } else {
-    print("no resolved values in strobe variable")
   }
 }
 
