@@ -354,75 +354,70 @@ find_all_values <- function(df){
   return(unique(all_value))
 }
 
-
-check_rule_vals <- function(){
+clean_values <- function(){
+  
   vals <- find_all_values(df)
   rules<- sort(unique(grep("rule", vals, value = T, ignore.case = T))) %>%
-  # remove any text that comes before rule, this will clean any like 'NA - resolved but Rule ...'
-  gsub(".*Rule", "Rule", .)
+    # remove any text that comes before rule, this will clean any like 'NA - resolved but Rule ...'
+    gsub(".*Rule", "Rule", .)
   # save rules in rule dict so can check all existing rule values are correct
   rules_dict <- read.csv("data/rules.csv", stringsAsFactors = F, encoding = "UTF-8", na.strings = c("", " "), )
   # check all rule values correct
   if(length(setdiff(rules, rules_dict$rule)) != 0) stop("some rule values wrong")
-}
-
-check_rule_vals()
-
-# remove name of coder who resolved conflict from values of resolved conflicts
-
-
-for(i in colnames(df)){
-  # save values that indicate a resolved conflict for a strobe item so can clean them>
-  # these will be responses to strobe items with the name of the coder who resolved them after the value >
-  # only becky or I resolved them so it will be "becky" or "me"
-  res <- c("Yes", "Partially-External", "Partially", "No", "Unsure", "NA") 
-  res <- c(paste0(res, " me"), paste0(res, " Becky"))
-  # save as a pattern so can use in gsub
-  pat <- paste(res, collapse = "|")
-  x <- df[[i]]
-  if(any(grep(pat, x, ignore.case = T))){
-    ids <- grep(pat, x, ignore.case = T)
-    x[ids] <- gsub(" .*$", "", x[ids])
-    df[[i]] <- x
-  }
-}
-
-####################################
-# replace rules with replacement responses ####
-####################################
-
-# replace rule responses with value rule applies to
-
-for(i in 1:length(colnames(df))){
-  col <- df[, i]
-  if(any(grepl("Rule =", col, ignore.case = T))){
-    for(j in 1:length(rules_dict$rule)){
-      rule <- rules_dict$rule[j]
-      col[grep(rule, col)] <- rules_dict$response[j]
+  
+  
+  # remove name of coder who resolved conflict from values of resolved conflicts
+  for(i in colnames(df)){
+    # save values that indicate a resolved conflict for a strobe item so can clean them>
+    # these will be responses to strobe items with the name of the coder who resolved them after the value >
+    # only becky or I resolved them so it will be "becky" or "me"
+    res <- c("Yes", "Partially-External", "Partially", "No", "Unsure", "NA") 
+    res <- c(paste0(res, " me"), paste0(res, " Becky"))
+    # save as a pattern so can use in gsub
+    pat <- paste(res, collapse = "|")
+    x <- df[[i]]
+    if(any(grep(pat, x, ignore.case = T))){
+      ids <- grep(pat, x, ignore.case = T)
+      x[ids] <- gsub(" .*$", "", x[ids])
+      df[[i]] <- x
     }
   }
-  df[, i] <- col
-}
-
-###########
-# clean non-strobe items ####
-###############
-
-
-for(i in colnames(df)){
-  # save values that indicate a resolved conflict for a strobe item so can clean them>
-  # these will be responses to strobe items with the name of the coder who resolved them after the value >
-  # only becky, I, or both of us resolved them so it will be "becky" or "me"
-  res <- c(" becky$", " me ", " me$", " us ", "us$") 
-  # save as a pattern so can use in gsub
-  pat <- paste(res, collapse = "|")
-  x <- df[[i]]
-  if(any(grepl(pat, x, ignore.case = T))){
-    ids <- grep(pat, x, ignore.case = T)
-    x[ids] <- gsub(" .*$", "", x[ids])
-    df[[i]] <- x
+  
+  
+  # replace rule responses with value rule applies to
+  
+  for(i in 1:length(colnames(df))){
+    col <- df[, i]
+    if(any(grepl("Rule =", col, ignore.case = T))){
+      for(j in 1:length(rules_dict$rule)){
+        rule <- rules_dict$rule[j]
+        col[grep(rule, col)] <- rules_dict$response[j]
+      }
+    }
+    df[, i] <- col
   }
+  
+  
+  # clean non-strobe items
+  
+  for(i in colnames(df)){
+    # save values that indicate a resolved conflict for a strobe item so can clean them>
+    # these will be responses to strobe items with the name of the coder who resolved them after the value >
+    # only becky, I, or both of us resolved them so it will be "becky" or "me"
+    res <- c(" becky$", " me ", " me$", " us ", "us$") 
+    # save as a pattern so can use in gsub
+    pat <- paste(res, collapse = "|")
+    x <- df[[i]]
+    if(any(grepl(pat, x, ignore.case = T))){
+      ids <- grep(pat, x, ignore.case = T)
+      x[ids] <- gsub(" .*$", "", x[ids])
+      df[[i]] <- x
+    }
+  }
+  return(df)
 }
+
+df <- clean_values()
 
 ###########################
 # merge in epi_access ####
@@ -439,7 +434,6 @@ for(i in colnames(df)){
   becky_its <- grep("becky it", df[[i]], ignore.case = T)
   df[[i]][becky_its] <- NA
 }
-
 
 # add check that only values with resolved me or becky tags have a space
 
