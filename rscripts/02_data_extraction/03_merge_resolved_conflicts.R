@@ -366,24 +366,6 @@ clean_values <- function(){
   if(length(setdiff(rules, rules_dict$rule)) != 0) stop("some rule values wrong")
   
   
-  # remove name of coder who resolved conflict from values of resolved conflicts
-  for(i in colnames(df)){
-    # save values that indicate a resolved conflict for a strobe item so can clean them>
-    # these will be responses to strobe items with the name of the coder who resolved them after the value >
-    # only becky or I resolved them so it will be "becky" or "me"
-    res <- c("Yes", "Partially-External", "Partially", "No", "Unsure", "NA") 
-    res <- c(paste0(res, " me"), paste0(res, " Becky"))
-    # save as a pattern so can use in gsub
-    pat <- paste(res, collapse = "|")
-    x <- df[[i]]
-    if(any(grep(pat, x, ignore.case = T))){
-      ids <- grep(pat, x, ignore.case = T)
-      x[ids] <- gsub(" .*$", "", x[ids])
-      df[[i]] <- x
-    }
-  }
-  
-  
   # replace rule responses with value rule applies to
   
   for(i in 1:length(colnames(df))){
@@ -404,7 +386,7 @@ clean_values <- function(){
     # save values that indicate a resolved conflict for a strobe item so can clean them>
     # these will be responses to strobe items with the name of the coder who resolved them after the value >
     # only becky, I, or both of us resolved them so it will be "becky" or "me"
-    res <- c(" becky$", " me ", " me$", " us ", "us$") 
+    res <- c(" becky ",  "becky$", " me ", " me$", " us ", "us$") 
     # save as a pattern so can use in gsub
     pat <- paste(res, collapse = "|")
     x <- df[[i]]
