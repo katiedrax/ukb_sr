@@ -5,6 +5,8 @@
 library(dplyr)
 library(magrittr)
 library(gtools)
+library(irr)
+library(lpSolve)
 ##########
 # import ####
 ##########
@@ -257,33 +259,6 @@ rr <- rr[!rr$predict %in% "Yes", ]
 bw <- bw[!bw$predict %in% "Yes", ]
 mg <- mg[!mg$predict %in% "Yes", ]
 
-#####################
-# MANUAL CHECK & TEMPORARY ####
-#####################
-# remove articles that are currently not double coded 
-# Becky is in the process of extracting these
-remove_single_coded <- function(df, coder_2_suffix){
-  df_orig <-df
-  kd_name <- "s20.kd"
-  b_name <- paste0("s20", coder_2_suffix)
-  if(is.null(df[[kd_name]])) stop(kd_name, " doesn't exist")
-  if(is.null(df[[b_name]])) stop(b_name, " doesn't exist")
-  x <- df$article_id[is.na(df[[kd_name]]) |is.na(df[[b_name]])]
-  if(length(x) > 0){
-    warning("removed ", length(x), " single coded articles")
-    df <- df[-which(df$article_id %in% x), ]
-    return(df)
-  } else {
-    print("all articles double coded")
-    if(!identical(df, df_orig)) stop("df changed even though no articles double coded")
-    return(df)
-  }
-}
-
-mg <- remove_single_coded(mg, ".mg")
-bw <- remove_single_coded(bw, ".bw")
-rr <- remove_single_coded(rr, ".rr")
-
 ##################
 # merge without prediction papers ####
 ################
@@ -379,17 +354,19 @@ find_all_values <- function(df){
   return(unique(all_value))
 }
 
-vals <- find_all_values(df)
 
-
-rules<- sort(unique(grep("rule", vals, value = T, ignore.case = T))) %>%
+check_rule_vals <- function(){
+  vals <- find_all_values(df)
+  rules<- sort(unique(grep("rule", vals, value = T, ignore.case = T))) %>%
+  # remove any text that comes before rule, this will clean any like 'NA - resolved but Rule ...'
   gsub(".*Rule", "Rule", .)
+  # save rules in rule dict so can check all existing rule values are correct
+  rules_dict <- read.csv("data/rules.csv", stringsAsFactors = F, encoding = "UTF-8", na.strings = c("", " "), )
+  # check all rule values correct
+  if(length(setdiff(rules, rules_dict$rule)) != 0) stop("some rule values wrong")
+}
 
-rules_dict <- read.csv("data/rules.csv", stringsAsFactors = F, encoding = "UTF-8", na.strings = c("", " "), )
-
-rules[which(!rules %in% rules_dict$rule)]
-
-values_exc_rules<- sort(unique(vals[grepl("rule", vals, ignore.case = T) == F]))
+check_rule_vals()
 
 # remove name of coder who resolved conflict from values of resolved conflicts
 
@@ -418,9 +395,7 @@ for(i in colnames(df)){
 
 for(i in 1:length(colnames(df))){
   col <- df[, i]
-  if(!any(grepl("Rule =", col, ignore.case = T))){
-    #print(paste("no rule values in ", i))
-  } else {
+  if(any(grepl("Rule =", col, ignore.case = T))){
     for(j in 1:length(rules_dict$rule)){
       rule <- rules_dict$rule[j]
       col[grep(rule, col)] <- rules_dict$response[j]
@@ -437,34 +412,34 @@ for(i in 1:length(colnames(df))){
 for(i in colnames(df)){
   # save values that indicate a resolved conflict for a strobe item so can clean them>
   # these will be responses to strobe items with the name of the coder who resolved them after the value >
-  # only becky or I resolved them so it will be "becky" or "me"
-  res <- c(" becky$", " me ", " me$") 
+  # only becky, I, or both of us resolved them so it will be "becky" or "me"
+  res <- c(" becky$", " me ", " me$", " us ", "us$") 
   # save as a pattern so can use in gsub
   pat <- paste(res, collapse = "|")
   x <- df[[i]]
   if(any(grepl(pat, x, ignore.case = T))){
-    print(x)
     ids <- grep(pat, x, ignore.case = T)
     x[ids] <- gsub(" .*$", "", x[ids])
     df[[i]] <- x
   }
 }
 
-# TEMPORARY REPLACE RULES & VALUES CURRENTLY NOT ACCEPTED BUT NEED TO BE CLEAN FOR ANALYSIS
+###########################
+# merge in epi_access ####
+#####################
+
+epi_access <- read.csv("data/epi_access.csv", stringsAsFactors = F, encoding = "UTF-8", na.strings = c("", " ")) %>%
+  .[, which(!colnames(.) %in% c("doi", "title", "authors"))]
+
+df <- left_join(df, epi_access, by = "article_id")
+
+# TEMPORARY REPLACE BECKY IT VALUES AS NA
 
 for(i in colnames(df)){
-  x <- gsub("Rule = \"NA\" because duplicate", "NA", df[[i]]) %>%
-    gsub("Rule = \"baseline\" not enough for search so marked as No", "No", .) %>%
-    gsub("Rule = \"NA\" because duplicate" , "NA", .) %>% 
-    gsub("Rule = \"No\" if dont indicate number of missing data for each variable that they didn't exclude based on missing data", "No", .) %>%
-    gsub("Rule = \"Partially\" if \"longitudinal\" referred to", "Partially", .) %>%
-    gsub("Rule = Partially if describe some results but missing all/some numerical results of main statistical tests", "Partially", .) %>%
-    gsub("Partially - resolved but NA", "NA", .)
   becky_its <- grep("becky it", df[[i]], ignore.case = T)
-  x[becky_its] <- NA
-  df[[i]] <- x
+  df[[i]][becky_its] <- NA
 }
-                                                                                      
+
 
 # add check that only values with resolved me or becky tags have a space
 
