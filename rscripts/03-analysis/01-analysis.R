@@ -97,29 +97,8 @@ if(sum(duplicated(colnames(df))) == 0){
 
 strobe_cols_names <- grep(strobe_pattern, colnames(df), value =T)
 
-save_strobe_div <- function(){
-  # extract strobe items that have sub divisions (created by dividing up double questions) >
-  # these should only be questions with roman numerals and/or are design specific >
-  # all these questions have a "_" in them
-  strobe_div <- strobe_cols_names[grepl("_", strobe_cols_names) == T] %>%
-    # this will retrieve one strobe item which has no subdivisions > 
-    # 14starredc_coh has a _ in because is design specific but that item is only relevant to cohort so is an item in itself
-    # remove this non-div item
-    .[-grep("s14starredc_coh", .)]
-  
-  # check no duplicate items
-  if(sum(duplicated(strobe_div)) != 0) stop("duplicates in strobe_div")
-  
-  # extract strobe items without sub divisions
-  strobe_comp <- strobe_cols_names[!strobe_cols_names %in% strobe_div]
-  
-  if(length(strobe_div) + length(strobe_comp) != length(strobe_cols_names)){
-    stop("number of strobe items with divisions plus those without don't equal number of strobe cols in s_df_tri")
-  }
-  return(strobe_div)
-}
-
-strobe_div <- save_strobe_div()
+strobe_stem <- gsub("_.*", "", strobe_cols_names) %>%
+  unique()
 
 ###################################
 # split into strobe and non-strobe ####
@@ -211,13 +190,12 @@ CreateTableOne(data = table1, includeNA =F )%>%
   # export
   write.csv(., "outputs/table1_no_levels.csv")
 
-
 #########################
 # recode strobe factors ####
 ########################
 
 # recode strobe variables into factors so can analyse later
-recode_strobe <- function(){
+factorise_strobe <- function(){
   # check strobe cols correct
   if(!all(strobe_cols_names %in% colnames(s_df))) stop("some strobe cols not in s_df")
   # save s_df before recoding factors
@@ -246,189 +224,129 @@ recode_strobe <- function(){
   return(s_df)
 }
 
-s_df <- recode_strobe()
+s_df <- factorise_strobe()
 
 
 #######################
-# recode strobe into ternary ####
+# divide strobe into ternary ####
 ########################
 
-recode_ternary <- function(){
+recode_strobe <- function(style = c("binary", "ternary")){
+  # check style arg correct
+  if(!style %in% c("binary", "ternary")) stop("style arg incorrect")
   
-  # recode s_df into numerical binary - yes or not yes
-  s_df_tri <- s_df
+  # recode s_df
+  x <- s_df
   
   # convert all cols into character variables
-  s_df_tri[] <- lapply(s_df, as.character)
+  x[] <- lapply(x, as.character)
   
   # get ids of all strobe cols
-  id <- grep(strobe_pattern, colnames(s_df_tri)) 
+  id <- grep(strobe_pattern, colnames(x)) 
   
-  # recode strobe options into yes and no
-  na_pre <- sum(is.na(s_df_tri))
-  
+  # check all are characters
   for(i in id){
-    if(is.character(s_df_tri[, i]) == F) stop(i, "isn't a character")
-    s_df_tri[, i] <-  gsub("^Yes$|^PartiallyExternal$", "1", s_df_tri[, i]) %>%
-      gsub("^Partially$", "0.5", .) %>%
-      gsub("^No$|^Unsure$", "0", .) %>%
-      gsub("na", NA, .) %>%
-      as.numeric(.)
-    if(is.numeric(s_df_tri[, i]) == F) stop(i, "not numeric")
+    if(is.character(x[, i]) == F) stop(i, "isn't a character")
   }
+  # recode into binary
+  if(style == "binary"){
+    for(i in id){
+      x[, i] <-  gsub("^Yes$", "1", x[, i]) %>%
+        gsub("^No$|^Partially$|^Unsure$|^PartiallyExternal$", "0", .) %>%
+        gsub("na", NA, .) %>%
+        as.numeric(.)
+      if(is.numeric(x[, i]) == F) stop(i, "not numeric")
+    }
+  }
+  # recode into ternary
+  if(style == "ternary") {
+    for(i in id){
+      x[, i] <-  gsub("^Yes$|^PartiallyExternal$", "1", x[, i]) %>%
+        gsub("^Partially$", "0.5", .) %>%
+        gsub("^No$|^Unsure$", "0", .) %>%
+        gsub("na", NA, .) %>%
+        as.numeric(.)
+      if(is.numeric(x[, i]) == F) stop(i, "not numeric")
+    }
+  }
+  #check strobe cols
+  if(!all(strobe_cols_names %in% colnames(x))) stop("some strobe cols not in s_df_tri")
   
-  #if(sum(is.na(s_df_tri)) != na_pre) stop("recoding changed number of NAs")
-  return(s_df_tri)
+  return(x)
 }
 
-s_df_tri <- recode_ternary()
+s_df_bin <- recode_strobe(style = "binary")
+s_df_tri <- recode_strobe(style = "ternary")
 
 #######################
 # calculate strobe scores for ternary  ####
 ######################## 
 
 
-sum_items_tri <- function(){
-  #check strobe cols
-  if(!all(strobe_cols_names %in% colnames(s_df_tri))) stop("some strobe cols not in s_df_tri")
-
-  # vector of numbers in strobe col names
-  strobe_div_items  <- strobe_div %>%
-    # remove everything after first "_"
-    gsub("_.*","",.) %>%
-    # add extra _ to easily remove __sum later
-    paste(., "_", sep = "")
+sum_items <- function(df, style = c("binary", "ternary")){
+  # check style arg correct
+  if(!style %in% c("binary", "ternary")) stop("style arg incorrect")
   
-  # all strobe_div_items should be multiples of the elements in strobe_div >
-  # because they should all be multiple sub division of of strobe_div elements
-  # check all strobe_div_items have duplicates
-  if(!all(strobe_div_items %in% strobe_div_items[duplicated(strobe_div_items)])){
-    stop("some div items not sub-divisions")
-  }
-  
-  pre <- ncol(s_df_tri)
-  
-  for(i in strobe_div_items){
+  pre <- ncol(df)
+  for(i in strobe_stem){
     # save dataframe of variables for same strobe item so can sum rows
-    x <- s_df_tri[,grep(i, colnames(s_df_tri))]
+    x <- df[,grep(i, colnames(df))]
     # create sum col name
     sum_name <- paste(i, "sum", sep = "_")
-    # sum rows in x dataframe 
-    sum_var <- rowSums(x, na.rm = T) / rowSums(!is.na(x))
+    # sum rows in x if it is a dataframe 
+    if(!is.numeric(x)){
+      sum_var <- rowSums(x, na.rm = T) / rowSums(!is.na(x))
+    } else {
+      # if not dataframe then no need to sum rows because only 1 col
+      sum_var <- x
+    }
     # check no rows dropped during summing
     if(length(sum_var) != nrow(df)) stop("missing some assessments")
-    # force into binary by rounding down any less than 1
-    sum_var[sum_var >0 & sum_var < 1] <- 0.5
+    # make scores binary or ternary 
+    if(style == "binary"){
+      # force into binary by rounding down any less than 1 to indicate all yes/not yes
+      sum_var[sum_var < 1] <- 0
+    }
+    if(style == "ternary"){
+      # force into ternary by rounding any not 0 or 1 numbers to 0.5 to indicate partialness
+      sum_var[sum_var >0 & sum_var < 1] <- 0.5
+    }
     # add sum to df under sum_name
-    s_df_tri[[sum_name]] <- sum_var
+    df[[sum_name]] <- sum_var
   }
   
   
-  if(ncol(s_df_tri) != pre + length(unique(strobe_div_items)))
-    stop("cols don't equal number of n cols before function plus number of sub-divided strobe items")
+  if(ncol(df) != pre + length(unique(strobe_stem)))
+    stop("cols don't equal number of n cols before function plus number strobe items")
   
-  return(s_df_tri)
+  # drop all columns that are not summs composite strobe items and strobe items without subdivisions
+  df <- df[, which(colnames(df) %in% c("article_id", grep("_sum$", colnames(df), value = T)))]
+  
+  # remove NaN values because rowSums will have introduced them
+  is.nan.data.frame <- function(x)
+    do.call(cbind, lapply(x, is.nan))
+  
+  df[is.nan(df)] <- NA
+  
+  # remove _sum from all colnames so matches strobe stems
+  colnames(df) <- gsub("_.*", "", colnames(df))
+  
+  return(df)
 }
 
-s_df_tri <- sum_items_tri()
-
-#######################
-# recode strobe into binary ####
-########################
-
-recode_binary <- function(){
-  
-  # recode s_df into numerical binary - yes or not yes
-  s_df_bin <- s_df
-  
-  # convert all cols into character variables
-  s_df_bin[] <- lapply(s_df, as.character)
-  
-  # get ids of all strobe cols
-  id <- grep(strobe_pattern, colnames(s_df_bin)) 
-  
-  # recode strobe options into yes and no
-  na_pre <- sum(is.na(s_df_bin))
-  
-  for(i in id){
-    if(is.character(s_df_bin[, i]) == F) stop(i, "isn't a character")
-    s_df_bin[, i] <-  gsub("^Yes$", "1", s_df_bin[, i]) %>%
-      gsub("^No$|^Partially$|^Unsure$|^PartiallyExternal$", "0", .) %>%
-      gsub("na", NA, .) %>%
-      as.numeric(.)
-    if(is.numeric(s_df_bin[, i]) == F) stop(i, "not numeric")
-  }
-  
-  #if(sum(is.na(s_df_bin)) != na_pre) stop("recoding changed number of NAs")
-  return(s_df_bin)
-}
-
-s_df_bin <- recode_binary()
+tri_sum <- sum_items(s_df_tri, style = "ternary")
+bin_sum <- sum_items(s_df_bin, style = "binary")
 
 
-#######################
-# calculate strobe scores for binary  ####
-######################## 
-
-
-sum_items_bin <- function(){
-  #check strobe cols
-  if(!all(strobe_cols_names %in% colnames(s_df_bin))) stop("some strobe cols not in s_df_bin")
-  
-  # vector of numbers in strobe col names
-  strobe_div_items  <- strobe_div %>%
-    # remove everything after first "_"
-    gsub("_.*","",.) %>%
-    # add extra _ to easily remove __sum later
-    paste(., "_", sep = "")
-  
-  # all strobe_div_items should be multiples of the elements in strobe_div >
-  # because they should all be multiple sub division of of strobe_div elements
-  # check all strobe_div_items have duplicates
-  if(!all(strobe_div_items %in% strobe_div_items[duplicated(strobe_div_items)])){
-    stop("some div items not sub-divisions")
-  }
-  
-  pre <- ncol(s_df_bin)
-  
-  for(i in strobe_div_items){
-    # save dataframe of variables for same strobe item so can sum rows
-    x <- s_df_bin[,grep(i, colnames(s_df_bin))]
-    # create sum col name
-    sum_name <- paste(i, "sum", sep = "_")
-    # sum rows in x dataframe 
-    sum_var <- rowSums(x, na.rm = T) / rowSums(!is.na(x))
-    # check no rows dropped during summing
-    if(length(sum_var) != nrow(df)) stop("missing some assessments")
-    # force into binary by rounding down any less than 1
-    sum_var[sum_var < 1] <- 0
-    # add sum to df under sum_name
-    s_df_bin[[sum_name]] <- sum_var
-  }
-  
-  
-  if(ncol(s_df_bin) != pre + length(unique(strobe_div_items)))
-    stop("cols don't equal number of n cols before function plus number of sub-divided strobe items")
-  
-  return(s_df_bin)
-}
-s_df_bin <- sum_items_bin()
 
 #####################
 # create bar chart data ###
 #######################
 
 create_bar_data <- function(df){
-  # select composite strobe items and strobe items without subdivisions
-  bar_data <- df[, -which(colnames(df) %in% c("article_id", strobe_div))]
-  
-  # remove NaN values
-  is.nan.data.frame <- function(x)
-    do.call(cbind, lapply(x, is.nan))
-  
-  bar_data[is.nan(bar_data)] <- NA
-  
-  # clean col names
+  bar_data <- df[, which(colnames(df) %in% strobe_stem)]
+  if(ncol(bar_data) != length(strobe_stem)) stop("some strobe items missing")
+  # clean col names so will match names of strobe items in strobe guidance
   colnames(bar_data) <- colnames(bar_data) %>%
     gsub("^s|__sum|starred", "", .) 
   
@@ -479,7 +397,7 @@ create_bar_data <- function(df){
   return(bar_data)
 }
 
-bar_data <- create_bar_data(s_df_tri)
+bar_data <- create_bar_data(tri_sum)
 
 #############################
 # export data to create bar chart labels ####
@@ -519,7 +437,7 @@ create_labels <- function(){
   
   # clean variable names so matches bar_chart_freq colnames (i.e. no subdivisions and no design specific questions) >
   # easiest to do this by cleaning non-cohort specific quesitons first then cohort excluding 14c_coh since this contains no roman numerials and is not a sub division
-  labels$variable <- gsub("_i.*|_v.*|starred|s|_cc|_cs", "", labels$variable)
+  labels$variable <- gsub("_.*|starred|s", "", labels$variable)
   labels$variable[!grepl("14c_coh", labels$variable)]  <- gsub("_coh", "", labels$variable[!grepl("14c_coh", labels$variable)])
   
   # remove duplicated rows now variables cleaned
@@ -559,7 +477,7 @@ labels <- create_labels()
 strobe_levels <-  bar_data$strobe_item[!duplicated(bar_data$strobe_item)]
 # set levels as mixed order so order preserved in ggplot
 bar_data$strobe_item<- factor(bar_data$strobe_item, levels = 
-                                     strobe_levels[gtools::mixedorder(strobe_levels)])
+                                strobe_levels[gtools::mixedorder(strobe_levels)])
 
 bar_data$response <- as.factor(bar_data$response)
 levels(bar_data$response) <- c("No", "Partially", "Yes", "Missing")
@@ -585,165 +503,3 @@ bar_data %>%ggplot(aes(x=strobe_item, y=count, fill = response)) +
   #geom_text(aes(label = count), vjust = 0, size = 8) +
   theme(plot.title = element_text(size = 22)) 
 dev.off()
-
-####################
-# check bar chart ####
-###################
-
-check_bar_data <- function(){
-  check <- s_df
-  
-  # recode all strobe cols in check
-  for(i in strobe_cols_names){
-    # set all cols to factor
-    check[[i]] <- as.factor(check[[i]])
-    #recode all factor levels
-    levels(check[[i]]) <- list(Yes = "Yes", Other = c("PartiallyExternal", "Partially", "No", "Unsure"))
-  }
-  
-  check_freq <- NULL
-  
-  # narrow all_freq
-  for(i in colnames(check)[colnames(check) != "article_id"]){
-    x <- data.frame(strobe = i, 
-                    percent = prop.table(table(check[[i]], useNA = "no")), 
-                    count = table(check[[i]], useNA = "no"),
-                    applic = sum(!is.na(check[[i]])))
-    check_freq <- rbind(check_freq, x)
-    row.names(check_freq) <- c()
-  }
-  
-  # check all strobe items have same order of yes and other so can remove counts and percents safely for "Other" values
-  if(identical(check_freq$percent.Var1, check_freq$count.Var1) ==F ){
-    stop("percent & count cols don't contain same order of Yes and Other ")
-  }
-  
-  # check all strobe items have percent for Yes and Other values
-  if(identical(unique(check_freq$strobe[check_freq$percent.Var1 == "Yes"]),
-               unique(check_freq$strobe[check_freq$percent.Var1 == "Other"])) ==F){
-    stop("not all strobe items have yes and other percents")
-  } else {
-    # if passed checks remove Other values
-    test <- check_freq[check_freq$percent.Var1 != "Other",  ]
-    if(identical(test$strobe, unique(check_freq$strobe)) == T){
-      # if stobe col identical after removing other values
-      check_freq <- test
-      # remove test
-      rm(test)
-    } else{
-      stop("strobe col different after removing Other values")
-    }
-  }
-  
-  if(identical(check_freq$percent.Var1, check_freq$count.Var1)){
-    colnames(check_freq)[colnames(check_freq) == "percent.Freq"] <- "percent_yes"
-    colnames(check_freq)[which(colnames(check_freq) == "count.Freq")] <- "count_yes"
-    check_freq$percent.Var1 <- NULL
-    check_freq$count.Var1 <- NULL
-  }else{
-    stop("percent.Var1 and count.Var1 not identical")
-  }
-  
-  # create percent col of percent yes out of number applicable to ensure percent calculated correctly
-  check_freq$test <- check_freq$count_yes / check_freq$applic
-  
-  if(identical(check_freq$test, check_freq$percent_yes)){
-    # remove test col if identical
-    check_freq$test <- NULL
-  } else {
-    # stop if not
-    stop("test percent col different to percent col")
-  }
-  
-}
-
-check_bar_data()
-
-#######################
-# frequencies of strobe ####
-######################
-
-create_wide_data <- function(){
-  strobe_freq_wide <- NULL
-  
-  for(i in strobe_cols_names){
-    x <- prop.table(table(s_df[[i]], useNA = "always"))
-    if(nrow(x) != length(names(x))) stop(i, " does not have 7 values in x")
-    x_df <- data.frame(strobe = i,x[1],x[2],x[3],x[4],x[5], x[6], x[7])
-    colnames(x_df) <- c("strobe", names(x))
-    strobe_freq_wide <- rbind(strobe_freq_wide, x_df)
-    row.names(strobe_freq_wide) <- c()
-  }
-  return(strobe_freq_wide)
-}
-
-strobe_freq_wide <- create_wide_data()
-
-create_narrow_data <- function(){
-  strobe_freq_narr <- NULL
-  
-  # narrow strobe_freq
-  for(i in strobe_cols_names){
-    s_df[[i]] <- as.factor(s_df[[i]])
-    levels(s_df[[i]]) <- list(Yes = "Yes", PartiallyExternal = "Partially-External",
-                              Partially = "Partially", No = "No", Unsure = "Unsure")
-    x <- data.frame(strobe = i,prop.table(table(s_df[[i]], useNA = "always")))
-    strobe_freq_narr <- rbind(strobe_freq_narr, x)
-    row.names(strobe_freq_narr) <- c()
-  }
-  return(strobe_freq_narr)
-}
-
-strobe_freq_narr <- create_narrow_data()
-
-strobe_freq_narr %>%ggplot(aes(fill=Var1, y=Freq, x=strobe)) + 
-  geom_bar(position="stack", stat="identity") +
-  theme_classic() +
-  scale_fill_manual(values= c("#009E73","#E69F00",  "#F0E442", "#D55E00", "#0072B2", "#999999")) +
-  theme(axis.text.x=element_text(angle=45,hjust=1))
-
-#####################################
-# frequencies for dicotomised strobe items ####
-######################################
-
-# dichotomise strobe item responses into yes and no
-
-s_bin <- s_df
-
-strobe_bin_freq <- NULL
-
-for(i in strobe_cols_names){
-  s_bin[[i]] <- as.factor(s_bin[[i]])
-  levels(s_bin[[i]]) <- list("Yes"=c("Partially", "PartiallyExternal", "Yes"), "No"=c("Unsure", "No"))
-  x <- data.frame(i, prop.table(table(s_bin[[i]])))
-  strobe_bin_freq <- rbind(strobe_bin_freq, x)
-}
-
-row.names(strobe_yes) <-c() 
-
-strobe_yes <- strobe_bin_freq[strobe_bin_freq$Var1 == "Yes",]
-
-strobe_yes$Var1 <- NULL
-
-colnames(strobe_yes)[colnames(strobe_yes) == "Freq"] <- "Yes (%)"
-colnames(strobe_yes)[colnames(strobe_yes) == "i"] <- "STROBE item"
-
-#######################################
-#### add completion scores for items #####
-########################################
-
-bar_data_tot <- bar_data
-
-# change bar data to numeric
-bar_data_tot[] <- lapply(bar_data_tot, as.numeric) 
-
-# count row sums without NA (returns NA if contains any NAs)
-
-count_na <- function(x) sum(is.na(x))
-
-bar_data_tot <- bar_data_tot %>%
-  mutate(sums = rowSums(., na.rm = T),
-         count_na = apply(., 1, count_na))
-bar_data_tot$applic <- 32 - bar_data_tot$count_na
-
-bar_data_tot$score <- bar_data_tot$sums/ bar_data_tot$applic
