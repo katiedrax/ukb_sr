@@ -8,6 +8,8 @@ library(gtools)
 library(tidyr)
 library(RColorBrewer)
 library(dplyr)
+library(irr)
+library(lpSolve)
 
 ######################
 # import  ####
@@ -502,3 +504,139 @@ bar_data %>%ggplot(aes(x=strobe_item, y=count, fill = response)) +
   #geom_text(aes(label = count), vjust = 0, size = 8) +
   theme(plot.title = element_text(size = 22)) 
 dev.off()
+
+
+#####################
+# calculate irr for NA and applicable ####
+################################
+
+inter <- read.csv("outputs/data-extraction-form-conflicted.csv", na.strings = "")
+
+create_kappa_df <- function(df){
+  
+  # save stems of variables that were not double coded (and therefore not conflicted)
+  # kd alone extracted some variables so save all these variables single/unique variables
+  single <- c("email","country","ukb_app","keywords","coi", "article_id") %>%
+    #  qualtrics metadata, comments & title substring vars are unique to each coder so stems duplicated but not colnames >
+    c(., "distribution_channel", "duration_in_seconds", "end_date", "finished", "progress", "recorded_date", "response_id", "response_type", "start_date", "user_language") %>%
+    # remove those unique to each coder
+    c(., "comments", "title_clean", "title_sub", "title")
+  
+  
+  stem <- grep("\\.", colnames(df), value = T) %>%
+    gsub("\\..*", "", .) %>%
+    unique() %>%
+    # remove single coded items since these can't be conflicted
+    .[!. %in% single] %>%
+    # remove predict because we already resolved these conflicts
+    .[!. %in% "predict"] %>%
+    # remove other variables that are not discrete
+    .[!. %in% c("other_guidelines", "reg_id")] %>%
+    # add '.' onto end so will match full word
+    paste0(., "\\.")
+  
+  kappa <- c()
+  z <- c()
+  p_value <- c()
+  variable <- c()
+  
+  for(i in stem){
+    x <- df[, grep(i, colnames(df))]
+    y <- kappa2(x, weight = "unweighted")
+    variable <- c(variable, i)
+    kappa <- c(kappa, y$value)
+    z <- c(z, y$statistic)
+    p_value <- c(p_value, y$p.value)
+  }
+  
+  irr_df <- data.frame(variable = variable, kappa= kappa, z= z, p_value = p_value)
+  
+}
+
+
+# divide df into into NA and applicable
+
+divide_na <- function(){
+  for(i in colnames(inter)){
+    x <- inter[[i]]
+    x[x != "NA"] <- "A"
+    inter[[i]] <- x
+  }
+  return(inter)
+}
+
+inter_na <- divide_na()
+na_kappa <- create_kappa_df(inter_na)
+
+#######################
+# calculate strobe scores for ternary for inter  ####
+######################## 
+
+# split into kd and coder2 so can sum strobe items for each then rejoin
+kd <- inter[, c("article_id", grep("\\.kd", colnames(inter), value = T))]
+coder2 <- inter[, c("article_id", grep("\\.coder2", colnames(inter), value = T))]
+
+sum_items <- function(df, coder_suffix){
+  # set "NA" and "Unsure" as missing so calculations only apply to reporting judgements
+  df[df == "NA" | df == "Unsure"] <- NA
+  strobe_cols_names <- grep("^s[[:digit:]]{1,2}", colnames(df), value =T)
+  
+  # remove everything after _ or suffix
+  strobe_stem <- gsub("_.*|\\..*", "", strobe_cols_names) %>%
+    unique()
+  
+  pre <- ncol(df)
+  
+  for(i in strobe_stem){
+    
+    # save dataframe of variables for same strobe item so can sum rows
+    x <- df[,grep(i, colnames(df))]
+    # create sum col name
+    sum_name <- paste0(i, "_sum", coder_suffix)
+    # create empty sum_var to add values to in for loop
+    sum_var <- c()
+    # sum rows in x if it is a dataframe 
+    if(!is.character(x)){
+      for(j in 1:nrow(x)){
+        if(all(x[j, ] %in% c("Yes", "Partially-External"), na.rm = T)) {
+          sum_var[j] <- "Yes"
+        } else {
+          if(!all(x[j, ] %in% c("Yes", "Partially-External"), na.rm = T) & !all(x[j, ] == "No", na.rm = T)) {
+            sum_var[j] <- "Partially"
+          } else {
+            if(all(x[j, ] == "No", na.rm = T)) {
+              sum_var[j] <- "No"
+            } else {
+              stop(j, " in ", i, " doesn't contain just yes, pe, partially or no")
+            }
+          }
+        }
+      }
+    } else {
+      # if not dataframe then no need to sum rows because only 1 col
+      sum_var <- x
+    }
+    # check no rows dropped during summing
+    if(length(sum_var) != nrow(df)) stop("missing some assessments")
+    # add sum to df under sum_name
+    df[[sum_name]] <- sum_var
+  }
+  if(ncol(df) != pre + length(unique(strobe_stem)))
+    stop("cols don't equal number of n cols before function plus number strobe items")
+  
+  # drop all cols that are not strobe sums & article id so can merge on id
+  df <- df[, which(colnames(df) %in% c("article_id", grep("_sum", colnames(df), value =T)))]
+  
+  return(df)
+}
+
+kd <- sum_items(kd, ".kd")
+coder2 <- sum_items(coder2, ".coder2")
+
+inter_item <- full_join(kd, coder2, by = "article_id") %>%
+  # reorder
+  .[ , gtools::mixedorder(colnames(.))] %>%
+  # remove article_id
+  .[, -which(colnames(.) %in% "article_id")]
+
+kappa_item <- create_kappa_df(inter_item)
