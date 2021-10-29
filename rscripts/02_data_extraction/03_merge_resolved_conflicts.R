@@ -7,6 +7,7 @@ library(magrittr)
 library(gtools)
 library(irr)
 library(lpSolve)
+
 ##########
 # import ####
 ##########
@@ -37,7 +38,7 @@ kd_only <- c("email","country","ukb_app","keywords","coi", "article_id")
 #  qualtrics metadata, comments & title substring vars are unique to each coder so stems duplicated but not colnames >
 qualtrics <- c("distribution_channel", "duration_in_seconds", "end_date", "finished", 
                "progress", "recorded_date", "response_id", "response_type", "start_date", "user_language")
-single <- c(kd_only, qualtrics, "comments", "title_clean", "title_sub")
+single <- c(kd_only, qualtrics, "comments", "title_clean", "title_sub", "title")
 
 ################
 # check suffixes all correct ####
@@ -166,7 +167,7 @@ rr_becky_it <- find_becky_its(rr)
 bw_becky_it <- find_becky_its(bw)
 
 ######################
-# drop evidence and star columns ####
+# drop evidence and star columns & set duplicates ####
 #######################
 
 drop_ev_star <- function(df){
@@ -175,6 +176,8 @@ drop_ev_star <- function(df){
   # remove all evidence cols as conflicts resolved so no longer needed
   # also remove star items because too conflicted to resolve
   df <- df[, -grep("_ev\\.|_star_", colnames(df))]
+  
+  return(df)
 } 
 
 rr <- drop_ev_star(rr)
@@ -259,8 +262,160 @@ rr <- rr[!rr$predict %in% "Yes", ]
 bw <- bw[!bw$predict %in% "Yes", ]
 mg <- mg[!mg$predict %in% "Yes", ]
 
+###################
+# calculate irr at subdiv level ####
 ##################
-# merge without prediction papers ####
+
+# merge and keep conflicts to calculate interrater reliability
+
+create_inter_df <- function(){
+  # replace coder2 suffixes with same suffix so cols will match
+  colnames(bw) <- gsub(".bw$", ".coder2", colnames(bw))
+  colnames(rr) <- gsub(".rr$", ".coder2", colnames(rr))
+  colnames(mg) <- gsub(".mg$", ".coder2", colnames(mg))
+  # join dfs
+  bw_rr <- full_join(bw, rr, by = intersect(colnames(bw), colnames(rr)))
+  inter <- full_join(bw_rr, mg, by = intersect(colnames(bw_rr), colnames(mg))) %>%
+    # reorder for ease
+    .[ , gtools::mixedorder(colnames(.))]
+  # drop all correct cols because not necessary for irr calculation
+  inter <- inter[, -grep(".correct$", colnames(inter))]
+  #
+  # set all values for duplicates and not applicable items to NA
+  drop_pat <- paste(c("5_vi", "s6a_iii", "10", "8starred_iii"), collapse = "|")
+  # drop na cols
+  inter <- inter[, -grep(drop_pat, colnames(inter))]
+  
+  return(inter)
+}
+
+inter <- create_inter_df()
+
+create_kappa_df <- function(df){
+  
+  stem <- grep("\\.", colnames(df), value = T) %>%
+    gsub("\\..*", "", .) %>%
+    unique() %>%
+    # remove single coded items since these can't be conflicted
+    .[!. %in% single] %>%
+    # remove predict because we already resolved these conflicts
+    .[!. %in% "predict"] %>%
+    # remove comments because not discrete
+    .[!. %in% c("comments", "other_guidelines", "reg_id")] %>%
+    # add '.' onto end so will match full word
+    paste0(., "\\.")
+  
+  kappa <- c()
+  z <- c()
+  p_value <- c()
+  variable <- c()
+  
+  for(i in stem){
+    x <- df[, grep(i, colnames(df))]
+    y <- kappa2(x, weight = "unweighted")
+    variable <- c(variable, i)
+    kappa <- c(kappa, y$value)
+    z <- c(z, y$statistic)
+    p_value <- c(p_value, y$p.value)
+  }
+  
+  irr_df <- data.frame(variable = variable, kappa= kappa, z= z, p_value = p_value)
+  
+}
+
+inter_kappa <- create_kappa_df(inter)
+
+############################
+# calculate irr at item level ####
+###############################
+
+divide_na <- function(){
+  for(i in colnames(inter)){
+    x <- inter[[i]]
+    x[x != "NA"] <- "A"
+    inter[[i]] <- x
+  }
+  return(inter)
+}
+
+inter_na <- divide_na()
+na_kappa <- create_kappa_df(inter_na)
+
+#######################
+# calculate strobe scores for ternary for inter  ####
+######################## 
+
+# split into kd and coder2 so can sum strobe items for each then rejoin
+kd <- inter[, c("article_id", grep("\\.kd", colnames(inter), value = T))]
+coder2 <- inter[, c("article_id", grep("\\.coder2", colnames(inter), value = T))]
+
+sum_items <- function(df, coder_suffix){
+  # set "NA" and "Unsure" as missing so calculations only apply to reporting judgements
+  df[df == "NA" | df == "Unsure"] <- NA
+  strobe_cols_names <- grep("^s[[:digit:]]{1,2}", colnames(df), value =T)
+  
+  # remove everything after _ or suffix
+  strobe_stem <- gsub("_.*|\\..*", "", strobe_cols_names) %>%
+    unique()
+  
+  pre <- ncol(df)
+
+  for(i in strobe_stem){
+    
+    # save dataframe of variables for same strobe item so can sum rows
+    x <- df[,grep(i, colnames(df))]
+    # create sum col name
+    sum_name <- paste0(i, "_sum", coder_suffix)
+    # create empty sum_var to add values to in for loop
+    sum_var <- c()
+    # sum rows in x if it is a dataframe 
+    if(!is.character(x)){
+      for(j in 1:nrow(x)){
+        if(all(x[j, ] %in% c("Yes", "Partially-External"), na.rm = T)) {
+          sum_var[j] <- "Yes"
+        } else {
+          if(!all(x[j, ] %in% c("Yes", "Partially-External"), na.rm = T) & !all(x[j, ] == "No", na.rm = T)) {
+            sum_var[j] <- "Partially"
+          } else {
+            if(all(x[j, ] == "No", na.rm = T)) {
+              sum_var[j] <- "No"
+            } else {
+            stop(j, " in ", i, " doesn't contain just yes, pe, partially or no")
+            }
+          }
+        }
+      }
+      } else {
+      # if not dataframe then no need to sum rows because only 1 col
+      sum_var <- x
+      }
+    # check no rows dropped during summing
+    if(length(sum_var) != nrow(df)) stop("missing some assessments")
+    # add sum to df under sum_name
+    df[[sum_name]] <- sum_var
+  }
+  if(ncol(df) != pre + length(unique(strobe_stem)))
+    stop("cols don't equal number of n cols before function plus number strobe items")
+  
+  # drop all cols that are not strobe sums & article id so can merge on id
+  df <- df[, which(colnames(df) %in% c("article_id", grep("_sum", colnames(df), value =T)))]
+
+  return(df)
+}
+
+kd <- sum_items(kd, ".kd")
+coder2 <- sum_items(coder2, ".coder2")
+
+inter_item <- full_join(kd, coder2, by = "article_id") %>%
+  # reorder
+  .[ , gtools::mixedorder(colnames(.))] %>%
+  # remove article_id
+  .[, -which(colnames(.) %in% "article_id")]
+
+kappa_item <- create_kappa_df(inter_item)
+
+##################
+# merge without conflicts ####
 ################
 
 # function to check conflicts
@@ -413,6 +568,7 @@ df <- left_join(df, epi_access, by = "article_id")
 # TEMPORARY REPLACE BECKY IT VALUES AS NA
 
 for(i in colnames(df)){
+  if(any(grepl("becky", df[[i]]))) print(i)
   becky_its <- grep("becky it", df[[i]], ignore.case = T)
   df[[i]][becky_its] <- NA
 }

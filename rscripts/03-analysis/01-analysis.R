@@ -438,8 +438,7 @@ create_labels <- function(){
   # clean variable names so matches bar_chart_freq colnames (i.e. no subdivisions and no design specific questions) >
   # easiest to do this by cleaning non-cohort specific quesitons first then cohort excluding 14c_coh since this contains no roman numerials and is not a sub division
   labels$variable <- gsub("_.*|starred|s", "", labels$variable)
-  labels$variable[!grepl("14c_coh", labels$variable)]  <- gsub("_coh", "", labels$variable[!grepl("14c_coh", labels$variable)])
-  
+
   # remove duplicated rows now variables cleaned
   labels <- labels[!duplicated(labels),]
   # sort
@@ -480,7 +479,7 @@ bar_data$strobe_item<- factor(bar_data$strobe_item, levels =
                                 strobe_levels[gtools::mixedorder(strobe_levels)])
 
 bar_data$response <- as.factor(bar_data$response)
-levels(bar_data$response) <- c("No", "Partially", "Yes", "Missing")
+levels(bar_data$response) <- c("No", "Partially", "Yes", "Not Applicable")
 
 # check labels identical to strobe item numbers in labels$x_labels (gsub at the space) to ensure labels will map to chart
 if(!identical(gsub(" .*", "", labels$x_labels), as.character(strobe_levels))) stop("labels won't map")
