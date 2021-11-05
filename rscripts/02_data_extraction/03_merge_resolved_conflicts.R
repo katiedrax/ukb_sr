@@ -278,11 +278,12 @@ create_inter_df <- function(){
     .[ , gtools::mixedorder(colnames(.))]
   # drop all correct cols because not necessary for irr calculation
   inter <- inter[, -grep(".correct$", colnames(inter))]
-  #
   # set all values for duplicates and not applicable items to NA
   drop_pat <- paste(c("5_vi", "s6a_iii", "10", "8starred_iii"), collapse = "|")
-  # drop na cols
-  inter <- inter[, -grep(drop_pat, colnames(inter))]
+  # set all to NA
+  for(i in grep(drop_pat, colnames(inter), value = T)){
+    inter[[i]] <- rep("NA", length(inter[[i]]))
+  }
   
   return(inter)
 }
@@ -438,13 +439,24 @@ df <- clean_values()
 # merge in epi_access ####
 #####################
 
+# add in whether they had supplementary material, this is in the first_80 ref csv
+first_80 <- read.csv("https://osf.io/9w72e/?action=download", encoding = "UTF-8", na.strings = c("", " ")) %>%
+  .[, which(colnames(.) %in% c("article_id", "access_supp"))]
+
+# I removed Davie from the first_80 in the first revision >
+# add this back in because we decided it did actually contain a cohort design
+
+first_80 <- rbind(first_80, c("Davie2018bank79-y", "Yes"))
+
 epi_access <- read.csv("data/epi_access.csv", stringsAsFactors = F, encoding = "UTF-8", na.strings = c("", " ")) %>%
   .[, which(!colnames(.) %in% c("doi", "title", "authors"))]
+
+epi_access <- left_join(first_80, epi_access, by = "article_id")
 
 df <- left_join(df, epi_access, by = "article_id")
 
 # TEMPORARY REPLACE BECKY IT VALUES AS NA
-
+ 
 for(i in colnames(df)){
   if(any(grepl("becky", df[[i]]))) print(i)
   becky_its <- grep("becky it", df[[i]], ignore.case = T)
