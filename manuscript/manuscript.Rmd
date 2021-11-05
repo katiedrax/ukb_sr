@@ -29,6 +29,8 @@ library(RColorBrewer)
 library(dplyr)
 library(irr)
 library(lpSolve)
+library(kableExtra)
+library(pander)
 
 ######################
 # import  ####
@@ -120,7 +122,6 @@ strobe_cols_names <- grep(strobe_pattern, colnames(df), value =T)
 
 strobe_stem <- gsub("_.*", "", strobe_cols_names) %>%
   unique()
-
 ###################################
 # split into strobe and non-strobe ####
 #################################
@@ -164,53 +165,6 @@ not_s_df <- df[, -which(colnames(df) %in% strobe_cols_names)]
 # check total ncol of s_df and not_s_df is same as original df +1 because article_id col is in both
 if(ncol(s_df) + ncol(not_s_df) != ncol(df) +1) stop("wrong number of cols in strobe or not_strobe dfs")
 
-###################
-# frequencies non-strobe ####
-##################
-
-# save version of not strobe df without qualtrics metadata variables to create table 1
-
-create_table1_df <- function(){
-  # save pattern to find qualtrics variables
-  qual <- c("distribution_channel", "duration_in_seconds", "end_date", "finished", "progress","recorded_date", "response_id", "response_type", "start_date", "user_language")
-  qual_pat <- paste0("^", qual, ".", collapse = "|")
-  
-  # find qualtrics columns in df
-  qual_cols <- grep(qual_pat, colnames(not_s_df))
-  
-  # check there are 4 of each qual column
-  if(length(qual_cols) != 4* length(qual)) stop("some qualtrics cols missing")
-  
-  table1 <- not_s_df[, -qual_cols]
-  
-  # drop article_id col as don't need freqs of these
-  table1 <- table1[, -which(colnames(table1) %in% "article_id")]
-  
-  #convert all non-strobe cols into characters as easier than setting multiple different factor levels
-  for(i in colnames(table1)){
-    table1[[i]] <- as.character(table1[[i]])
-  }
-  
-  # ensure UK and USA country values are capitalised as frequency is case-sensitive
-  uk_usa <- grep("^uk$|^usa$", table1$country, ignore.case = T)
-  table1$country[uk_usa] <- toupper(table1$country[uk_usa])
-  return(table1)
-}
-
-
-table1 <- create_table1_df()
-
-CreateTableOne(data = table1, includeNA = F)%>%
-  print(., noSpaces = T, showAllLevels = T) %>%
-  # export
-  write.csv(., "../outputs/table1_all_levels.csv")
-
-
-CreateTableOne(data = table1, includeNA =F )%>%
-  print(., noSpaces = T) %>%
-  # export
-  write.csv(., "../outputs/table1_no_levels.csv")
-
 #########################
 # recode strobe factors ####
 ########################
@@ -226,7 +180,7 @@ factorise_strobe <- function(){
     # set all cols to factor
     s_df[[i]] <- as.factor(s_df[[i]])
     #recode all factor levels
-    levels(s_df[[i]]) <- list(Yes = "Yes", PartiallyExternal = "PartiallyExternal", Partially = "Partially", No = "No", Unsure = "Unsure", na = "na")
+    levels(s_df[[i]]) <- list(Yes = "Yes", PartiallyExternal = "PartiallyExternal", Partially = "Partially", No = "No", na = "na")
   }
   
   # check recode successful
@@ -273,7 +227,7 @@ recode_strobe <- function(style = c("binary", "ternary")){
   if(style == "binary"){
     for(i in id){
       x[, i] <-  gsub("^Yes$", "1", x[, i]) %>%
-        gsub("^No$|^Partially$|^Unsure$|^PartiallyExternal$", "0", .) %>%
+        gsub("^No$|^Partially$|^PartiallyExternal$", "0", .) %>%
         gsub("na", NA, .) %>%
         as.numeric(.)
       if(is.numeric(x[, i]) == F) stop(i, "not numeric")
@@ -284,7 +238,7 @@ recode_strobe <- function(style = c("binary", "ternary")){
     for(i in id){
       x[, i] <-  gsub("^Yes$|^PartiallyExternal$", "1", x[, i]) %>%
         gsub("^Partially$", "0.5", .) %>%
-        gsub("^No$|^Unsure$", "0", .) %>%
+        gsub("^No$", "0", .) %>%
         gsub("na", NA, .) %>%
         as.numeric(.)
       if(is.numeric(x[, i]) == F) stop(i, "not numeric")
@@ -375,13 +329,14 @@ create_bar_data <- function(df){
   bar_data[] <- lapply(bar_data, as.character)
   
   bar_data <- tidyr::pivot_longer(bar_data, colnames(bar_data), names_to = "strobe_item", values_to = "value") 
-  x <- table(bar_data$strobe_item, bar_data$value, useNA = "always")
+  x <- table(bar_data$strobe_item, bar_data$value, useNA = "always") %>%
+    # convert to dataframe
+    as.data.frame.matrix()
   y <- prop.table(table(bar_data$strobe_item, bar_data$value), 1) %>%
-    round(., 2)
-  # convert to dataframe
-  x <- as.data.frame.matrix(x)
-  y <- as.data.frame.matrix(y)
-  
+    # round so more interpretable
+    round(., 2) %>%
+    as.data.frame.matrix()
+
   # row names will contain the x values given to table(x, y), move these to a column >
   # remove the X added
   x$strobe_item <- gsub("^X", "", row.names(x))
@@ -500,7 +455,12 @@ bar_data$strobe_item<- factor(bar_data$strobe_item, levels =
                                 strobe_levels[gtools::mixedorder(strobe_levels)])
 
 bar_data$response <- as.factor(bar_data$response)
-levels(bar_data$response) <- c("No", "Partially", "Yes", "Not Applicable")
+
+# set levels using list so is accurate
+levels(bar_data$response) <- list(NotApplicable = "na", No = 0, Partially = 0.5, Yes = 1)
+
+# add space to NA level since can't do this in list
+levels(bar_data$response)[levels(bar_data$response) == "NotApplicable"] <- "Not Applicable"
 
 # check labels identical to strobe item numbers in labels$x_labels (gsub at the space) to ensure labels will map to chart
 if(!identical(gsub(" .*", "", labels$x_labels), as.character(strobe_levels))) stop("labels won't map")
@@ -519,7 +479,7 @@ bar_data %>%ggplot(aes(x=strobe_item, y=count, fill = response)) +
   xlab("STROBE Item") +
   ylab("Count") +
   ggtitle("Figure 1. STROBE completion")+
-  scale_fill_brewer(palette = "Spectral") +
+  scale_fill_brewer(palette = "Greys") +
   #geom_text(aes(label = count), vjust = 0, size = 8) +
   theme(plot.title = element_text(size = 22)) 
 dev.off()
@@ -541,7 +501,6 @@ create_kappa_df <- function(df){
     # remove those unique to each coder
     c(., "comments", "title_clean", "title_sub", "title")
   
-  
   stem <- grep("\\.", colnames(df), value = T) %>%
     gsub("\\..*", "", .) %>%
     unique() %>%
@@ -554,10 +513,21 @@ create_kappa_df <- function(df){
     # add '.' onto end so will match full word
     paste0(., "\\.")
   
+  # save stems of duplicate and not applicable cols so can join back in
+  na_items <- c("5_vi", "6a_iii", "10", "8starred_iii")
+  na_stem <-  grep(paste0(na_items, collapse ="|"), stem, value =T)
+  
+  # remove all stems that are duplicate or not applicable as will throw error in kappa2 if set "NA" to missing and all are set to NA after qualtrics
+  
+  stem <- stem[-which(stem == na_stem)]
+  #save empty objects so can save outputs from for loop
   kappa <- c()
   z <- c()
   p_value <- c()
   variable <- c()
+  n_match <- c()
+  n_conflicts <-c()
+  n_na <- c()
   
   for(i in stem){
     x <- df[, grep(i, colnames(df))]
@@ -566,10 +536,38 @@ create_kappa_df <- function(df){
     kappa <- c(kappa, y$value)
     z <- c(z, y$statistic)
     p_value <- c(p_value, y$p.value)
+    n_match <- c(n_match, sum(x[[1]] == x[[2]], na.rm = T))
+    n_conflicts <- c(n_conflicts, sum(x[[1]] != x[[2]], na.rm = T))
+    # count number of items with NA--NA dyads or notNA--NA dyads so are excluded from kappa
+    n_na <- c(n_na, sum(is.na(x[[1]] != x[[2]])))
   }
   
-  irr_df <- data.frame(variable = variable, kappa= kappa, z= z, p_value = p_value)
+  # bind objects into df so can render in manuscript
+  irr_df <- data.frame(STROBEItem = variable, Kappa = kappa, Zstatistic = z, pvalue = p_value, Matches = n_match, Conflicts = n_conflicts, NotApplicableUnsure = n_na)
   
+  # create df of empty varibles and bind to main df so will appear in table
+  empty <- data.frame(STROBEItem = na_stem)
+  irr_df <- full_join(irr_df, empty, by = "STROBEItem")
+  
+  # round all numeric cols so more interpretable
+  nums <- colnames(irr_df)[colnames(irr_df) != "STROBEItem"]
+  for(i in nums){
+    x <- irr_df[[i]]
+    if(!is.numeric(x)) stop(i, " col not numeric")
+    x <- round(x, digits = 2)
+    irr_df[[i]] <- x
+  }
+  
+  # remove backslash that was added to variable names
+  irr_df$STROBEItem <- gsub("\\\\.*", "", irr_df$STROBEItem)
+  
+  # reorder
+  irr_df <- irr_df[gtools::mixedorder(irr_df$STROBEItem), ] 
+    
+  # set rownames to null to ensure none created
+  row.names(irr_df) <- NULL
+  
+  return(irr_df)
 }
 
 
@@ -585,7 +583,7 @@ divide_na <- function(){
 }
 
 inter_na <- divide_na()
-na_kappa <- create_kappa_df(inter_na)
+kappa_na <- create_kappa_df(inter_na)
 
 #######################
 # calculate strobe scores for ternary for inter  ####
@@ -660,6 +658,7 @@ inter_item <- full_join(kd, coder2, by = "article_id") %>%
 
 kappa_item <- create_kappa_df(inter_item)
 
+kappa_item$STROBEItem <- gsub("^s|_.*|starred", "", kappa_item$STROBEItem)
 
 ```
 
@@ -746,6 +745,7 @@ This is the date the UKB was launched and UKB data was first available beforehan
 This includes studies which reported findings from other studies alongside findings from UKB data.
 
 Exclusion criteria:
+
 * Article findings were produced from analysis(es) of pooled data from multiple studies.
 These are studies which have used data from participants from the UKB and other datasets in the same analysis.
 * Meta-analyses; narrative and systematic reviews; preprints; post-prints; replies; letters to the editor; corrections; and any other publication types that are not full research articles.
@@ -858,13 +858,123 @@ Therefore, we did not attempt to retrieve any missing items in the Data Extracti
 
 ## Study selection
 
+
 ## Study characteristics
 
-## Reporting quality
+Of the `r nrow(df)` included studies `r sum(grepl("Case-control", df$designs))` contained case-control designs, `r sum(grepl("Cohort", df$designs))` cohort, and `r sum(grepl("Cross-sectional", df$designs))` cross-sectional. These numbers add up to more than 70 because some articles contained cross-sectional and cohort studies.
+UK based researchers led the vast majority with `r sum(grepl("UK", df$country, ignore.case = F))` having authors affiliated with institutions in the UK.
+`r sum(grepl("2014", df$year))` studies were published in 2014, `r sum(grepl("2015", df$year))` in 2015, `r sum(grepl("2016", df$year))` in 2016, `r sum(grepl("2017", df$year))` in 2017, `r sum(grepl("2018", df$year))` in 2018, and `r sum(grepl("2019", df$year))` in 2019.
 
-![Figure 1](Rplot9.png)
+## STROBE Reporting quality
 
+Using the data extraction form on Qualtrics, we assessed reporting quality separately for all subdivisions of the STROBE items and for the “starred” items associated with any STROBE items that had an asterisk (*) next to it. 
+For the final analysis, we excluded all starred subdivisions because inter-rater reliability was so poor and the applicability of the items was often uncertain. 
+We then summed the subdivisions to indicate the reporting quality of each STROBE item, these results are presented in Figure 1. 
+For completeness, the results for the subdivisions are available in Supplementary Table 2.
+
+We originally assessed reporting quality separately for all subdivisions of the STROBE items.
+The results for the subdivisions are reported in Supplementary Table 2.
+
+![](Rplot9.png)
+
+We calculated kappa statistics to estimate the inter-rater reliability for each of the STROBE items, these are presented in Table 1.
+
+```{r table1}
+
+doc.type <- knitr::opts_knit$get('rmarkdown.pandoc.to')
+
+if(doc.type == "docx"){pander(kappa_item, caption = "Table 1. Inter-rater reliability for the STROBE items")} else {kable(kappa_item)}
+
+```
+
+## Other reporting quality
+
+We collected reporting quality data in addition to the STROBE items.
+We intended to conduct exploratory analyses using these variables, for example comparing articles that reported using some form of reporting guidelines to those who did not.
+We did not conduct an exploratory analyses into the relationships between these variabels because subgroup analyses for all of these variables would have very small subgroup samples. 
+Instead we report the descriptive statistics for each variable in Table 2 below.
+
+*Table 2. Descriptive statistics for additional reporting quality variables*
+
+```{r table2, echo=F, include = F}
+
+###################
+# frequencies non-strobe ####
+##################
+
+# save version of not strobe df without qualtrics metadata variables to create table 2
+
+create_table2 <- function(){
+  # save pattern to find qualtrics variables
+  qual <- c("distribution_channel", "duration_in_seconds", "end_date", "finished", "progress","recorded_date", "response_id", "response_type", "start_date", "user_language")
+  qual_pat <- paste0("^", qual, ".", collapse = "|")
+  
+  # find qualtrics columns in df
+  qual_cols <- grep(qual_pat, colnames(not_s_df))
+  
+  # check there are 4 of each qual column
+  if(length(qual_cols) != 4* length(qual)) stop("some qualtrics cols missing")
+  
+  table2 <- not_s_df[, -qual_cols]
+  
+  # drop cols that are qualitative so contain unique info for each observation so no point in calculating frequencies
+  table2 <- table2[, -which(colnames(table2) %in% c("article_id", "correction_address", "open_access_address", "reg_id", "correction_address"))]
+  
+  #convert all non-strobe cols into characters as easier than setting multiple different factor levels
+  for(i in colnames(table2)){
+    table2[[i]] <- as.character(table2[[i]])
+  }
+  
+  # ensure UK and USA country values are capitalised as frequency is case-sensitive
+  uk_usa <- grep("^uk$|^usa$", table2$country, ignore.case = T)
+  table2$country[uk_usa] <- toupper(table2$country[uk_usa])
+  
+  # drop cols that are characteristics
+  chars <- c("designs", "country", "year")
+  if(!all(chars %in% colnames(table2))) stop("missing char elements in colnames")
+  table2 <- table2[, -which(colnames(table2) %in% chars)]
+  
+  # set missing & na as won't make a difference to absolute numbers
+  table2[is.na(table2)|table2 == "na"] <- "Not Applicable"
+  table2[table2 == "ni"] <- "No information"
+  table2[table2 == "TRUE"] <- "Yes"
+  table2[table2 == "FALSE"] <- "No"
+  
+  # rename table2 colnames so will come out as full words in createtableon
+  colnames(table2)[colnames(table2) == "code"] <- "Report shared analysis code"
+  colnames(table2)[colnames(table2) == "exposure"] <- "Exposures reported as exposures"
+  colnames(table2)[colnames(table2) == "outcome"] <- "Outcomes reported as outcomes"
+  colnames(table2)[colnames(table2) == "reg"] <- "Report analyses registered"
+  colnames(table2)[colnames(table2) == "strobe"] <- "Report using STROBE guidelines"
+  colnames(table2)[colnames(table2) == "strobe_cite"] <- "Cite STROBE guidelines if used"
+  colnames(table2)[colnames(table2) == "ukb_credit"] <- "Report UK Biobank credit statement correctly"
+  colnames(table2)[colnames(table2) == "var_id"] <- "Report UK Biobank variable IDs"
+  colnames(table2)[colnames(table2) == "other_guidelines"] <- "Report using reporting guidelines other than STROBE"
+  colnames(table2)[colnames(table2) == "open_access_publisher"] <- "Published as open access"
+  colnames(table2)[colnames(table2) == "correction"] <- "Has a correction"
+  colnames(table2)[colnames(table2) == "ukb_app_pres"] <- "Report UK Biobank application number" 
+  colnames(table2)[colnames(table2) == "email_pres"] <- "Has email address for corresponding author"
+  colnames(table2)[colnames(table2) == "keywords_pres"] <- "Has keywords"
+  colnames(table2)[colnames(table2) == "coi_pres"] <- "Report conflict of interest statement"
+  colnames(table2)[colnames(table2) == "access_supp"] <- "Has supplementary material"
+  
+# drop retraction col because none should be
+  table2 <- table2[, -which(colnames(table2) %in% "retraction")]
+  return(table2)
+}
+
+
+table2 <- create_table2()
+
+
+
+CreateTableOne(data = table2, includeNA = F) %>%
+  print(., noSpaces = T) %>%
+  write.csv(., "../outputs/table2.csv")
+
+```
 # Discussion
+
 
 ## Summary
 
@@ -881,5 +991,44 @@ The funder had no input on any aspect of the project, such the protocol design, 
 
 # Conflicts of Interest
 There are no conflicts of interest to report.
+
+# Supplementary Material
+
+## Supplementary Table 2
+
+```{r SuppTable2}
+
+create_stab2 <- function(){
+  stab2 <- df[, which(colnames(df) %in% c(strobe_cols_names))]
+  # convert all to characters so can easily reset values and table will just treat as nominal
+  for(i in colnames(stab2)){
+    stab2[[i]] <- as.character(stab2[[i]])
+  }
+  
+  # set missing to na as won't make a difference to absolute numbers
+  stab2[is.na(stab2)|stab2 == "na"] <- "Not Applicable"
+  stab2[stab2 == "PartiallyExternal"] <- "Partially-External"
+  
+  
+  # pivot so can table frequencies
+  stab2 <- tidyr::pivot_longer(stab2, colnames(stab2), names_to = "strobe_item", values_to = "value") %>%
+    # reorder so follows strobe order
+    .[mixedorder(as.character(.$strobe_item)), ]
+  
+  # remove s from strobe item
+  stab2$strobe_item <- gsub("^s", "", stab2$strobe_item)
+  
+  # table
+  stab2 <- table(stab2$strobe_item, stab2$value, useNA = "ifany") 
+  
+  return(stab2)
+}
+
+stab2 <- create_stab2()
+
+if(doc.type == "docx"){pander(stab2, caption = "Supplementary Table 2. Descriptive statistics for reporting quality of subdivisions of all STROBE items")} else {kable(stab2)}
+```
+
+
 
 # References
