@@ -264,8 +264,10 @@ sum_items <- function(df, style = c("binary", "ternary")){
   
   pre <- ncol(df)
   for(i in strobe_stem){
+    # convert stem into pattern so don't get greedy matches e.g. s2 match s22
+    pat <- paste0(c(paste0(i, "_"), paste0(i, "$")), collapse = "|")
     # save dataframe of variables for same strobe item so can sum rows
-    x <- df[,grep(i, colnames(df))]
+    x <- df[, grep(pat, colnames(df))]
     # create sum col name
     sum_name <- paste(i, "sum", sep = "_")
     # sum rows in x if it is a dataframe 
@@ -666,27 +668,19 @@ kappa_item$STROBEItem <- gsub("^s|_.*|starred", "", kappa_item$STROBEItem)
 
 Background
 
-Objectives
 
-Data sources
-
-Eligibility criteria
+The STrengthening the Reporting of OBservational studies in Epidemiology (STROBE)
+statement provides a reporting guideline for observational studies, including secondary analyses.
+We aimed to use the STROBE guidelines to assess the reporting quality of studies using UK Biobank data.
 
 Participants
 
-Intervention
+70 cohort, cross-sectional and case-control studies published before 2019 were assessed using the STROBE guidelines.
 
-Study appraisal
-
-Synthesis methods
-
-Restuls
-
-Limitations
+Results
+??? studies were identified, ??? were included and ??? were assessed. 
 
 Conclusions
-
-Implications
 
 ```{r, prisma}
 
@@ -877,6 +871,70 @@ The results for the subdivisions are reported in Supplementary Table 2.
 
 ![](Rplot9.png)
 
+```{r assistance}
+
+bad <- as.data.frame(bar_data) %>%
+  .[order(as.character(.[,2]), .[,3]), ] %>%
+  .[-which(.$response == "Yes" & .$count > 30), ] %>%
+  .[-which(.$response == "No" & .$count < 20), ] %>%
+  .[-which(.$response == "Not Applicable"), ]
+
+good <- as.data.frame(bar_data) %>%
+  .[order(as.character(.[,2]), .[,3]), ] %>%
+  .[-which(.$response == "Yes" & .$count < 30), ] %>%
+  .[-which(.$response == "No" & .$count > 20), ] %>%
+  .[-which(.$response == "Not Applicable"), ]
+
+bad <- c("5", "8", "11", "12b", "12c", "16a", "19", "22", "12d", "13c", "14b", "16c", "1a", "9")
+
+good <- unique(bar_data$strobe_item[!bar_data$strobe_item %in% bad])
+```
+
+Figure 1 shows the best reported items are 2, 3, 4, 12a, and 18 with nearly all articles reporting each item fully.
+The good reporting of the main statistical methods suggested by 12a is encouraging for the reproducibility of the analyses.
+Most articles also fully reported item 21.
+
+Items 5, 8, 11, 12c, 16a, 19 and 22  were dominated by partial reporting.
+For some this is not a major concern.
+Items 5 and 8 relates to the setting, recruitment, location, dates, and assessment methods of the UK Biobank data collection.
+Although it does not meet the STROBE guidelines, all information for item 5 and 8 is fully reported in the publically available UK Biobank documentation.
+
+Other results indicate more uncertainty for the reproducibility of the included studies. 
+Authors poorly reported how they handled their variables (item 11) and missing data (item 12c).
+Another potential area of concern is the reporting of sensitivity, subgroup, interaction, and other analyses.
+Most reporting of the methods (items 12b and 12e) and results (item 17) from these analyses was incomplete. 
+Both of these issues could limit the reproducibility of UK Biobank analyses.
+
+Other items that were poorly reported do not pose the same concerns for reprodu
+In Figure 1, item 16a appears to be a potential cause for concern.
+Supplementary Table 2 shows that while nearly all authors fully report their confounder-adjusted estimates most are failing report their unadjusted elements and to justify why they included the confounders they did.  
+This poses less threats to estimating reproducibility of the results but does suggest a widespread norm of researchers including confounders without a stated justification.
+Similarly the poor reporting of item 19 and 22 provide few threats to the reproducibility of the methods but suggest researchers are not expected to provide detailed information on potential bias or report the role of funders in their studies.
+
+The worst reported items were 12d, 13c, 14b and 16c, with most authors reporting no information about them.
+Again the implications are of varying concern for different items.
+Figure 1 shows few authors reported addressing loss to follow up in item 12d.
+This could be because many studies used NHS data linked to the UK Biobank as follow up data so the studies are likely to have low loss to follow up.
+Although confirming this will require further investigation into the individual studies.
+The impact of rare reporting of flow diagrams (item 13c) is also tempered by the good results for 13a and 13b, as it suggests authors do report the information just not in a flow diagram.
+Authors are poor at reporting absolute risk estimates (16c) and missing data (14c).
+
+
+```{r to-do}
+
+# CHECK OTHER STEMS ARE NOT BEING GREEDY
+# REMOVE ACCOUNT FOR SAMPLING FROM 12D LABEL?
+```
+
+
+
+
+**  12b - fv serious element so worrying
+
+lots of nos, lots of yes, few partial
+* 1a, 9, 
+
+
 We calculated kappa statistics to estimate the inter-rater reliability for each of the STROBE items, these are presented in Table 1.
 
 ```{r table1}
@@ -1030,5 +1088,5 @@ if(doc.type == "docx"){pander(stab2, caption = "Supplementary Table 2. Descripti
 ```
 
 
-
+  
 # References
