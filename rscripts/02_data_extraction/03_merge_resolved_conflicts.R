@@ -369,16 +369,18 @@ df <- merge_all_three()
 # clean strobe responses ####
 ####################
 
-# catergories should only be a few check this
+# save pattern of naming format used to indicate a resolved conflict for a strobe item so can clean them>
+# these will be responses to strobe items with the name of the coder who resolved them after the value >
+# only becky, I, or both of us resolved them so it will be "becky" or "me"
+res_pat <- paste0(c(" becky ",  "becky$", " me ", " me$", " us ", "us$"), collapse = "|") 
 
 find_all_values <- function(df){
-  # remove all columns that aren't strobe variables (i.e. don't begin with s[digit])
-  df <- df[, grep("^s[0-9]", colnames(df))]
   ls <- list()
   for(i in colnames(df)){
     ls[[i]] <- unique(df[[i]])
   }
-  ls <- ls[lengths(ls) != 33]
+  # don't find values for cols with more than 20 unique values (arbitrary boundary) as these will be qualitative variables
+  ls <- ls[lengths(ls) < 20]
   ls <- lapply(ls, `length<-`, max(lengths(ls)))
   x <- as.data.frame(ls)
   all_value <- c()
@@ -389,7 +391,7 @@ find_all_values <- function(df){
 }
 
 clean_values <- function(){
-  
+  # find all values 
   vals <- find_all_values(df)
   rules<- sort(unique(grep("rule", vals, value = T, ignore.case = T))) %>%
     # remove any text that comes before rule, this will clean any like 'NA - resolved but Rule ...'
@@ -413,19 +415,15 @@ clean_values <- function(){
     df[, i] <- col
   }
   
-  
-  # clean non-strobe items
+  # clean all strobe values that are resolved conflicts but don't have a rule
   
   for(i in colnames(df)){
-    # save values that indicate a resolved conflict for a strobe item so can clean them>
-    # these will be responses to strobe items with the name of the coder who resolved them after the value >
-    # only becky, I, or both of us resolved them so it will be "becky" or "me"
-    res <- c(" becky ",  "becky$", " me ", " me$", " us ", "us$") 
-    # save as a pattern so can use in gsub
-    pat <- paste(res, collapse = "|")
     x <- df[[i]]
-    if(any(grepl(pat, x, ignore.case = T))){
-      ids <- grep(pat, x, ignore.case = T)
+    if(any(grepl(res_pat, x, ignore.case = T))){
+      ids <- grep(res_pat, x, ignore.case = T)
+      # cols "strobe, reg, var_id, ukb_credit" all had original values with more than 1 space >
+      # but simplified all except var_id to 1 word values in previous rscripts >
+      # but values of var_id will still make sense after removing everything after first space
       x[ids] <- gsub(" .*$", "", x[ids])
       df[[i]] <- x
     }
@@ -449,11 +447,16 @@ first_80 <- read.csv("https://osf.io/9w72e/?action=download", encoding = "UTF-8"
 first_80 <- rbind(first_80, c("Davie2018bank79-y", "Yes"))
 
 epi_access <- read.csv("data/epi_access.csv", stringsAsFactors = F, encoding = "UTF-8", na.strings = c("", " ")) %>%
-  .[, which(!colnames(.) %in% c("doi", "title", "authors"))]
+  .[, which(!colnames(.) %in% c("doi", "title"))]
 
 epi_access <- left_join(first_80, epi_access, by = "article_id")
 
 df <- left_join(df, epi_access, by = "article_id")
+
+df$authors <- df$authors %>%
+  gsub(" and ", ",", .) %>%
+  strsplit(., ",") %>%
+  lengths()
 
 # TEMPORARY REPLACE BECKY IT VALUES AS NA
  
