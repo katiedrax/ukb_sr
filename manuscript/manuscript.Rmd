@@ -29,7 +29,6 @@ library(RColorBrewer)
 library(dplyr)
 library(irr)
 library(lpSolve)
-library(kableExtra)
 library(pander)
 
 ######################
@@ -385,7 +384,7 @@ create_bar_labels_csv <- function(){
   strobe_qs <- read.csv("../outputs/extraction_dict.csv", stringsAsFactors = F, encoding = "UTF-8") %>%
     .[, colnames(.) %in% c("question", "variable")] %>%
     # select those that are strobe items 
-    .[grep("s[[:digit:]]{1,2}", .$variable), ] %>%
+    .[grep(strobe_pattern, .$variable), ] %>%
     .[-grep("\\_ev|\\_star", .$variable), ]
   
   strobe_qs$question <- sub("[^0-9]*", "", strobe_qs$question)
@@ -480,7 +479,6 @@ bar_data %>%ggplot(aes(x=strobe_item, y=count, fill = response)) +
   coord_flip() +
   xlab("STROBE Item") +
   ylab("Count") +
-  ggtitle("Figure 1. STROBE completion")+
   scale_fill_brewer(palette = "Greys") +
   #geom_text(aes(label = count), vjust = 0, size = 8) +
   theme(plot.title = element_text(size = 22)) 
@@ -519,16 +517,27 @@ create_kappa_df <- function(df){
   na_items <- c("5_vi", "6a_iii", "10", "8starred_iii")
   na_stem <-  grep(paste0(na_items, collapse ="|"), stem, value =T)
   
+  # find other empty rows and add them to the na_stems
+  for(i in stem){
+    x <- df[, grep(i, colnames(df))]
+    i_na <- sum(is.na(x[[1]] != x[[2]]))
+    if(i_na == nrow(df)){
+      na_stem <- c(na_stem, i)
+    }
+  }
+  
+  # keep only unique so not creating duplicates when add back in
+  na_stem <- unique(na_stem)
+  
   # remove all stems that are duplicate or not applicable as will throw error in kappa2 if set "NA" to missing and all are set to NA after qualtrics
   
-  stem <- stem[-which(stem == na_stem)]
+  stem <- stem[-which(stem %in% na_stem)]
   #save empty objects so can save outputs from for loop
   kappa <- c()
   z <- c()
-  p_value <- c()
   variable <- c()
   n_match <- c()
-  n_conflicts <-c()
+  agree <-c()
   n_na <- c()
   
   for(i in stem){
@@ -537,15 +546,18 @@ create_kappa_df <- function(df){
     variable <- c(variable, i)
     kappa <- c(kappa, y$value)
     z <- c(z, y$statistic)
-    p_value <- c(p_value, y$p.value)
-    n_match <- c(n_match, sum(x[[1]] == x[[2]], na.rm = T))
-    n_conflicts <- c(n_conflicts, sum(x[[1]] != x[[2]], na.rm = T))
+    i_match <- sum(x[[1]] == x[[2]], na.rm = T)
+    n_match <- c(n_match, i_match)
     # count number of items with NA--NA dyads or notNA--NA dyads so are excluded from kappa
-    n_na <- c(n_na, sum(is.na(x[[1]] != x[[2]])))
+    i_na <- sum(is.na(x[[1]] != x[[2]]))
+    n_na <- c(n_na, i_na)
+    app <- sum(!is.na(x[[1]] != x[[2]]))
+    i_agree <- round((i_match / app) * 100, 0)
+    agree <- c(agree, i_agree)
   }
   
   # bind objects into df so can render in manuscript
-  irr_df <- data.frame(STROBEItem = variable, Kappa = kappa, Zstatistic = z, pvalue = p_value, Matches = n_match, Conflicts = n_conflicts, NotApplicableUnsure = n_na)
+  irr_df <- data.frame(STROBEItem = variable, Kappa = kappa, Zstatistic = z, Matches = n_match, Agreement = agree, NotApplicableUnsure = n_na)
   
   # create df of empty varibles and bind to main df so will appear in table
   empty <- data.frame(STROBEItem = na_stem)
@@ -565,13 +577,17 @@ create_kappa_df <- function(df){
   
   # reorder
   irr_df <- irr_df[gtools::mixedorder(irr_df$STROBEItem), ] 
-    
+  
+  irr_df$STROBEItem <- as.factor(irr_df$STROBEItem)
   # set rownames to null to ensure none created
   row.names(irr_df) <- NULL
   
   return(irr_df)
 }
 
+##########################
+# kappa for applicability #####
+##########################
 
 # divide df into into NA and applicable
 
@@ -588,6 +604,18 @@ inter_na <- divide_na()
 kappa_na <- create_kappa_df(inter_na)
 
 #######################
+# calculate strobe scores for inter at subdivision level  ####
+######################## 
+
+inter_sub <- inter
+inter_sub[inter_sub == "NA" | inter_sub == "Unsure"] <- NA
+inter_sub[inter_sub == "Partially-External"] <- "Yes"
+
+# only select 
+inter_sub <- inter_sub[, grep(strobe_pattern, colnames(inter_sub))]
+kappa_sub <- create_kappa_df(inter_sub)
+
+#######################
 # calculate strobe scores for ternary for inter  ####
 ######################## 
 
@@ -598,7 +626,7 @@ coder2 <- inter[, c("article_id", grep("\\.coder2", colnames(inter), value = T))
 sum_items <- function(df, coder_suffix){
   # set "NA" and "Unsure" as missing so calculations only apply to reporting judgements
   df[df == "NA" | df == "Unsure"] <- NA
-  strobe_cols_names <- grep("^s[[:digit:]]{1,2}", colnames(df), value =T)
+  strobe_cols_names <- grep(strobe_pattern, colnames(df), value =T)
   
   # remove everything after _ or suffix
   strobe_stem <- gsub("_.*|\\..*", "", strobe_cols_names) %>%
@@ -607,26 +635,32 @@ sum_items <- function(df, coder_suffix){
   pre <- ncol(df)
   
   for(i in strobe_stem){
-    
+    # convert stem into pattern so don't get greedy matches e.g. s2 match s22
+    pat <- paste0(c(paste0(i, "_"), paste0(i, "$"), paste0(i, "\\.")), collapse = "|")
     # save dataframe of variables for same strobe item so can sum rows
-    x <- df[,grep(i, colnames(df))]
+    x <- df[,grep(pat, colnames(df))]
     # create sum col name
     sum_name <- paste0(i, "_sum", coder_suffix)
     # create empty sum_var to add values to in for loop
     sum_var <- c()
     # sum rows in x if it is a dataframe 
-    if(!is.character(x)){
+    if(is.data.frame(x)){
       for(j in 1:nrow(x)){
-        if(all(x[j, ] %in% c("Yes", "Partially-External"), na.rm = T)) {
-          sum_var[j] <- "Yes"
+        row <- as.character(x[j, ])[!is.na(as.character(x[j, ]))]
+        if(length(row) == 0) {
+          sum_var[j] <- NA
         } else {
-          if(!all(x[j, ] %in% c("Yes", "Partially-External"), na.rm = T) & !all(x[j, ] == "No", na.rm = T)) {
-            sum_var[j] <- "Partially"
+          if(all(row %in% c("Yes", "Partially-External"), na.rm = T)) {
+            sum_var[j] <- "Yes"
           } else {
-            if(all(x[j, ] == "No", na.rm = T)) {
-              sum_var[j] <- "No"
+            if(!all(row %in% c("Yes", "Partially-External"), na.rm = T) & !all(row == "No", na.rm = T)) {
+              sum_var[j] <- "Partially"
             } else {
-              stop(j, " in ", i, " doesn't contain just yes, pe, partially or no")
+              if(all(row == "No", na.rm = T)) {
+                sum_var[j] <- "No"
+              } else {
+                stop(j, " in ", i, " doesn't contain just yes, pe, partially or no")
+              }
             }
           }
         }
@@ -660,7 +694,6 @@ inter_item <- full_join(kd, coder2, by = "article_id") %>%
 
 kappa_item <- create_kappa_df(inter_item)
 
-kappa_item$STROBEItem <- gsub("^s|_.*|starred", "", kappa_item$STROBEItem)
 
 ```
 
@@ -668,17 +701,16 @@ kappa_item$STROBEItem <- gsub("^s|_.*|starred", "", kappa_item$STROBEItem)
 
 Background
 
-
 The STrengthening the Reporting of OBservational studies in Epidemiology (STROBE)
 statement provides a reporting guideline for observational studies, including secondary analyses.
-We aimed to use the STROBE guidelines to assess the reporting quality of studies using UK Biobank data.
+We used the STROBE guidelines to assess the reporting quality of studies using UK Biobank data.
 
 Participants
 
-70 cohort, cross-sectional and case-control studies published before 2019 were assessed using the STROBE guidelines.
+We assessed 70 cohort, cross-sectional and case-control studies published before 2019 using the STROBE guidelines.
 
 Results
-??? studies were identified, ??? were included and ??? were assessed. 
+We identified ??? studies, included ???, and assessed a random sample of ???.
 
 Conclusions
 
@@ -689,32 +721,30 @@ Conclusions
 
 ```
 
-
-
 # Background
 
 There is a general move towards making data freely accessible, or ‘open’, by academic and governmental institutions alike [@vasilevsky2017; @worldwidewebfoundation2018]. 
 Completely open data allows any individual, regardless of their motivation, discipline or skillset, to access and analyse a dataset for free. 
 This accessibility offers researchers new opportunities but there is also uncertainty about how the nature of open data may impact the reliability of research findings. 
-One method by which the reliability of results from open data may be investigated is through replication. 
-Direct replication of secondary data analyses is aided by the publication of an original analysis plan, in which the authors describe their statistical analysis in full. 
-However, recent evidence suggests that it is unclear whether this is sufficient to ensure direct replicability of findings [@hardwicke2018; @naudet2018]. 
+One method researchers can use to investigate the reliability of results from open data is replication.
+In the case of secondary data analyses replications will involve new researchers retrieving the same dataset as the previous researchers and repeating their analyses.
+Researchers can make such direct replications of their work easier by publishing a detailed description of their statistical analysis.
+However, recent evidence suggests that it is unclear whether a detailed plan alone is sufficient to ensure direct replicability of findings [@hardwicke2018; @naudet2018]. 
 
 To investigate the reliability of findings from open data, we will attempt to replicate all eligible research articles that use UK Biobank (UKB) data. 
 The UKB is a prospective cohort study which collected a wide range of health data from 500,000 people aged 40-69 in the UK during 2006-2010 [@ukbiobankcoordinatingcentre2007].
-Importantly, UKB data is partially open data because it is only available to bona fide researchers conducting research in the public interest on a cost-recovery basis.
+Importantly, UKB data is "controlled data", meaning it is only available to bona fide researchers conducting research in the public interest on a cost-recovery basis.
 The UKB reserves the right to reject access applications for projects it deems inappropriate [@ukbiobankcoordinatingcentre2011].
-We first conducted a systematic review to (1) assess the completeness of UKB study reporting, (2) identify articles that are suitable for replication, and (3) inform reporting guidelines for other articles using the UKB and similar resources. 
-We will evaluate reproducibility of studies conducted in the UKB given the abundance of published articles using data from this cohort and their contemporary nature, increasing the likelihood that authors will be contactable.
-Furthermore, they all use the same, professionally collected, maintained and diverse open resource. 
-This guarantees data accessibility and usability and means that differences between the original and replication results cannot be explained by poor data curation or heterogeneity between studies.
+We plan to replicate UKB studies specifically because there is an abundance of published articles using the data and they are all contemporary, which increases the likelihood that authors will be contactable.
+Furthermore, they all use the same, professionally collected, maintained and diverse open resource which we will be able to access and use.
 
-Many previous systematic reviews of reporting standards across a range of disciplines used guidelines to assess the completeness of reporting [e.g. @agha2014; @cook2011; @plint2006).
+We first conducted a systematic review to (1) assess the completeness of UKB study reporting, (2) identify articles that are suitable for replication, and (3) inform the development of reporting guidelines for other articles using the UKB and similar resources. 
+Many previous systematic reviews of reporting quality across a range of disciplines used guidelines to assess the completeness of reporting [e.g. @agha2014; @cook2011; @plint2006).
 We used the STROBE (STrengthening the Reporting of Observational Studies in Epidemiology) Statement, which provides reporting guidelines for observational studies, to evaluate articles arising from UKB and to make comparisons between the articles. 
 The STROBE Statement has been endorsed by over 100 journals and, as no major changes have been made to the original version published in 2007 [@cevallos2014], these guidelines are relevant to all studies conducted using the UKB.
-Given that studies conducted using UKB may be cohort, cross-sectional or ‘nested’ case-control, the review used the combined STROBE Statement for cohort, cross-sectional and case-control designs, and its extensions, to assess the reporting standards in UKB articles.
+Given that studies conducted using UKB may be cohort, cross-sectional or ‘nested’ case-control, the review used the combined STROBE Statement for cohort, cross-sectional and case-control designs, and its extensions, to assess the reporting quality in UKB articles.
 
-We aimed to conduct a systematic review of articles reporting studies using data from the UKB with the aim of answering the following questions:
+We conducted a systematic review of articles reporting studies using data from the UKB with the aim of answering the following questions:
 
 1. What is the quality of reporting of findings from the UKB (in terms of the detail, clarity and completeness with which authors report their design, analysis and results)?
 2. Does reporting quality vary across the type of studies conducted?
@@ -727,14 +757,16 @@ This study was preregistered before we began to screen the search results [@drax
 
 ## Eligibility criteria
 
-Eligible articles are full research articles that report analyses of UKB data. Each article that is excluded at the full-text level of screening will be listed with the reason for exclusion.
+Eligible articles were full research articles that reported analyses of UKB data. 
+We give the reason for exclusion for each article we excluded at the full-text level of screening. 
 
 Inclusion criteria:
 
 * Publication date: After 30 March 2012. 
-This is the date the UKB was launched and UKB data was first available beforehand.
+This is the date the UKB was launched and UKB data was first available for researchers to use.
 * Publication type: Full research articles (including simulation and modelling articles).
-* Language: English. Relevant studies written in another language may be eligible but, to ensure accurate and precise evaluation, the article would require a professional translation which is not feasible given the review’s resources.
+* Language: English. 
+Relevant studies written in another language may be relevant but, to ensure accurate and precise evaluation, the article would require a professional translation which is not feasible given the review’s resources.
 * Data source: Article’s findings were produced from analysis(es) of data from the UKB. 
 This includes studies which reported findings from other studies alongside findings from UKB data.
 
@@ -744,10 +776,12 @@ Exclusion criteria:
 These are studies which have used data from participants from the UKB and other datasets in the same analysis.
 * Meta-analyses; narrative and systematic reviews; preprints; post-prints; replies; letters to the editor; corrections; and any other publication types that are not full research articles.
 * Retracted articles
+* Studies with inaccessible supplementary material. 
+We was to ensure our estimates of reporting completeness included the entire version of record.
 
 ## Information sources and search strategy
 
-Four databases were electronically searched on 15/01/2019 for UKB articles: PubMed, EMBASE, Web of Science Core Collection (WoSCC) and PsycINFO. 
+We searched four databases on 15/01/2019 for UKB articles: PubMed, EMBASE, Web of Science Core Collection (WoSCC) and PsycINFO. 
 The search strategy was limited to articles published from 2012 onwards and there was no restriction on language or publication type.
 
 The full search strategy for each database is included in Appendix A of the protocol [osf ref]. 
@@ -760,30 +794,30 @@ To summarise, the terms "UK Biobank", "UKB", "UKBiobank", and "UKB Resource" wer
 
 ```
 
-## study selection
+## Study selection
 
 We conducted four stages of screening for eligibility.
-First, using Endnote, KD removed duplicate results, checked the results for completeness, updated the metadata if necessary, and retrieved the full-texts of all results.
+First, using Endnote, KD removed duplicate results, checked the results for completeness, updated the metadata if necessary, and retrieved the full-texts of all articles.
+KD updated the metadata by checking each article's Endnote metadata contained the article's DOI, and adding them if they were missing.
 KD checked completeness using a list of published full research articles that have used the UKB Resource, provided by the UKB on 27 November 2018. 
+We conducted a systematic search despite having this list because we wished to capture all articles from 2018.
 Using the full-texts of the results, KD assessed if results were full research articles, and excluded reviews, corrections, conference abstracts, etc.
 
-
-Second, the results were imported into Rayyan [@ouzzani2016] and screened by BW and KD to determine whether they met the inclusion criteria.
-If insufficient information was available to determine a paper’s eligibility, the authors were contacted to request the required information. 
-If this information was unobtainable, the article was excluded.
+Second, we imported the results into Rayyan [@ouzzani2016]. 
+BW and KD screened them to determine if they met the inclusion criteria.
+If insufficient information was available to determine a paper’s eligibility, we contacted the authors and requested the required information, if it was unobtainable we excluded the article.
 Time constraints meant we excluded some articles with insufficient information without contacting the authors.
 
 Third, We classified studies as "traditional epidemiology", "Mendelian randomisation" and "Other", according to the type of data they analysed.
-After being piloted on 20 studies, the classification criteria were:
+After we piloted these classifications on 20 studies, the classification criteria were:
 
 *	Traditional epidemiology – studies investigating associations between exposures and health outcomes using the UK Biobank data alone. 
 *	Mendelian randomisation – studies that conduct Mendelian randomisation analyses on UK Biobank data alone
 *	Other – articles that do not meet the ‘Traditional epidemiology’ or ‘MR’ classification criteria described above or include analyses of genetic or imaging data.
 
-Articles abstracts were classified independently by MG and KD. 
-Full texts were examined where classification is unclear from the abstract.
-Any conflicts were discussed by KD and BW and resolved by mutual consent if possible. 
-If not resolved after discussion RR assign the category.
+BW and KD independently classified articles' abstracts.
+They examined full texts if classification was unclear from the abstract alone.
+They discussed any conflicts and resolved them by mutual consent if possible, if not resolved after discussion then RR assigned the category.
 Articles could be allocated into more than one classification group.
 We then excluded all but the traditional epidemiology studies.
 The Mendialian randomisation studies were not relevant to this paper but we included it as a classification because the data may be used for one of our author's future projects.
@@ -798,8 +832,8 @@ None were identified.
 However, we did identify studies that should be excluded, these studies were:
 
 * Studies incorrectly classified as observational epidemiological studies.
-* Studies with inaccessible supplementary material
-* Studies we did consider to be observiational epidemiological studies but could not consider them to have cohort, case-control or cross-sectional designs - for example those using prediction models
+* Studies with inaccessible supplementary material. 
+* Studies we did consider to be observational epidemiological studies but could not consider them to have cohort, case-control or cross-sectional designs - for example those using prediction models
 
 ## Data collection process
 
@@ -807,149 +841,125 @@ However, we did identify studies that should be excluded, these studies were:
 
 Different STROBE items are relevant for cohort, case-control and cross-sectional study designs. 
 To ensure coders completed the same STROBE items for each article KD and MG independently identified the study designs used by each of the 178 “observational epidemiology” articles by completing the Study Design Form for each article.
-In the form, extractors also indicated if all supplementary material can be accessed via University of Bristol subscriptions. 
-Any conflicts were discussed by the two extractors and resolved by mutual consent if possible.
+In the form, coders also indicated if all supplementary material can be accessed via University of Bristol subscriptions. 
+Any conflicts were discussed by the two coders and resolved by mutual consent if possible.
 If not resolved after discussion, RR determined the study designs. 
 The Study Design Form was hosted on Qualtrics but a PDF version can be found at https://osf.io/jfk24/.
 
-The articles were randomly assigned an ID number from 1-178. 
-The articles with an ID number between 1 and 80 were selected for the first round of data extraction. 
-KD was assigned as the first extractor to all 80 articles. 
-The second extractor was randomly assigned from MG, RR or BW.
+The articles were randomly assigned an ID number from 1-178.
+We selected the articles with an ID number between 1 and 80 for the first round of data extraction. 
+We assigned KD as the first coder for all 80 articles and randomly assigned MG, RR, or BW as the second coder.
 We initially randomly selected 80 articles with the hope that we would randomly select more studies once data extraction for the first 80 were complete.
-Unfortunately we did not have time to assess more studies. 
+Unfortunately we did not have time to assess more studies so we do not have data on the remaining 98 articles. 
+Figure 1 shows the flow of records identified from our searches and reasons for exclusion.
+
+![Figure 1. Flow diagram of included articles](flow.png)
 
 ### Data Extraction Form
 
-The Data Extraction Form was hosted on Qualtrics and piloted twice. 
+The data extraction form was hosted on Qualtrics. 
 This form combined the data items described as part of the "Data Extraction Form" and "Reporting Quality Assessment" in the protocol, but not all were kept.
-In the first, 5 observational epidemiology articles were piloted by MG, KD and/or RR. 
-Major changes were made so the Data Extraction Form will be completed again for the articles in the first pilot. 
+We conducted two pilots.
+In the first, MG, KD and/or RR piloted 5 observational epidemiology articles.
+We made major changes to the Data Extraction Form so we completed it again for the articles in the first pilot. 
 In the second, KD piloted the changed form on 3 articles. 
-No changes were made so the responses for articles in the second pilot were retained.
+We made no major changes so the we retained the responses for articles in the second pilot.
+See the PDF version of the data extraction form for full information on our variables and how we measured them at https://osf.io/hngcj/.
 
-The extractors independently completed the Data Extraction Form for each article assigned to them.
-Initially, any conflicts were discussed by the two extractors and resolved by mutual consent if possible. 
+The coders independently completed the data extraction form for each article assigned to them.
+Almost all variables were categorical so coders assigned the most appropriate category for each variable.
+Variables derived from the STROBE items had the same six categories:
+
+* "NA = this information was not relevant to any of the studies in the article"
+* "Unsure = I am unsure what to respond    "
+* "No = this information was relevant but none of it was present"
+* "Partially = some of the information was present"
+* "Partially-External = some of the information was present and/or the authors report that additional information can be found in an external source (i.e. not in the article or supplementary material)" 
+* "Yes = all of the information was present".
+
+After two coders completed one data extraction form for each article, the two coders discussed any conflicts and resolved them by mutual consent if possible. 
 If not resolved after discussion, RR resolved the conflict.
-However, given the number of conflicts this could not be sustained.
-To reduce the time-burden on other authors KD and RR devised a series of "rules" and general guidelines KD could use to resolve conflicts by herself. 
-This means the majority of conflicts were resolved by these "Rules" or KD's own judgement.
-An explanation of the rules and guidelines can be found at https://osf.io/hngcj/.
+However, given the number of conflicts, this practice could not be sustained.
+To reduce the time-burden on other authors KD and RR devised a series of "rules" and general guidelines KD could use to resolve conflicts by themself. 
+This means KD resolved the majority of conflicts by these "Rules".
+For example, for item 1a of the STROBE checklist we agreed that authors describing a study as a "longitudinal" is not sufficient according to the STROBE guidelines but it still gives some indication of the study design.
+Therefore, we agreed on the rule "Rule = "Partially" if "longitudinal" referred to" for item 1a.
+The rules and guidelines can be found at https://osf.io/hngcj/.
 
 ### Other data collection
 
-The items in Table 1 were extracted manually by KD or automatically by Endnote which contained the article’s metadata exported from the database the article was located in.
+The items in Table 2 were extracted manually by KD or automatically by Endnote which contained the article’s metadata exported from the database the article was located in.
 
 ### Unclear and Missing Information.
 
 In our protocol we planned to locate and examine publications linked to the article, e.g. related full research articles, comments, corrections, etc, so that we could retrieve any missing items in the Data Extraction Form from them.
 If the missing information is not contained in a linked publication we planned to contact the article’s authors.
-However, we realised this would give an inaccurate assessment of the verision of record. 
-Also few articles had linked publications and that there was a lot of missing or unclear information.
+However, we realised this would give an inaccurate assessment of the version of record. 
+Also few articles had linked publications and there was a lot of missing or unclear information.
 Therefore, we did not attempt to retrieve any missing items in the Data Extraction Form, from either the authors or linked articles. 
+
+## Data analysis
+
+Using the data extraction form on Qualtrics, we collected data on the reporting quality on numerous variables, including those derived from the STROBE items.
+This mean our raw data estimated the reporting quality for all subdivisions of the STROBE items and for the “starred” items associated with any STROBE items that had an asterisk (*) next to it. 
+For the final analysis, we excluded all starred subdivisions because inter-rater reliability was so poor, this was primarily because raters could not agree when the items were or were not applicable.
+In the data extraction form raters could indicate items as "NA", "Unsure", "No", "Partially", "Partially-External" or "Yes".
+After resolving conflicts, no "Unsure" ratings remained. 
+We collapsed the "Partially-External" into the "Yes" catergory.
+This was because we agreed reporting there were very few "Partially-External" categories after resolving conflicts, to make the kappa statistics more interpretable, and we understood that reporting where the required information can be found could be considered complete reporting.
+
+Some STROBE items were written as multiple-barrelled questions e.g " Report assessment methods for outcomes, exposures, predictors, confounder, and effect modifiers". 
+We subdivided these questions into separate variables in the data extraction form.
+We could have assessed each item without dividing it up but collecting the reporting completeness at the subdivision level we have a more granular understanding of what information is or is not reported.
+We summed the subdivisions back together to calculate the reporting completeness of each STROBE item they corresponded to. 
+This gave us an understanding of the reporting quality for the entire STROBE item and reduced the number of variables from `r length(unique(stab2$strobe_item))` to `r length(unique(bar_data$strobe_item))`.
+
+We calculated Cohen's kappa statistics to estimate the inter-rater reliability for each of the STROBE items.
+We treated any "Not Applicable" or "Unsure" values as missing data in the kappa calculations.  
+For our subgroup analyses we repeated the analyses for the subdivisions.
+We conducted all our data cleaning and analysis in R.
 
 # Results 
 
-## Study selection
-
-
 ## Study characteristics
 
-Of the `r nrow(df)` included studies `r sum(grepl("Case-control", df$designs))` contained case-control designs, `r sum(grepl("Cohort", df$designs))` cohort, and `r sum(grepl("Cross-sectional", df$designs))` cross-sectional. These numbers add up to more than 70 because some articles contained cross-sectional and cohort studies.
+Of the `r nrow(df)` included articles `r sum(grepl("Case-control", df$designs))` contained case-control designs, `r sum(grepl("Cohort", df$designs))` cohort, and `r sum(grepl("Cross-sectional", df$designs))` cross-sectional. These numbers add up to more than 70 because some articles contained cross-sectional and cohort studies.
 UK based researchers led the vast majority with `r sum(grepl("UK", df$country, ignore.case = F))` having authors affiliated with institutions in the UK.
+The mean number of authors was `r round(mean(as.numeric(as.character(df$authors))))` (SD = `r round(sd(as.numeric(as.character(df$authors))))`).
 `r sum(grepl("2014", df$year))` studies were published in 2014, `r sum(grepl("2015", df$year))` in 2015, `r sum(grepl("2016", df$year))` in 2016, `r sum(grepl("2017", df$year))` in 2017, `r sum(grepl("2018", df$year))` in 2018, and `r sum(grepl("2019", df$year))` in 2019.
 
 ## STROBE Reporting quality
 
-Using the data extraction form on Qualtrics, we assessed reporting quality separately for all subdivisions of the STROBE items and for the “starred” items associated with any STROBE items that had an asterisk (*) next to it. 
-For the final analysis, we excluded all starred subdivisions because inter-rater reliability was so poor and the applicability of the items was often uncertain. 
-We then summed the subdivisions to indicate the reporting quality of each STROBE item, these results are presented in Figure 1. 
-For completeness, the results for the subdivisions are available in Supplementary Table 2.
+Figure 1 presents the reporting completeness for each STROBE item, to ensure a comprehensive understanding of our results, Supplementary Table 2 provides the reporting completeness for each subdivision.
 
-We originally assessed reporting quality separately for all subdivisions of the STROBE items.
-The results for the subdivisions are reported in Supplementary Table 2.
 
-![](Rplot9.png)
 
-```{r assistance}
-
-bad <- as.data.frame(bar_data) %>%
-  .[order(as.character(.[,2]), .[,3]), ] %>%
-  .[-which(.$response == "Yes" & .$count > 30), ] %>%
-  .[-which(.$response == "No" & .$count < 20), ] %>%
-  .[-which(.$response == "Not Applicable"), ]
-
-good <- as.data.frame(bar_data) %>%
-  .[order(as.character(.[,2]), .[,3]), ] %>%
-  .[-which(.$response == "Yes" & .$count < 30), ] %>%
-  .[-which(.$response == "No" & .$count > 20), ] %>%
-  .[-which(.$response == "Not Applicable"), ]
-
-bad <- c("5", "8", "11", "12b", "12c", "16a", "19", "22", "12d", "13c", "14b", "16c", "1a", "9")
-
-good <- unique(bar_data$strobe_item[!bar_data$strobe_item %in% bad])
-```
-
-Figure 1 shows the best reported items are 2, 3, 4, 12a, and 18 with nearly all articles reporting each item fully.
-The good reporting of the main statistical methods suggested by 12a is encouraging for the reproducibility of the analyses.
-Most articles also fully reported item 21.
-
-Items 5, 8, 11, 12c, 16a, 19 and 22  were dominated by partial reporting.
-For some this is not a major concern.
-Items 5 and 8 relates to the setting, recruitment, location, dates, and assessment methods of the UK Biobank data collection.
-Although it does not meet the STROBE guidelines, all information for item 5 and 8 is fully reported in the publically available UK Biobank documentation.
-
-Other results indicate more uncertainty for the reproducibility of the included studies. 
-Authors poorly reported how they handled their variables (item 11) and missing data (item 12c).
-Another potential area of concern is the reporting of sensitivity, subgroup, interaction, and other analyses.
-Most reporting of the methods (items 12b and 12e) and results (item 17) from these analyses was incomplete. 
-Both of these issues could limit the reproducibility of UK Biobank analyses.
-
-Other items that were poorly reported do not pose the same concerns for reprodu
-In Figure 1, item 16a appears to be a potential cause for concern.
-Supplementary Table 2 shows that while nearly all authors fully report their confounder-adjusted estimates most are failing report their unadjusted elements and to justify why they included the confounders they did.  
-This poses less threats to estimating reproducibility of the results but does suggest a widespread norm of researchers including confounders without a stated justification.
-Similarly the poor reporting of item 19 and 22 provide few threats to the reproducibility of the methods but suggest researchers are not expected to provide detailed information on potential bias or report the role of funders in their studies.
-
-The worst reported items were 12d, 13c, 14b and 16c, with most authors reporting no information about them.
-Again the implications are of varying concern for different items.
-Figure 1 shows few authors reported addressing loss to follow up in item 12d.
-This could be because many studies used NHS data linked to the UK Biobank as follow up data so the studies are likely to have low loss to follow up.
-Although confirming this will require further investigation into the individual studies.
-The impact of rare reporting of flow diagrams (item 13c) is also tempered by the good results for 13a and 13b, as it suggests authors do report the information just not in a flow diagram.
-Authors are poor at reporting absolute risk estimates (16c) and missing data (14c).
-
+![Figure 2. STROBE completion](Rplot9.png)
 
 ```{r to-do}
 
 # CHECK OTHER STEMS ARE NOT BEING GREEDY
-# REMOVE ACCOUNT FOR SAMPLING FROM 12D LABEL?
+# REMOVE ACCOUNT FOR SAMPLING FROM 12D LABEL in figure 1?
 ```
 
-
-
-
-**  12b - fv serious element so worrying
-
-lots of nos, lots of yes, few partial
-* 1a, 9, 
-
-
-We calculated kappa statistics to estimate the inter-rater reliability for each of the STROBE items, these are presented in Table 1.
+Table 1 presents Cohen's kappa statistics for each of the STROBE items.
+Many items had poor inter-rater reliability with `r sum(kappa_item$Kappa < 0.2 & kappa_item$Kappa != 0, na.rm = T)` items having a kappa below 0.2.
+The main reason for this is that the data extraction form was subjective.
+Conflicts occured when one coder did not notice that the required information was reported and when coders interpretted the STROBE item differently.
+The list of "rules" we compiled give an indication for conflicts that occurred more than once, how we decided to resolve them and our justification for it.
 
 ```{r table1}
 
-doc.type <- knitr::opts_knit$get('rmarkdown.pandoc.to')
-
-if(doc.type == "docx"){pander(kappa_item, caption = "Table 1. Inter-rater reliability for the STROBE items")} else {kable(kappa_item)}
+pander(kappa_item, caption = "Table 1. Inter-rater reliability for the STROBE items")
 
 ```
+
 
 ## Other reporting quality
 
 We collected reporting quality data in addition to the STROBE items.
-We intended to conduct exploratory analyses using these variables, for example comparing articles that reported using some form of reporting guidelines to those who did not.
-We did not conduct an exploratory analyses into the relationships between these variabels because subgroup analyses for all of these variables would have very small subgroup samples. 
+We intended to conduct exploratory analyses using these variables to answer our second research question, for example comparing articles that reported using some form of reporting guidelines to those who did not.
+We did not conduct an exploratory analyses into the relationships between these variables because subgroup analyses for all of these variables would have very small subgroup samples. 
 Instead we report the descriptive statistics for each variable in Table 2 below.
 
 *Table 2. Descriptive statistics for additional reporting quality variables*
@@ -998,10 +1008,15 @@ create_table2 <- function(){
   table2[table2 == "TRUE"] <- "Yes"
   table2[table2 == "FALSE"] <- "No"
   
+  # replace unclear value to make it more understandable
+  table2[table2 == "No available elsewhere"] <- "No but publicly available on another platform"
+  table2[table2 == "yes_exact"] <- "Yes - exact wording"
+  table2[table2 == "yes_almost"] <- "Yes - almost exact wording"
+  
   # rename table2 colnames so will come out as full words in createtableon
   colnames(table2)[colnames(table2) == "code"] <- "Report shared analysis code"
-  colnames(table2)[colnames(table2) == "exposure"] <- "Exposures reported as exposures"
-  colnames(table2)[colnames(table2) == "outcome"] <- "Outcomes reported as outcomes"
+  colnames(table2)[colnames(table2) == "exposure"] <- "Exposure variables clearly labelled as exposures"
+  colnames(table2)[colnames(table2) == "outcome"] <- "Outcome variables clearly labeled as outcomes"
   colnames(table2)[colnames(table2) == "reg"] <- "Report analyses registered"
   colnames(table2)[colnames(table2) == "strobe"] <- "Report using STROBE guidelines"
   colnames(table2)[colnames(table2) == "strobe_cite"] <- "Cite STROBE guidelines if used"
@@ -1033,12 +1048,56 @@ CreateTableOne(data = table2, includeNA = F) %>%
 ```
 # Discussion
 
-
 ## Summary
+
+Our results indicate that the STROBE items best reported by UK Biobank studies are those regarding backround (item 2), objectives (item 3), explaining design early (item 4), main statistical methods (item 12a), and summarising results (item 18) with nearly all articles reporting each item fully.
+The good reporting of the main statistical methods is encouraging for the potential reproducibility of the analysis methods.
+Most articles also fully reported information on generalisability (item 21).
+
+Partial reporting dominated items regarding setting, recruitment, location, and dates (item 5); assessment methods (item 8); variable analysis and grouping (item 11); addressing missing data (item 12c); main results and definitions of confounders (item 16a); limitations and bias (item 19); and funder details (item 22). 
+For some items partial reporting is not a major concern.
+Although it does not meet the STROBE guidelines, all information for item 5 and 8 is fully reported in the publicly available UK Biobank documentation.
+For others, partial reporting casts doubt on the ability of new researchers to know how to repeat the included studies. 
+Authors rarely fully reported how they handled their variables (item 11) and missing data (item 12c).
+Another potential area of concern is the reporting of sensitivity, subgroup, interaction, and other analyses.
+Most reporting of the methods (items 12b and 12e) and results (item 17) from these analyses was incomplete. 
+Both of these issues could limit how accurately the UK Biobank analysis methods can be repeated.
+
+Other items that were poorly reported carry different concerns to those of reproducibility.
+Most authors partially reported item 16a. 
+Supplementary Table 2 shows that while nearly all authors fully report their confounder-adjusted estimates most are failing report their unadjusted elements and to justify why they included the confounders they did.  
+This information may be less vital to reproducing analyses than other items, but it does suggest a widespread norm of researchers including confounders without a stated justification.
+Similarly the significant lack of reporting for item 9, 19 and 22 suggests it is acceptable for researchers not to provide detailed analysis of potential bias in their studies or report the role of funders in their studies.
+Lastly, many authors failing to mention the design of their study in their title or abstract (item 1a) could create problems in retrieving studies during searches.
+
+The worst reported items were 12d, 13c, 14b and 16c, with most authors reporting no information about them.
+Again the implications are of varying concern for different items.
+Figure 2 shows few authors reported addressing loss to follow up in item 12d.
+This could be because many studies used NHS data linked to the UK Biobank as follow up data so the studies are likely to have low loss to follow up.
+Although confirming this will require further investigation into the individual studies.
+The impact of rare reporting of flow diagrams (item 13c) is also tempered by the good results for 13a and 13b, as it suggests authors do report the information just not in a flow diagram.
+Authors are poor at reporting absolute risk estimates (16c) and missing data (14c).
+
+We coded additional variables to measure reporting quality of information not covered by the STROBE guidelines.
+62 articles reported a conflict of interest statement, 41 provided their studies' UK Biobank application number, and 59 reported the UK Biobank credit statement correctly.
+However, the reporting was poor for the variables we included to assess the reproducibility of the analysis methods.
+Only 2 papers shared any part of their analysis code, 2 reported having registered their analyses though whether these registrations were before or after seeing the data was unclear, and 10 reported at least one UK Biobank variable ID. 
+
 
 ## Limitations
 
+* appropriateness of strobe for secondary data analysis - e.g. item 10 excluded completely
+* kappa statistics -- limitations of double coding for something so subjective
+* deviations from systematic review method & protocol
+* reverse engineering of reporting guidelines = inappropriate to use as reporting assessment?
+  ** Releasing ‘adherence checklists’ with reporting guidelines would help 
+reporting assessments
+
 ## Conclusions
+
+Good reporting of statistical methods will aid replications of the main results. 
+Comparing replication results to the original may be difficult given the poor reporting of unadjusted estimates.
+The lack of shared code will also make replications more difficult.
 
 # Funding Source
 
@@ -1052,9 +1111,64 @@ There are no conflicts of interest to report.
 
 # Supplementary Material
 
+## Supplementary Table 1
+
+```{r STable1, echo= F}
+
+create_stab1 <- function(){
+  # read in rules to add into table
+  stab1 <- read.csv("../data/rules.csv", encoding = "UTF-8", na.strings = c(""), stringsAsFactors = F)
+  
+  # save ids of all variable cols
+  cols_id <- grep("variable", colnames(stab1))
+  
+  # save variables element so can save for loop products
+  x <- c()
+  
+  # paste all variable cols together and save products
+  for(i in 1:nrow(stab1)){
+    x <- c(x, paste(stab1[i, cols_id], collapse = ","))
+  }
+  
+  # clean variable names to strobe items and remove all missing items and spaces
+  x <- gsub(",NA.*| |starred|^s", "", x) %>%
+    gsub(",s", ",", .) %>%
+    # add spaces back in so more readable
+    gsub(",", ", ", .)
+  
+  # add in as column
+  stab1$STROBEItem <- x
+  
+  colnames(stab1)[colnames(stab1) == "rule"] <- "Rule"
+  colnames(stab1)[colnames(stab1) == "STROBEItem"] <- "STROBE Item" 
+  # remove all unnecessary cols
+  stab1 <- stab1[, -grep("variable|response", colnames(stab1))]
+  
+  stab1$Rule <- gsub("^Rule = |^Rule =", "", stab1$Rule)
+  
+  return(stab1)
+  
+}
+
+
+stab1 <- create_stab1()
+
+pander(stab1, caption = "Supplementary Table 1. Rules for resolving conflicts", justify = c("left", "center"))
+```
+
+  
+
 ## Supplementary Table 2
 
-```{r SuppTable2}
+```{r STable2, echo=F}
+
+# create labels for strobe items at subdivision level
+
+sub_labels <- read.csv("../outputs/extraction_dict.csv", stringsAsFactors = F, encoding = "UTF-8") %>%
+  .[grep(strobe_pattern, .$variable), ] %>%
+  .[-grep("_ev$", .$variable),]
+
+# create stabe
 
 create_stab2 <- function(){
   stab2 <- df[, which(colnames(df) %in% c(strobe_cols_names))]
@@ -1065,7 +1179,7 @@ create_stab2 <- function(){
   
   # set missing to na as won't make a difference to absolute numbers
   stab2[is.na(stab2)|stab2 == "na"] <- "Not Applicable"
-  stab2[stab2 == "PartiallyExternal"] <- "Partially-External"
+  stab2[stab2 == "PartiallyExternal"] <- "Yes"
   
   
   # pivot so can table frequencies
@@ -1074,19 +1188,51 @@ create_stab2 <- function(){
     .[mixedorder(as.character(.$strobe_item)), ]
   
   # remove s from strobe item
-  stab2$strobe_item <- gsub("^s", "", stab2$strobe_item)
+  stab2$strobe_item <- gsub("^s|starred", "", stab2$strobe_item)
   
-  # table
-  stab2 <- table(stab2$strobe_item, stab2$value, useNA = "ifany") 
+  strobe_levels <-  unique(stab2$strobe_item)
+  
+  # set levels as mixed order so order preserved in ggplot and pander
+  stab2$strobe_item<- factor(stab2$strobe_item, levels =  strobe_levels[gtools::mixedorder(strobe_levels)])
+  
+  
+  # order levels 
+  stab2$value <- as.factor(stab2$value)
+  levels(stab2$value) <- list(NotApplicable = "Not Applicable", No = "No", Partially = "Partially", Yes = "Yes")
   
   return(stab2)
 }
 
 stab2 <- create_stab2()
+stab2_tab <- table(stab2$strobe_item, stab2$value, useNA = "ifany") 
 
-if(doc.type == "docx"){pander(stab2, caption = "Supplementary Table 2. Descriptive statistics for reporting quality of subdivisions of all STROBE items")} else {kable(stab2)}
+png("Rplot10.png", width = 1300, height = 1500)
+
+# strobe item on x axis and plot % yes
+stab2 %>%ggplot(aes(x=strobe_item, y=..count.., fill = value)) + 
+  # blue fill
+  geom_bar() +
+  theme_classic() +
+  theme(text = element_text(size=30))+
+  #scale_x_discrete(labels= labels$x_labels) +
+  #scale_y_continuous(breaks = seq(0, nrow(df), by = 10)) + 
+  coord_flip() +
+  xlab("STROBE Item") +
+  ylab("Count") +
+  scale_fill_brewer(palette = "Greys") +
+  #geom_text(aes(label = count), vjust = 0, size = 8) +
+  theme(plot.title = element_text(size = 22)) 
+dev.off()
+
+
+
+pander(stab2_tab, caption = "Supplementary Table 2. Descriptive statistics for reporting quality of subdivisions of all STROBE items")
 ```
 
+## Supplementary Table 3
 
-  
+```{r, echo = F}
+pander(kappa_sub, caption = "Supplementary Table 3. Kappa statistics for reporting quality of subdivisions of all STROBE items")
+```
+
 # References
