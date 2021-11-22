@@ -9,18 +9,13 @@ Meaning that if these change during conflict resolution it may create conflicts 
 
 * 1b_ii and 4 - If 1b_ii is "Yes" then 4 will be "Yes" because methods would have been fully described in abstract. 
 * 7_v, 12b_i, and 17_i - These items apply if subgroup analyses done. We defined effect modifiers as terms used in subgroup analyses or interactions but this is not how STROBE seem to do it
-* 7_v, 12_ii, and 17_ii - These items apply if interaction analyses used. 
-* 11_ii, 11_iii, and 16b - These items all apply if grouping were created.  
-* 12_e, and 17_iii - These items apply if sensitivity analyses done.
 
 # General guidelines
 
-* 9 - is just binary, don't use partially because we it's a very subjective judgement of what discussion of bias would be partial. Instead we just made a judgement of if discussion was present
-* all sub(starred) items - exclude all. 
-We are restricting our analysis to main items only because subitems had a high conflict rate in terms of when coders thought they would apply. Apply these items for multiple or continuous exposures would be ridiculous but we did not consistently agree what the limit of groups would be.
+* 9 - is just binary, don't use partially because we it's a very subjective judgement of what discussion of bias would be partial. Instead we just made a judgement of if discussion was present or not
 * 11_ii & 11_iii - KD used unsure/Partially when no/some groupings defined but unclear if variables were grouped. All other coders evaluated the completeness of reporting for stated groupings/catergories so did not use "unsure". We used this rule because it is the one the majority of coders used. KD simply reassessed her "Partially" or "unsure" judgements based on uncertainty of whether any other groups existed in line with the majority interpretation then resolved conflicts. 
-* 5_iv - Becky & Mark initally said no because don't give dates for when people self-reported their exposure. 
-Emma said no throughout for the same reason
+* 5_iv - RR & MG initally said no because don't give dates for when people self-reported their exposure. 
+BW said no throughout for the same reason
 Mark, Becky & I later interpreted it as date baseline assessments done. 
 We also agreed that "Partially" could be assigned to statements of measurements made at "baseline" 
 * 12d - complete case analysis is not a way of addressing loss to follow up.
@@ -36,11 +31,6 @@ It's more about have they run a competeing risk model & censoring based on loss 
 Some items are duplicates of each other. 
 Meaning that in the case of observational epidemiological studies using UK Biobank data, these items refered to the same information.
 All duplicated items that came after the first duplicate item in the data extraction form will be "NA". 
-
-* 6a_i, 6a_iii & 10 - took 6a_i to mean inclusion in the analysis and took 6a_iii to mean methods of selection into the analysis, which is the same thing.
-10 is a duplicate of 6a_i and 6a_iii because all included studies are not novel studies so eligbility criteria covered by 6a_i is justification for sample size.
-All of which are the same thing.
-* 5_vi - we took "dates of data collection" to mean if they included all dates for exposure/outcome, recruitment, beginning & end of follow-up (if used) but could they mean something else + this interpretation means that it is simply a duplicate of 5_iii, 5_iv, and 5_v. 
 
 We believe some items could be considered as duplicates but our interpretation meant that they were not.
 
